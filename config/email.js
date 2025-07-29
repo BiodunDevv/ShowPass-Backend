@@ -1,4 +1,4 @@
-import { createTransport } from "nodemailer";
+const { createTransport } = require("nodemailer");
 
 const transporter = createTransport({
   service: "gmail",
@@ -17,4 +17,4 @@ transporter.verify((error, success) => {
   }
 });
 
-export default transporter;
+module.exports = transporter;

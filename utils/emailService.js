@@ -1,5 +1,37 @@
-const transporter = require("../config/email").default;
+const nodemailer = require("nodemailer");
 const { formatCurrency } = require("./helpers");
+
+// Create transporter with better error handling
+const createTransporter = () => {
+  try {
+    const transporter = nodemailer.createTransport({
+      service: "gmail",
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS, // Fixed: using EMAIL_PASS instead of EMAIL_PASSWORD
+      },
+      tls: {
+        rejectUnauthorized: false,
+      },
+    });
+
+    // Test connection
+    transporter.verify((error, success) => {
+      if (error) {
+        console.log("❌ Email configuration error:", error);
+      } else {
+        console.log("✅ Email server is ready to send messages");
+      }
+    });
+
+    return transporter;
+  } catch (error) {
+    console.error("❌ Error creating email transporter:", error);
+    return null;
+  }
+};
+
+const transporter = createTransporter();
 
 // Send email verification
 const sendVerificationEmail = async (user, verificationToken) => {
@@ -348,10 +380,194 @@ const sendPasswordResetEmail = async (user, resetToken) => {
   await transporter.sendMail(mailOptions);
 };
 
+// Send account creation welcome email
+const sendWelcomeEmail = async (user) => {
+  const mailOptions = {
+    from: process.env.EMAIL_FROM,
+    to: user.email,
+    subject: "🎉 Welcome to ShowPass - Your Account is Ready!",
+    html: `
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="utf-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Welcome to ShowPass</title>
+            <style>
+                body { font-family: Arial, sans-serif; line-height: 1.6; margin: 0; padding: 0; background-color: #f4f4f4; }
+                .container { max-width: 600px; margin: 0 auto; padding: 20px; background-color: white; }
+                .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; text-align: center; border-radius: 10px 10px 0 0; }
+                .content { padding: 30px 20px; }
+                .role-badge { display: inline-block; padding: 5px 15px; background-color: #28a745; color: white; border-radius: 15px; font-size: 12px; text-transform: uppercase; }
+                .features { background-color: #f8f9fa; padding: 20px; border-radius: 10px; margin: 20px 0; }
+                .footer { text-align: center; padding: 20px; color: #666; font-size: 12px; }
+                .logo { font-size: 24px; font-weight: bold; }
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <div class="header">
+                    <div class="logo">🎟️ ShowPass</div>
+                    <h2>Welcome to ShowPass!</h2>
+                </div>
+                <div class="content">
+                    <h3>Hello ${user.firstName}! 👋</h3>
+                    <p>Your ShowPass account has been successfully created!</p>
+                    <p><strong>Account Type:</strong> <span class="role-badge">${
+                      user.role
+                    }</span></p>
+                    
+                    <div class="features">
+                        <h4>🎯 What you can do with ShowPass:</h4>
+                        ${
+                          user.role === "admin"
+                            ? `
+                        <ul>
+                            <li>📊 Manage all events and users</li>
+                            <li>✅ Approve/reject events</li>
+                            <li>💰 Monitor platform analytics</li>
+                            <li>🔧 System administration</li>
+                        </ul>
+                        `
+                            : user.role === "organizer"
+                            ? `
+                        <ul>
+                            <li>🎪 Create and manage events</li>
+                            <li>🎟️ Track ticket sales</li>
+                            <li>📈 View event analytics</li>
+                            <li>💬 Communicate with attendees</li>
+                        </ul>
+                        `
+                            : `
+                        <ul>
+                            <li>🔍 Discover amazing events</li>
+                            <li>🎫 Purchase tickets securely</li>
+                            <li>📱 Get digital QR tickets</li>
+                            <li>❤️ Save favorite events</li>
+                        </ul>
+                        `
+                        }
+                    </div>
+                    
+                    <p><strong>Login Credentials:</strong></p>
+                    <p>📧 Email: ${user.email}</p>
+                    <p>🔒 Use the password you created during registration</p>
+                    
+                    <p>Ready to get started? Log in to your account and explore what ShowPass has to offer!</p>
+                </div>
+                <div class="footer">
+                    <p>© 2024 ShowPass. All rights reserved.</p>
+                    <p>Questions? Contact us at ${process.env.EMAIL_FROM}</p>
+                </div>
+            </div>
+        </body>
+        </html>
+        `,
+  };
+
+  await transporter.sendMail(mailOptions);
+};
+
+// Send event creation notification
+const sendEventCreationNotification = async (organizer, event) => {
+  const mailOptions = {
+    from: process.env.EMAIL_FROM,
+    to: organizer.email,
+    subject: `🎪 Event Created: ${event.title} - ShowPass`,
+    html: `
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="utf-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Event Created - ShowPass</title>
+            <style>
+                body { font-family: Arial, sans-serif; line-height: 1.6; margin: 0; padding: 0; background-color: #f4f4f4; }
+                .container { max-width: 600px; margin: 0 auto; padding: 20px; background-color: white; }
+                .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; text-align: center; border-radius: 10px 10px 0 0; }
+                .content { padding: 30px 20px; }
+                .event-details { background-color: #f8f9fa; padding: 20px; border-radius: 10px; margin: 20px 0; }
+                .status-badge { display: inline-block; padding: 5px 15px; background-color: #ffc107; color: #212529; border-radius: 15px; font-size: 12px; text-transform: uppercase; }
+                .footer { text-align: center; padding: 20px; color: #666; font-size: 12px; }
+                .logo { font-size: 24px; font-weight: bold; }
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <div class="header">
+                    <div class="logo">🎟️ ShowPass</div>
+                    <h2>Event Created Successfully!</h2>
+                </div>
+                <div class="content">
+                    <h3>Hello ${organizer.firstName}! 🎉</h3>
+                    <p>Great news! Your event has been created successfully on ShowPass.</p>
+                    
+                    <div class="event-details">
+                        <h4>📅 Event Information</h4>
+                        <p><strong>Event Title:</strong> ${event.title}</p>
+                        <p><strong>Category:</strong> ${event.category}</p>
+                        <p><strong>Date:</strong> ${new Date(
+                          event.startDate
+                        ).toLocaleDateString()}</p>
+                        <p><strong>Time:</strong> ${event.startTime} - ${
+      event.endTime
+    }</p>
+                        <p><strong>Venue:</strong> ${event.venue.name}</p>
+                        <p><strong>Status:</strong> <span class="status-badge">${
+                          event.status
+                        }</span></p>
+                        
+                        <h4>🎟️ Ticket Types</h4>
+                        ${event.ticketTypes
+                          .map(
+                            (ticket) => `
+                            <p><strong>${
+                              ticket.name
+                            }:</strong> ${formatCurrency(ticket.price)} (${
+                              ticket.quantity
+                            } available)</p>
+                        `
+                          )
+                          .join("")}
+                    </div>
+                    
+                    ${
+                      event.status === "pending"
+                        ? `
+                    <div style="background-color: #fff3cd; border: 1px solid #ffeaa7; padding: 15px; border-radius: 5px; margin: 15px 0;">
+                        <h4>⏳ Next Steps</h4>
+                        <p>Your event is currently under review by our admin team. You'll receive a notification once it's approved and ready for ticket sales.</p>
+                    </div>
+                    `
+                        : `
+                    <div style="background-color: #d1ecf1; border: 1px solid #bee5eb; padding: 15px; border-radius: 5px; margin: 15px 0;">
+                        <h4>✅ Event Live</h4>
+                        <p>Your event is now live and ready for ticket sales! Start promoting your event to attract attendees.</p>
+                    </div>
+                    `
+                    }
+                    
+                    <p>You can manage your event, track sales, and view analytics from your organizer dashboard.</p>
+                </div>
+                <div class="footer">
+                    <p>© 2024 ShowPass. All rights reserved.</p>
+                    <p>Need help? Contact us at ${process.env.EMAIL_FROM}</p>
+                </div>
+            </div>
+        </body>
+        </html>
+        `,
+  };
+
+  await transporter.sendMail(mailOptions);
+};
+
 module.exports = {
   sendVerificationEmail,
   sendTicketConfirmation,
   sendRefundConfirmation,
   sendEventUpdateNotification,
   sendPasswordResetEmail,
+  sendWelcomeEmail,
+  sendEventCreationNotification,
 };

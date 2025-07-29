@@ -4,6 +4,10 @@ const bcrypt = require("bcryptjs");
 const User = require("../models/User");
 const Event = require("../models/Event");
 const connectDB = require("../config/database");
+const {
+  sendWelcomeEmail,
+  sendEventCreationNotification,
+} = require("./emailService");
 
 const seedData = async () => {
   try {
@@ -29,6 +33,14 @@ const seedData = async () => {
     await adminUser.save();
     console.log("👑 Admin user created:", adminUser.email);
 
+    // Send welcome email to admin
+    try {
+      await sendWelcomeEmail(adminUser);
+      console.log("📧 Welcome email sent to admin");
+    } catch (emailError) {
+      console.log("⚠️  Welcome email failed for admin:", emailError.message);
+    }
+
     // Create Organizer User
     const organizerUser = new User({
       firstName: "Louis",
@@ -41,6 +53,17 @@ const seedData = async () => {
     await organizerUser.save();
     console.log("🎯 Organizer user created:", organizerUser.email);
 
+    // Send welcome email to organizer
+    try {
+      await sendWelcomeEmail(organizerUser);
+      console.log("📧 Welcome email sent to organizer");
+    } catch (emailError) {
+      console.log(
+        "⚠️  Welcome email failed for organizer:",
+        emailError.message
+      );
+    }
+
     // Create Regular User
     const regularUser = new User({
       firstName: "Muhammed",
@@ -52,6 +75,14 @@ const seedData = async () => {
     });
     await regularUser.save();
     console.log("👤 Regular user created:", regularUser.email);
+
+    // Send welcome email to user
+    try {
+      await sendWelcomeEmail(regularUser);
+      console.log("📧 Welcome email sent to user");
+    } catch (emailError) {
+      console.log("⚠️  Welcome email failed for user:", emailError.message);
+    }
 
     // Create Additional Users
     const additionalUsers = [
@@ -85,6 +116,17 @@ const seedData = async () => {
       const user = new User(userData);
       await user.save();
       console.log(`👥 User created: ${user.email}`);
+
+      // Send welcome email to additional user
+      try {
+        await sendWelcomeEmail(user);
+        console.log(`📧 Welcome email sent to: ${user.email}`);
+      } catch (emailError) {
+        console.log(
+          `⚠️  Welcome email failed for ${user.email}:`,
+          emailError.message
+        );
+      }
     }
 
     // Get all organizers for event creation
@@ -286,6 +328,20 @@ const seedData = async () => {
       const event = new Event(eventData);
       await event.save();
       console.log(`🎪 Event created: ${event.title}`);
+
+      // Send event creation notification to organizer
+      try {
+        const organizer = await User.findById(event.organizer);
+        if (organizer) {
+          await sendEventCreationNotification(organizer, event);
+          console.log(`📧 Event creation email sent to: ${organizer.email}`);
+        }
+      } catch (emailError) {
+        console.log(
+          `⚠️  Event creation email failed for ${event.title}:`,
+          emailError.message
+        );
+      }
     }
 
     console.log(`
