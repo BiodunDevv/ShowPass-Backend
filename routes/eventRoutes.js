@@ -5,6 +5,7 @@ const {
   requireAuth,
   isOrganizer,
   optionalAuth,
+  isAdmin,
 } = require("../middlewares/auth");
 const {
   validateEvent,
@@ -117,6 +118,50 @@ router.get(
   requireAuth,
   isOrganizer,
   eventController.getEventAttendees
+);
+
+// Admin-only routes for event management and warnings
+// @route   GET /api/events/admin/review
+// @desc    Get events that require admin review (flagged, warnings, etc.)
+// @access  Private (Admin only)
+router.get(
+  "/admin/review",
+  requireAuth,
+  isAdmin,
+  eventController.getEventsForReview
+);
+
+// @route   POST /api/events/:eventId/admin/warning
+// @desc    Issue warning to organizer for event policy violations
+// @access  Private (Admin only)
+router.post(
+  "/:eventId/admin/warning",
+  validateObjectId(param("eventId")),
+  requireAuth,
+  isAdmin,
+  eventController.issueOrganizerWarning
+);
+
+// @route   DELETE /api/events/:eventId/admin/delete
+// @desc    Delete event by admin (for flagged events)
+// @access  Private (Admin only)
+router.delete(
+  "/:eventId/admin/delete",
+  validateObjectId(param("eventId")),
+  requireAuth,
+  isAdmin,
+  eventController.deleteEventByAdmin
+);
+
+// @route   PUT /api/events/:eventId/admin/review/:modificationId
+// @desc    Review post-approval modification by admin
+// @access  Private (Admin only)
+router.put(
+  "/:eventId/admin/review/:modificationId",
+  validateObjectId(param("eventId")),
+  requireAuth,
+  isAdmin,
+  eventController.reviewPostApprovalModification
 );
 
 module.exports = router;

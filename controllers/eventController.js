@@ -15,6 +15,8 @@ const {
   sendEventUpdateNotification,
   sendOrganizerEventUpdateNotification,
   sendAdminEventUpdateNotification,
+  sendOrganizerWarningNotification,
+  sendEventDeletionNotification,
 } = require("../utils/emailService");
 
 // Create new event
@@ -78,7 +80,6 @@ const createEvent = async (req, res) => {
     });
 
     await event.save();
-    await event.populate("organizer", "firstName lastName email");
 
     // Update organizer's created events array
     await updateUserEventArrays(req.user._id, event._id, "created");
@@ -104,12 +105,18 @@ const createEvent = async (req, res) => {
       console.error("Failed to send admin notifications:", emailError);
     }
 
+    // Get fresh event data with populated organizer for response
+    const createdEvent = await Event.findById(event._id).populate(
+      "organizer",
+      "firstName lastName email"
+    );
+
     sendSuccess(
       res,
       `Event created successfully! ${
         isFreeEvent ? "Your free event" : "Your event"
       } will be visible to users after admin approval.`,
-      event
+      createdEvent
     );
   } catch (error) {
     console.error("Create event error:", error);
@@ -280,6 +287,16 @@ const updateEvent = async (req, res) => {
       (field) => updates[field] !== undefined
     );
 
+    // Track post-approval modifications
+    if (event.approved && Object.keys(updates).length > 0) {
+      event.postApprovalModifications.push({
+        modifiedAt: new Date(),
+        modifiedBy: req.user._id,
+        changes: updates,
+        reviewedByAdmin: false,
+      });
+    }
+
     if (hasMajorChanges && event.approved) {
       event.approved = false;
       event.status = "pending";
@@ -373,6 +390,11 @@ const updateEvent = async (req, res) => {
       }
     }
 
+    await event.save();
+
+    // Populate organizer details before sending notifications and response
+    await event.populate("organizer", "firstName lastName email");
+
     // Send organizer notification for event update (regardless of approval status)
     try {
       await sendOrganizerEventUpdateNotification(
@@ -409,10 +431,12 @@ const updateEvent = async (req, res) => {
       );
     }
 
-    await event.save();
-    await event.populate("organizer", "firstName lastName email");
-
-    sendSuccess(res, "Event updated successfully", event);
+    // Ensure the response includes populated organizer data
+    const updatedEvent = await Event.findById(event._id).populate(
+      "organizer",
+      "firstName lastName email"
+    );
+    sendSuccess(res, "Event updated successfully", updatedEvent);
   } catch (error) {
     console.error("Update event error:", error);
     sendError(res, 500, "Failed to update event", error.message);
@@ -567,6 +591,264 @@ const getEventCategories = async (req, res) => {
   }
 };
 
+// Admin: Issue warning to organizer for inappropriate event updates
+const issueOrganizerWarning = async (req, res) => {
+  try {
+    if (req.user.role !== "admin") {
+      return sendError(res, 403, "Admin access required");
+    }
+
+    const { eventId } = req.params;
+    const { reason, severity = "minor" } = req.body;
+
+    if (!reason) {
+      return sendError(res, 400, "Warning reason is required");
+    }
+
+    const event = await Event.findById(eventId).populate(
+      "organizer",
+      "firstName lastName email"
+    );
+
+    if (!event) {
+      return sendError(res, 404, "Event not found");
+    }
+
+    // Add warning to event
+    const warning = {
+      adminId: req.user._id,
+      reason,
+      severity,
+      issuedAt: new Date(),
+    };
+
+    event.warnings.push(warning);
+    event.warningCount += 1;
+
+    // Flag for deletion if critical warning or multiple warnings
+    if (severity === "critical" || event.warningCount >= 3) {
+      event.flaggedForDeletion = true;
+      event.flaggedBy = req.user._id;
+      event.flaggedAt = new Date();
+      event.deletionReason = `${
+        severity === "critical" ? "Critical violation" : "Multiple warnings"
+      }: ${reason}`;
+    }
+
+    await event.save();
+
+    // Send warning email to organizer
+    try {
+      await sendOrganizerWarningNotification(event.organizer, event, warning);
+      console.log(
+        `📧 Warning notification sent to organizer: ${event.organizer.email}`
+      );
+    } catch (emailError) {
+      console.error("Failed to send warning notification:", emailError);
+    }
+
+    sendSuccess(
+      res,
+      `Warning issued successfully. ${
+        event.flaggedForDeletion ? "Event has been flagged for deletion." : ""
+      }`,
+      {
+        warningCount: event.warningCount,
+        flaggedForDeletion: event.flaggedForDeletion,
+        warning,
+      }
+    );
+  } catch (error) {
+    console.error("Issue warning error:", error);
+    sendError(res, 500, "Failed to issue warning", error.message);
+  }
+};
+
+// Admin: Delete flagged event
+const deleteEventByAdmin = async (req, res) => {
+  try {
+    if (req.user.role !== "admin") {
+      return sendError(res, 403, "Admin access required");
+    }
+
+    const { eventId } = req.params;
+    const { reason } = req.body;
+
+    const event = await Event.findById(eventId).populate(
+      "organizer",
+      "firstName lastName email"
+    );
+
+    if (!event) {
+      return sendError(res, 404, "Event not found");
+    }
+
+    // Check if event has bookings
+    const bookingsCount = await Booking.countDocuments({
+      event: eventId,
+      status: "confirmed",
+    });
+
+    if (bookingsCount > 0) {
+      return sendError(
+        res,
+        400,
+        "Cannot delete event with confirmed bookings. Please process refunds first."
+      );
+    }
+
+    // Send notification to organizer about deletion
+    try {
+      await sendEventDeletionNotification(
+        event.organizer,
+        event,
+        reason || event.deletionReason || "Administrative action"
+      );
+      console.log(
+        `📧 Event deletion notification sent to organizer: ${event.organizer.email}`
+      );
+    } catch (emailError) {
+      console.error("Failed to send deletion notification:", emailError);
+    }
+
+    await Event.findByIdAndDelete(eventId);
+
+    sendSuccess(res, "Event deleted successfully by admin", {
+      eventTitle: event.title,
+      organizerEmail: event.organizer.email,
+      reason: reason || event.deletionReason,
+    });
+  } catch (error) {
+    console.error("Admin delete event error:", error);
+    sendError(res, 500, "Failed to delete event", error.message);
+  }
+};
+
+// Admin: Get events requiring review (flagged or with unreviewed post-approval modifications)
+const getEventsForReview = async (req, res) => {
+  try {
+    if (req.user.role !== "admin") {
+      return sendError(res, 403, "Admin access required");
+    }
+
+    const { page, limit, skip } = getPagination(req);
+
+    // Find events that need admin review
+    const query = {
+      $or: [
+        { flaggedForDeletion: true },
+        { warningCount: { $gt: 0 } },
+        {
+          "postApprovalModifications.reviewedByAdmin": false,
+          approved: true,
+        },
+      ],
+    };
+
+    const events = await Event.find(query)
+      .populate("organizer", "firstName lastName email")
+      .populate("flaggedBy", "firstName lastName")
+      .populate("warnings.adminId", "firstName lastName")
+      .sort({ updatedAt: -1 })
+      .skip(skip)
+      .limit(limit);
+
+    const total = await Event.countDocuments(query);
+
+    const eventsWithReviewInfo = events.map((event) => ({
+      ...event.toObject(),
+      reviewFlags: {
+        flaggedForDeletion: event.flaggedForDeletion,
+        warningCount: event.warningCount,
+        unreviewed_modifications: event.postApprovalModifications.filter(
+          (mod) => !mod.reviewedByAdmin
+        ).length,
+        lastModified: event.updatedAt,
+      },
+    }));
+
+    sendSuccess(
+      res,
+      "Events for review retrieved successfully",
+      eventsWithReviewInfo,
+      {
+        pagination: {
+          page,
+          limit,
+          total,
+          pages: Math.ceil(total / limit),
+        },
+      }
+    );
+  } catch (error) {
+    console.error("Get events for review error:", error);
+    sendError(res, 500, "Failed to retrieve events for review", error.message);
+  }
+};
+
+// Admin: Review post-approval modification
+const reviewPostApprovalModification = async (req, res) => {
+  try {
+    if (req.user.role !== "admin") {
+      return sendError(res, 403, "Admin access required");
+    }
+
+    const { eventId, modificationId } = req.params;
+    const { approved, feedback } = req.body;
+
+    const event = await Event.findById(eventId);
+    if (!event) {
+      return sendError(res, 404, "Event not found");
+    }
+
+    const modification = event.postApprovalModifications.id(modificationId);
+    if (!modification) {
+      return sendError(res, 404, "Modification not found");
+    }
+
+    modification.reviewedByAdmin = true;
+    modification.reviewedAt = new Date();
+    modification.reviewedBy = req.user._id;
+    modification.approved = approved;
+
+    await event.save();
+
+    // If not approved, could trigger a warning
+    if (!approved) {
+      // Optionally auto-issue a warning for rejected modifications
+      const warning = {
+        adminId: req.user._id,
+        reason: `Post-approval modification rejected: ${
+          feedback || "Inappropriate changes"
+        }`,
+        severity: "major",
+        issuedAt: new Date(),
+      };
+
+      event.warnings.push(warning);
+      event.warningCount += 1;
+
+      if (event.warningCount >= 3) {
+        event.flaggedForDeletion = true;
+        event.flaggedBy = req.user._id;
+        event.flaggedAt = new Date();
+        event.deletionReason = `Multiple violations: Latest - ${feedback}`;
+      }
+
+      await event.save();
+    }
+
+    sendSuccess(res, "Modification reviewed successfully", {
+      approved,
+      warningIssued: !approved,
+      flaggedForDeletion: event.flaggedForDeletion,
+    });
+  } catch (error) {
+    console.error("Review modification error:", error);
+    sendError(res, 500, "Failed to review modification", error.message);
+  }
+};
+
 // Get user's created events (for organizers)
 const getUserCreatedEvents = async (req, res) => {
   try {
@@ -578,9 +860,9 @@ const getUserCreatedEvents = async (req, res) => {
       return sendError(res, 404, "User not found");
     }
 
-    // Get user's created events with pagination
-    const Event = require("../models/Event");
+    // Get user's created events with pagination and populate organizer
     const events = await Event.find({ organizer: req.user._id })
+      .populate("organizer", "firstName lastName email")
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit);
@@ -616,9 +898,9 @@ const getUserApprovedEvents = async (req, res) => {
       return sendError(res, 404, "User not found");
     }
 
-    // Get approved events with pagination
-    const Event = require("../models/Event");
+    // Get approved events with pagination and populate organizer
     const events = await Event.find({ approved: true })
+      .populate("organizer", "firstName lastName email")
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit);
@@ -650,13 +932,19 @@ const getUserAttendingEvents = async (req, res) => {
       return sendError(res, 404, "User not found");
     }
 
-    // Get user's attending events through bookings
+    // Get user's attending events through bookings with populated event organizer
     const Booking = require("../models/Booking");
     const bookings = await Booking.find({
       user: req.user._id,
       status: "confirmed",
     })
-      .populate("event")
+      .populate({
+        path: "event",
+        populate: {
+          path: "organizer",
+          select: "firstName lastName email",
+        },
+      })
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit);
@@ -741,7 +1029,7 @@ const getFreeEvents = async (req, res) => {
     sort[sortBy] = sortOrder === "desc" ? -1 : 1;
 
     const events = await Event.find(query)
-      .populate("organizer", "firstName lastName")
+      .populate("organizer", "firstName lastName email")
       .sort(sort)
       .skip(skip)
       .limit(limit);
@@ -838,4 +1126,8 @@ module.exports = {
   getUserApprovedEvents,
   getUserAttendingEvents,
   getFreeEvents,
+  issueOrganizerWarning,
+  deleteEventByAdmin,
+  getEventsForReview,
+  reviewPostApprovalModification,
 };

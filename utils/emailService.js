@@ -453,8 +453,8 @@ const sendWelcomeEmail = async (user) => {
                     
                     <p><strong>Login Credentials:</strong></p>
                     <p>📧 Email: ${user.email}</p>
-                    <p>🔒 Use the password you created during registration</p>
-                    
+                    <p>🔒 Password: Use ${user.password} to log in</p>
+
                     <p>Ready to get started? Log in to your account and explore what ShowPass has to offer!</p>
                 </div>
                 <div class="footer">
@@ -575,6 +575,14 @@ const sendEventCreationNotification = async (organizer, event) => {
 
 // Send admin notification for new event
 const sendAdminEventNotification = async (admin, event, organizer) => {
+  // Debug logging to help identify undefined organizer properties
+  console.log("🔍 Debug - New event admin notification organizer data:", {
+    firstName: organizer?.firstName,
+    lastName: organizer?.lastName,
+    email: organizer?.email,
+    fullOrganizer: organizer,
+  });
+
   const mailOptions = {
     from: "ShowPass <noreply@showpass.com>",
     to: admin.email,
@@ -613,9 +621,11 @@ const sendAdminEventNotification = async (admin, event, organizer) => {
                     <div class="event-details">
                         <h4>📅 Event Information</h4>
                         <p><strong>Event Title:</strong> ${event.title}</p>
-                        <p><strong>Organizer:</strong> ${organizer.firstName} ${
-      organizer.lastName
-    } (${organizer.email})</p>
+                        <p><strong>Organizer:</strong> ${
+                          organizer.firstName || "Unknown"
+                        } ${organizer.lastName || ""} (${
+      organizer.email || "No email"
+    })</p>
                         <p><strong>Category:</strong> ${event.category}</p>
                         <p><strong>Date:</strong> ${new Date(
                           event.startDate
@@ -716,8 +726,8 @@ const sendEventApprovalNotification = async (users, event, organizer) => {
       event.isFreeEvent ? '<span class="free-badge">FREE</span>' : ""
     }</h4>
                         <p><strong>Organized by:</strong> ${
-                          organizer.firstName
-                        } ${organizer.lastName}</p>
+                          organizer.firstName || "Unknown"
+                        } ${organizer.lastName || ""}</p>
                         <p><strong>Category:</strong> ${event.category}</p>
                         <p><strong>Date:</strong> ${new Date(
                           event.startDate
@@ -933,7 +943,7 @@ const sendOrganizerEventUpdateNotification = async (
                     </div>
 
                     ${
-                      event.isApproved
+                      event.approved
                         ? "<p><strong>Status:</strong> ✅ Your event is approved and attendees have been notified of the changes.</p>"
                         : '<div class="status-note"><strong>Status:</strong> ⏳ Your event is still pending approval. Changes will be visible to attendees once approved by our admin team.</div>'
                     }
@@ -960,6 +970,14 @@ const sendAdminEventUpdateNotification = async (
   organizer,
   changeDetails
 ) => {
+  // Debug logging to help identify undefined organizer properties
+  console.log("🔍 Debug - Admin notification organizer data:", {
+    firstName: organizer?.firstName,
+    lastName: organizer?.lastName,
+    email: organizer?.email,
+    fullOrganizer: organizer,
+  });
+
   const mailOptions = {
     from: "ShowPass <noreply@showpass.com>",
     to: admin.email,
@@ -999,9 +1017,11 @@ const sendAdminEventUpdateNotification = async (
                     <div class="event-info">
                         <h4>📅 Event Information</h4>
                         <p><strong>Event Title:</strong> ${event.title}</p>
-                        <p><strong>Organizer:</strong> ${organizer.firstName} ${
-      organizer.lastName
-    } (${organizer.email})</p>
+                        <p><strong>Organizer:</strong> ${
+                          organizer.firstName || "Unknown"
+                        } ${organizer.lastName || ""} (${
+      organizer.email || "No email"
+    })</p>
                         <p><strong>Category:</strong> ${event.category}</p>
                         <p><strong>Date:</strong> ${new Date(
                           event.startDate
@@ -1017,17 +1037,17 @@ const sendAdminEventUpdateNotification = async (
                     </div>
 
                     <div class="approval-status ${
-                      event.isApproved ? "approved" : "pending"
+                      event.approved ? "approved" : "pending"
                     }">
                         <strong>Current Status:</strong> ${
-                          event.isApproved
+                          event.approved
                             ? "✅ Event is approved - attendees have been notified of changes"
                             : "⏳ Event is pending approval - changes are not yet visible to attendees"
                         }
                     </div>
                     
                     <p>Please review these changes${
-                      event.isApproved
+                      event.approved
                         ? " and ensure they are appropriate"
                         : " as part of the approval process"
                     }.</p>
@@ -1035,6 +1055,201 @@ const sendAdminEventUpdateNotification = async (
                 <div class="footer">
                     <p>Best regards,<br>The ShowPass System</p>
                     <p>This is an automated notification. Please review the event in the admin panel.</p>
+                </div>
+            </div>
+        </body>
+        </html>
+        `,
+  };
+
+  await transporter.sendMail(mailOptions);
+};
+
+// Send organizer warning notification
+const sendOrganizerWarningNotification = async (organizer, event, warning) => {
+  // Debug logging to help identify undefined organizer properties
+  console.log("🔍 Debug - Warning notification organizer data:", {
+    firstName: organizer?.firstName,
+    lastName: organizer?.lastName,
+    email: organizer?.email,
+    fullOrganizer: organizer,
+  });
+
+  const severityColors = {
+    minor: "#ffc107",
+    major: "#fd7e14",
+    critical: "#dc3545",
+  };
+
+  const severityIcons = {
+    minor: "⚠️",
+    major: "🚨",
+    critical: "🔴",
+  };
+
+  const mailOptions = {
+    from: "ShowPass <noreply@showpass.com>",
+    to: organizer.email,
+    subject: `${
+      severityIcons[warning.severity]
+    } ${warning.severity.toUpperCase()} Warning - Event Policy Violation - ShowPass`,
+    html: `
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="utf-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Warning Notice - ShowPass</title>
+            <style>
+                body { font-family: Arial, sans-serif; line-height: 1.6; margin: 0; padding: 0; background-color: #f4f4f4; }
+                .container { max-width: 100%; margin: 0 auto; background-color: white; }
+                .header { background: linear-gradient(135deg, ${
+                  severityColors[warning.severity]
+                } 0%, #e74c3c 100%); color: white; padding: 20px; text-align: center; border-radius: 10px 10px 0 0; }
+                .content { padding: 10px; }
+                .warning-box { background-color: #fff3cd; border: 2px solid ${
+                  severityColors[warning.severity]
+                }; padding: 20px; border-radius: 10px; margin: 20px 0; }
+                .event-details { background-color: #f8f9fa; padding: 15px; border-radius: 8px; margin: 15px 0; }
+                .footer { text-align: center; padding: 20px; color: #666; font-size: 12px; }
+                .logo { font-size: 24px; font-weight: bold; }
+                .severity-badge { background-color: ${
+                  severityColors[warning.severity]
+                }; color: white; padding: 5px 10px; border-radius: 15px; font-weight: bold; }
+                .consequences { background-color: #f8d7da; border: 1px solid #f5c6cb; padding: 15px; border-radius: 8px; margin: 15px 0; }
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <div class="header">
+                    <div class="logo">${
+                      severityIcons[warning.severity]
+                    } ShowPass Warning</div>
+                    <h2>${warning.severity.toUpperCase()} Policy Violation</h2>
+                </div>
+                <div class="content">
+                    <h3>Hello ${organizer.firstName || "Organizer"},</h3>
+                    <p>We need to bring to your attention a policy violation regarding your event on ShowPass.</p>
+                    
+                    <div class="event-details">
+                        <h4>📅 Event Information</h4>
+                        <p><strong>Event:</strong> ${event.title}</p>
+                        <p><strong>Event ID:</strong> ${event._id}</p>
+                        <p><strong>Warning Level:</strong> <span class="severity-badge">${warning.severity.toUpperCase()}</span></p>
+                        <p><strong>Date Issued:</strong> ${new Date(
+                          warning.issuedAt
+                        ).toLocaleDateString()}</p>
+                    </div>
+                    
+                    <div class="warning-box">
+                        <h4>${
+                          severityIcons[warning.severity]
+                        } Violation Details</h4>
+                        <p><strong>Reason:</strong> ${warning.reason}</p>
+                    </div>
+                    
+                    ${
+                      warning.severity === "critical" || event.warningCount >= 3
+                        ? `
+                    <div class="consequences">
+                        <h4>🚫 Immediate Action Required</h4>
+                        <p><strong>Your event has been flagged for deletion</strong> due to ${
+                          warning.severity === "critical"
+                            ? "the critical nature of this violation"
+                            : "multiple policy violations"
+                        }.</p>
+                        <p>Please contact our support team immediately to discuss this matter and prevent event removal.</p>
+                    </div>
+                    `
+                        : `
+                    <div style="background-color: #d1ecf1; border: 1px solid #bee5eb; padding: 15px; border-radius: 8px; margin: 15px 0;">
+                        <h4>📋 Next Steps</h4>
+                        <p>Please review our event guidelines and ensure future updates comply with our policies.</p>
+                        <p><strong>Warning Count:</strong> ${event.warningCount}/3</p>
+                        <p><em>Note: Receiving 3 warnings or a critical violation may result in event removal.</em></p>
+                    </div>
+                    `
+                    }
+                    
+                    <p>If you believe this warning was issued in error, please contact our support team with details.</p>
+                    <p>Thank you for your cooperation in maintaining the quality of events on ShowPass.</p>
+                </div>
+                <div class="footer">
+                    <p>© 2024 ShowPass. All rights reserved.</p>
+                    <p>Support: ${
+                      process.env.EMAIL_FROM
+                    } | This is an automated notice.</p>
+                </div>
+            </div>
+        </body>
+        </html>
+        `,
+  };
+
+  await transporter.sendMail(mailOptions);
+};
+
+// Send event deletion notification to organizer
+const sendEventDeletionNotification = async (organizer, event, reason) => {
+  const mailOptions = {
+    from: "ShowPass <noreply@showpass.com>",
+    to: organizer.email,
+    subject: `🚫 Event Removed - ${event.title} - ShowPass`,
+    html: `
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="utf-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Event Removal Notice - ShowPass</title>
+            <style>
+                body { font-family: Arial, sans-serif; line-height: 1.6; margin: 0; padding: 0; background-color: #f4f4f4; }
+                .container { max-width: 100%; margin: 0 auto; background-color: white; }
+                .header { background: linear-gradient(135deg, #dc3545 0%, #c82333 100%); color: white; padding: 20px; text-align: center; border-radius: 10px 10px 0 0; }
+                .content { padding: 10px; }
+                .deletion-notice { background-color: #f8d7da; border: 2px solid #dc3545; padding: 20px; border-radius: 10px; margin: 20px 0; }
+                .event-details { background-color: #f8f9fa; padding: 15px; border-radius: 8px; margin: 15px 0; }
+                .footer { text-align: center; padding: 20px; color: #666; font-size: 12px; }
+                .logo { font-size: 24px; font-weight: bold; }
+                .support-info { background-color: #d1ecf1; border: 1px solid #bee5eb; padding: 15px; border-radius: 8px; margin: 15px 0; }
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <div class="header">
+                    <div class="logo">🚫 ShowPass</div>
+                    <h2>Event Removal Notice</h2>
+                </div>
+                <div class="content">
+                    <h3>Hello ${organizer.firstName || "Organizer"},</h3>
+                    <p>We regret to inform you that your event has been removed from ShowPass.</p>
+                    
+                    <div class="event-details">
+                        <h4>📅 Removed Event</h4>
+                        <p><strong>Event Title:</strong> ${event.title}</p>
+                        <p><strong>Event ID:</strong> ${event._id}</p>
+                        <p><strong>Removal Date:</strong> ${new Date().toLocaleDateString()}</p>
+                    </div>
+                    
+                    <div class="deletion-notice">
+                        <h4>🚫 Removal Reason</h4>
+                        <p>${reason}</p>
+                    </div>
+                    
+                    <div class="support-info">
+                        <h4>📞 Need Help?</h4>
+                        <p>If you have questions about this removal or would like to appeal this decision, please contact our support team.</p>
+                        <p><strong>Support Email:</strong> ${
+                          process.env.EMAIL_FROM
+                        }</p>
+                        <p>Include your event ID and organizer email in your inquiry.</p>
+                    </div>
+                    
+                    <p>We appreciate your understanding and encourage you to review our event guidelines for future submissions.</p>
+                </div>
+                <div class="footer">
+                    <p>© 2024 ShowPass. All rights reserved.</p>
+                    <p>This is an automated notification. Please contact support for assistance.</p>
                 </div>
             </div>
         </body>
@@ -1058,4 +1273,6 @@ module.exports = {
   sendOrganizerApprovalNotification,
   sendOrganizerEventUpdateNotification,
   sendAdminEventUpdateNotification,
+  sendOrganizerWarningNotification,
+  sendEventDeletionNotification,
 };

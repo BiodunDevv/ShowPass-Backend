@@ -148,6 +148,66 @@ const eventSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    // Admin warning system
+    warnings: [
+      {
+        adminId: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "Admin",
+        },
+        reason: String,
+        issuedAt: {
+          type: Date,
+          default: Date.now,
+        },
+        severity: {
+          type: String,
+          enum: ["minor", "major", "critical"],
+          default: "minor",
+        },
+      },
+    ],
+    warningCount: {
+      type: Number,
+      default: 0,
+    },
+    flaggedForDeletion: {
+      type: Boolean,
+      default: false,
+    },
+    flaggedBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Admin",
+    },
+    flaggedAt: Date,
+    deletionReason: String,
+    // Track post-approval modifications
+    postApprovalModifications: [
+      {
+        modifiedAt: {
+          type: Date,
+          default: Date.now,
+        },
+        modifiedBy: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "Organizer",
+        },
+        changes: Object,
+        reviewedByAdmin: {
+          type: Boolean,
+          default: false,
+        },
+        reviewedAt: Date,
+        reviewedBy: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "Admin",
+        },
+        approved: {
+          type: Boolean,
+          default: null,
+        },
+      },
+    ],
   },
   {
     timestamps: true,
