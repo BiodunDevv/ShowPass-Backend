@@ -38,7 +38,7 @@ const sendVerificationEmail = async (user, verificationToken) => {
   const verificationURL = `${process.env.BASE_URL}/api/auth/verify-email?token=${verificationToken}`;
 
   const mailOptions = {
-    from: process.env.EMAIL_FROM,
+    from: "ShowPass <noreply@showpass.com>",
     to: user.email,
     subject: "Welcome to ShowPass - Please Verify Your Email",
     html: `
@@ -50,9 +50,9 @@ const sendVerificationEmail = async (user, verificationToken) => {
             <title>Email Verification - ShowPass</title>
             <style>
                 body { font-family: Arial, sans-serif; line-height: 1.6; margin: 0; padding: 0; background-color: #f4f4f4; }
-                .container { max-width: 600px; margin: 0 auto; padding: 20px; background-color: white; }
+                .container { max-width: 100%; margin: 0 auto; background-color: white; }
                 .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; text-align: center; border-radius: 10px 10px 0 0; }
-                .content { padding: 30px 20px; }
+                .content { padding: 10px; }
                 .button { display: inline-block; padding: 12px 30px; background-color: #667eea; color: white; text-decoration: none; border-radius: 5px; margin: 20px 0; }
                 .footer { text-align: center; padding: 20px; color: #666; font-size: 12px; }
                 .logo { font-size: 24px; font-weight: bold; }
@@ -92,7 +92,7 @@ const sendVerificationEmail = async (user, verificationToken) => {
 // Send ticket confirmation email
 const sendTicketConfirmation = async (user, booking, event, qrCodeImage) => {
   const mailOptions = {
-    from: process.env.EMAIL_FROM,
+    from: "ShowPass <noreply@showpass.com>",
     to: user.email,
     subject: `🎟️ Your Ticket for ${event.title} - ShowPass`,
     html: `
@@ -104,9 +104,9 @@ const sendTicketConfirmation = async (user, booking, event, qrCodeImage) => {
             <title>Ticket Confirmation - ShowPass</title>
             <style>
                 body { font-family: Arial, sans-serif; line-height: 1.6; margin: 0; padding: 0; background-color: #f4f4f4; }
-                .container { max-width: 600px; margin: 0 auto; padding: 20px; background-color: white; }
+                .container { max-width: 100%; margin: 0 auto; background-color: white; }
                 .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; text-align: center; border-radius: 10px 10px 0 0; }
-                .content { padding: 30px 20px; }
+                .content { padding: 10px; }
                 .ticket-details { background-color: #f8f9fa; padding: 20px; border-radius: 10px; margin: 20px 0; }
                 .qr-code { text-align: center; margin: 20px 0; }
                 .footer { text-align: center; padding: 20px; color: #666; font-size: 12px; }
@@ -184,7 +184,7 @@ const sendTicketConfirmation = async (user, booking, event, qrCodeImage) => {
 // Send refund confirmation email
 const sendRefundConfirmation = async (user, refundRequest, booking, event) => {
   const mailOptions = {
-    from: process.env.EMAIL_FROM,
+    from: "ShowPass <noreply@showpass.com>",
     to: user.email,
     subject: `💰 Refund Processed - ${event.title} - ShowPass`,
     html: `
@@ -196,9 +196,9 @@ const sendRefundConfirmation = async (user, refundRequest, booking, event) => {
             <title>Refund Confirmation - ShowPass</title>
             <style>
                 body { font-family: Arial, sans-serif; line-height: 1.6; margin: 0; padding: 0; background-color: #f4f4f4; }
-                .container { max-width: 600px; margin: 0 auto; padding: 20px; background-color: white; }
+                .container { max-width: 100%; margin: 0 auto; background-color: white; }
                 .header { background: linear-gradient(135deg, #28a745 0%, #20c997 100%); color: white; padding: 20px; text-align: center; border-radius: 10px 10px 0 0; }
-                .content { padding: 30px 20px; }
+                .content { padding: 10px; }
                 .refund-details { background-color: #f8f9fa; padding: 20px; border-radius: 10px; margin: 20px 0; }
                 .footer { text-align: center; padding: 20px; color: #666; font-size: 12px; }
                 .logo { font-size: 24px; font-weight: bold; }
@@ -252,7 +252,7 @@ const sendRefundConfirmation = async (user, refundRequest, booking, event) => {
 // Send event update notification
 const sendEventUpdateNotification = async (user, event, changeDetails) => {
   const mailOptions = {
-    from: process.env.EMAIL_FROM,
+    from: "ShowPass <noreply@showpass.com>",
     to: user.email,
     subject: `📢 Important Update: ${event.title} - ShowPass`,
     html: `
@@ -264,9 +264,9 @@ const sendEventUpdateNotification = async (user, event, changeDetails) => {
             <title>Event Update - ShowPass</title>
             <style>
                 body { font-family: Arial, sans-serif; line-height: 1.6; margin: 0; padding: 0; background-color: #f4f4f4; }
-                .container { max-width: 600px; margin: 0 auto; padding: 20px; background-color: white; }
+                .container { max-width: 100%; margin: 0 auto; background-color: white; }
                 .header { background: linear-gradient(135deg, #ffc107 0%, #ff8f00 100%); color: white; padding: 20px; text-align: center; border-radius: 10px 10px 0 0; }
-                .content { padding: 30px 20px; }
+                .content { padding: 10px; }
                 .update-details { background-color: #fff3cd; border: 1px solid #ffeaa7; padding: 20px; border-radius: 10px; margin: 20px 0; }
                 .footer { text-align: center; padding: 20px; color: #666; font-size: 12px; }
                 .logo { font-size: 24px; font-weight: bold; }
@@ -321,7 +321,7 @@ const sendPasswordResetEmail = async (user, resetToken) => {
   const resetURL = `${process.env.BASE_URL}/reset-password?token=${resetToken}`;
 
   const mailOptions = {
-    from: process.env.EMAIL_FROM,
+    from: "ShowPass <noreply@showpass.com>",
     to: user.email,
     subject: "Password Reset Request - ShowPass",
     html: `
@@ -333,9 +333,9 @@ const sendPasswordResetEmail = async (user, resetToken) => {
             <title>Password Reset - ShowPass</title>
             <style>
                 body { font-family: Arial, sans-serif; line-height: 1.6; margin: 0; padding: 0; background-color: #f4f4f4; }
-                .container { max-width: 600px; margin: 0 auto; padding: 20px; background-color: white; }
+                .container { max-width: 100%; margin: 0 auto; background-color: white; }
                 .header { background: linear-gradient(135deg, #dc3545 0%, #c82333 100%); color: white; padding: 20px; text-align: center; border-radius: 10px 10px 0 0; }
-                .content { padding: 30px 20px; }
+                .content { padding: 10px; }
                 .button { display: inline-block; padding: 12px 30px; background-color: #dc3545; color: white; text-decoration: none; border-radius: 5px; margin: 20px 0; }
                 .footer { text-align: center; padding: 20px; color: #666; font-size: 12px; }
                 .logo { font-size: 24px; font-weight: bold; }
@@ -383,7 +383,7 @@ const sendPasswordResetEmail = async (user, resetToken) => {
 // Send account creation welcome email
 const sendWelcomeEmail = async (user) => {
   const mailOptions = {
-    from: process.env.EMAIL_FROM,
+    from: "ShowPass <noreply@showpass.com>",
     to: user.email,
     subject: "🎉 Welcome to ShowPass - Your Account is Ready!",
     html: `
@@ -395,11 +395,13 @@ const sendWelcomeEmail = async (user) => {
             <title>Welcome to ShowPass</title>
             <style>
                 body { font-family: Arial, sans-serif; line-height: 1.6; margin: 0; padding: 0; background-color: #f4f4f4; }
-                .container { max-width: 600px; margin: 0 auto; padding: 20px; background-color: white; }
+                .container { max-width: 100%; margin: 0 auto; background-color: white; }
                 .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; text-align: center; border-radius: 10px 10px 0 0; }
-                .content { padding: 30px 20px; }
+                .content { padding: 10px; }
                 .role-badge { display: inline-block; padding: 5px 15px; background-color: #28a745; color: white; border-radius: 15px; font-size: 12px; text-transform: uppercase; }
                 .features { background-color: #f8f9fa; padding: 20px; border-radius: 10px; margin: 20px 0; }
+                .features ul { list-style-type: none; padding: 0; }
+                .features li { margin: 5px 0; }
                 .footer { text-align: center; padding: 20px; color: #666; font-size: 12px; }
                 .logo { font-size: 24px; font-weight: bold; }
             </style>
@@ -471,7 +473,7 @@ const sendWelcomeEmail = async (user) => {
 // Send event creation notification
 const sendEventCreationNotification = async (organizer, event) => {
   const mailOptions = {
-    from: process.env.EMAIL_FROM,
+    from: "ShowPass <noreply@showpass.com>",
     to: organizer.email,
     subject: `🎪 Event Created: ${event.title} - ShowPass`,
     html: `
@@ -483,9 +485,9 @@ const sendEventCreationNotification = async (organizer, event) => {
             <title>Event Created - ShowPass</title>
             <style>
                 body { font-family: Arial, sans-serif; line-height: 1.6; margin: 0; padding: 0; background-color: #f4f4f4; }
-                .container { max-width: 600px; margin: 0 auto; padding: 20px; background-color: white; }
+                .container { max-width: 100%; margin: 0 auto; background-color: white; }
                 .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; text-align: center; border-radius: 10px 10px 0 0; }
-                .content { padding: 30px 20px; }
+                .content { padding: 10px; }
                 .event-details { background-color: #f8f9fa; padding: 20px; border-radius: 10px; margin: 20px 0; }
                 .status-badge { display: inline-block; padding: 5px 15px; background-color: #ffc107; color: #212529; border-radius: 15px; font-size: 12px; text-transform: uppercase; }
                 .footer { text-align: center; padding: 20px; color: #666; font-size: 12px; }
@@ -516,16 +518,19 @@ const sendEventCreationNotification = async (organizer, event) => {
                         <p><strong>Status:</strong> <span class="status-badge">${
                           event.status
                         }</span></p>
+                        <p><strong>Event Type:</strong> ${
+                          event.isFreeEvent ? "🆓 Free Event" : "💰 Paid Event"
+                        }</p>
                         
                         <h4>🎟️ Ticket Types</h4>
                         ${event.ticketTypes
                           .map(
                             (ticket) => `
-                            <p><strong>${
-                              ticket.name
-                            }:</strong> ${formatCurrency(ticket.price)} (${
-                              ticket.quantity
-                            } available)</p>
+                            <p><strong>${ticket.name}:</strong> ${
+                              ticket.isFree || ticket.price === 0
+                                ? "Free"
+                                : formatCurrency(ticket.price)
+                            } (${ticket.quantity} available)</p>
                         `
                           )
                           .join("")}
@@ -542,12 +547,331 @@ const sendEventCreationNotification = async (organizer, event) => {
                         : `
                     <div style="background-color: #d1ecf1; border: 1px solid #bee5eb; padding: 15px; border-radius: 5px; margin: 15px 0;">
                         <h4>✅ Event Live</h4>
-                        <p>Your event is now live and ready for ticket sales! Start promoting your event to attract attendees.</p>
+                        <p>Your event is now live and ready for ${
+                          event.isFreeEvent
+                            ? "attendee registration"
+                            : "ticket sales"
+                        }! Start promoting your event to attract attendees.</p>
                     </div>
                     `
                     }
                     
-                    <p>You can manage your event, track sales, and view analytics from your organizer dashboard.</p>
+                    <p>You can manage your event, track ${
+                      event.isFreeEvent ? "registrations" : "sales"
+                    }, and view analytics from your organizer dashboard.</p>
+                </div>
+                <div class="footer">
+                    <p>© 2024 ShowPass. All rights reserved.</p>
+                    <p>Need help? Contact us at ${process.env.EMAIL_FROM}</p>
+                </div>
+            </div>
+        </body>
+        </html>
+        `,
+  };
+
+  await transporter.sendMail(mailOptions);
+};
+
+// Send admin notification for new event
+const sendAdminEventNotification = async (admin, event, organizer) => {
+  const mailOptions = {
+    from: "ShowPass <noreply@showpass.com>",
+    to: admin.email,
+    subject: `🔔 New Event Pending Review: ${event.title} - ShowPass Admin`,
+    html: `
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="utf-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>New Event Review - ShowPass Admin</title>
+            <style>
+                body { font-family: Arial, sans-serif; line-height: 1.6; margin: 0; padding: 0; background-color: #f4f4f4; }
+                .container { max-width: 100%; margin: 0 auto; background-color: white; }
+                .header { background: linear-gradient(135deg, #dc3545 0%, #bd2130 100%); color: white; padding: 20px; text-align: center; border-radius: 10px 10px 0 0; }
+                .content { padding: 10px; }
+                .event-details { background-color: #f8f9fa; padding: 20px; border-radius: 10px; margin: 20px 0; }
+                .action-buttons { text-align: center; margin: 20px 0; }
+                .btn { display: inline-block; padding: 10px 20px; margin: 0 10px; border-radius: 5px; text-decoration: none; font-weight: bold; }
+                .btn-approve { background-color: #28a745; color: white; }
+                .btn-review { background-color: #007bff; color: white; }
+                .footer { text-align: center; padding: 20px; color: #666; font-size: 12px; }
+                .logo { font-size: 24px; font-weight: bold; }
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <div class="header">
+                    <div class="logo">👑 ShowPass Admin</div>
+                    <h2>New Event Requires Review</h2>
+                </div>
+                <div class="content">
+                    <h3>Hello Admin! 📋</h3>
+                    <p>A new event has been submitted and requires your review for approval.</p>
+                    
+                    <div class="event-details">
+                        <h4>📅 Event Information</h4>
+                        <p><strong>Event Title:</strong> ${event.title}</p>
+                        <p><strong>Organizer:</strong> ${organizer.firstName} ${
+      organizer.lastName
+    } (${organizer.email})</p>
+                        <p><strong>Category:</strong> ${event.category}</p>
+                        <p><strong>Date:</strong> ${new Date(
+                          event.startDate
+                        ).toLocaleDateString()}</p>
+                        <p><strong>Time:</strong> ${event.startTime} - ${
+      event.endTime
+    }</p>
+                        <p><strong>Venue:</strong> ${event.venue.name}, ${
+      event.venue.city
+    }</p>
+                        <p><strong>Event Type:</strong> ${
+                          event.isFreeEvent ? "🆓 Free Event" : "💰 Paid Event"
+                        }</p>
+                        
+                        <h4>📝 Description</h4>
+                        <p>${event.description}</p>
+                        
+                        <h4>🎟️ Ticket Information</h4>
+                        ${event.ticketTypes
+                          .map(
+                            (ticket) => `
+                            <p><strong>${ticket.name}:</strong> ${
+                              ticket.isFree || ticket.price === 0
+                                ? "Free"
+                                : formatCurrency(ticket.price)
+                            } - ${ticket.quantity} tickets</p>
+                        `
+                          )
+                          .join("")}
+                    </div>
+                    
+                    <div class="action-buttons">
+                        <a href="${process.env.ADMIN_DASHBOARD_URL}/events/${
+      event._id
+    }" class="btn btn-review">Review Event</a>
+                    </div>
+                    
+                    <p>Please review this event and take appropriate action from your admin dashboard.</p>
+                </div>
+                <div class="footer">
+                    <p>© 2024 ShowPass Admin Panel. All rights reserved.</p>
+                </div>
+            </div>
+        </body>
+        </html>
+        `,
+  };
+
+  await transporter.sendMail(mailOptions);
+};
+
+// Send event approval notification to users
+const sendEventApprovalNotification = async (users, event, organizer) => {
+  const recipients = users
+    .filter((user) => user.notifications?.newEvents !== false)
+    .map((user) => user.email);
+
+  if (recipients.length === 0) return;
+
+  const mailOptions = {
+    from: "ShowPass <noreply@showpass.com>",
+    bcc: recipients,
+    subject: `🎉 New Event Available: ${event.title} - ShowPass`,
+    html: `
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="utf-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>New Event Available - ShowPass</title>
+            <style>
+                body { font-family: Arial, sans-serif; line-height: 1.6; margin: 0; padding: 0; background-color: #f4f4f4; }
+                .container { max-width: 100%; margin: 0 auto; background-color: white; }
+                .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; text-align: center; border-radius: 10px 10px 0 0; }
+                .content { padding: 10px; }
+                .event-details { background-color: #f8f9fa; padding: 20px; border-radius: 10px; margin: 20px 0; }
+                .cta-button { text-align: center; margin: 20px 0; }
+                .btn { display: inline-block; padding: 12px 30px; background-color: #28a745; color: white; text-decoration: none; border-radius: 5px; font-weight: bold; }
+                .footer { text-align: center; padding: 20px; color: #666; font-size: 12px; }
+                .logo { font-size: 24px; font-weight: bold; }
+                .free-badge { background-color: #28a745; color: white; padding: 3px 8px; border-radius: 12px; font-size: 11px; }
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <div class="header">
+                    <div class="logo">🎟️ ShowPass</div>
+                    <h2>New Event Available!</h2>
+                </div>
+                <div class="content">
+                    <h3>Hello! 🎉</h3>
+                    <p>Exciting news! A new event has been approved and is now available ${
+                      event.isFreeEvent ? "for registration" : "for booking"
+                    }.</p>
+                    
+                    <div class="event-details">
+                        <h4>📅 ${event.title} ${
+      event.isFreeEvent ? '<span class="free-badge">FREE</span>' : ""
+    }</h4>
+                        <p><strong>Organized by:</strong> ${
+                          organizer.firstName
+                        } ${organizer.lastName}</p>
+                        <p><strong>Category:</strong> ${event.category}</p>
+                        <p><strong>Date:</strong> ${new Date(
+                          event.startDate
+                        ).toLocaleDateString()}</p>
+                        <p><strong>Time:</strong> ${event.startTime} - ${
+      event.endTime
+    }</p>
+                        <p><strong>Venue:</strong> ${event.venue.name}, ${
+      event.venue.city
+    }</p>
+                        
+                        <p><strong>Description:</strong></p>
+                        <p>${event.description}</p>
+                        
+                        ${
+                          !event.isFreeEvent
+                            ? `
+                        <h4>🎟️ Ticket Prices</h4>
+                        ${event.ticketTypes
+                          .map((ticket) =>
+                            ticket.price > 0
+                              ? `<p><strong>${
+                                  ticket.name
+                                }:</strong> ${formatCurrency(ticket.price)}</p>`
+                              : `<p><strong>${ticket.name}:</strong> Free</p>`
+                          )
+                          .join("")}
+                        `
+                            : "<p><strong>This is a FREE event - no payment required!</strong></p>"
+                        }
+                    </div>
+                    
+                    <div class="cta-button">
+                        <a href="${process.env.FRONTEND_URL}/events/${
+      event._id
+    }" class="btn">
+                            ${
+                              event.isFreeEvent ? "Register Now" : "Get Tickets"
+                            }
+                        </a>
+                    </div>
+                    
+                    <p>Don't miss out on this amazing event!</p>
+                </div>
+                <div class="footer">
+                    <p>© 2024 ShowPass. All rights reserved.</p>
+                    <p>Want to stop receiving these notifications? <a href="${
+                      process.env.FRONTEND_URL
+                    }/profile/notifications">Update your preferences</a></p>
+                </div>
+            </div>
+        </body>
+        </html>
+        `,
+  };
+
+  await transporter.sendMail(mailOptions);
+};
+
+// Send event approval notification to organizer
+const sendOrganizerApprovalNotification = async (
+  organizer,
+  event,
+  isApproved,
+  rejectionReason = null
+) => {
+  const mailOptions = {
+    from: "ShowPass <noreply@showpass.com>",
+    to: organizer.email,
+    subject: `${isApproved ? "✅ Event Approved" : "❌ Event Rejected"}: ${
+      event.title
+    } - ShowPass`,
+    html: `
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="utf-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Event ${
+              isApproved ? "Approved" : "Rejected"
+            } - ShowPass</title>
+            <style>
+                body { font-family: Arial, sans-serif; line-height: 1.6; margin: 0; padding: 0; background-color: #f4f4f4; }
+                .container { max-width: 100%; margin: 0 auto; background-color: white; }
+                .header { background: linear-gradient(135deg, ${
+                  isApproved ? "#28a745, #20c997" : "#dc3545, #c82333"
+                }); color: white; padding: 20px; text-align: center; border-radius: 10px 10px 0 0; }
+                .content { padding: 10px; }
+                .event-details { background-color: #f8f9fa; padding: 20px; border-radius: 10px; margin: 20px 0; }
+                .status-badge { display: inline-block; padding: 5px 15px; background-color: ${
+                  isApproved ? "#28a745" : "#dc3545"
+                }; color: white; border-radius: 15px; font-size: 12px; text-transform: uppercase; }
+                .footer { text-align: center; padding: 20px; color: #666; font-size: 12px; }
+                .logo { font-size: 24px; font-weight: bold; }
+                .rejection-reason { background-color: #f8d7da; border: 1px solid #f5c6cb; padding: 15px; border-radius: 5px; margin: 15px 0; }
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <div class="header">
+                    <div class="logo">🎟️ ShowPass</div>
+                    <h2>Event ${isApproved ? "Approved" : "Rejected"}</h2>
+                </div>
+                <div class="content">
+                    <h3>Hello ${organizer.firstName}! ${
+      isApproved ? "🎉" : "😔"
+    }</h3>
+                    <p>We have reviewed your event submission and ${
+                      isApproved
+                        ? "are pleased to inform you that it has been approved"
+                        : "unfortunately it has been rejected"
+                    }.</p>
+                    
+                    <div class="event-details">
+                        <h4>📅 Event Information</h4>
+                        <p><strong>Event Title:</strong> ${event.title}</p>
+                        <p><strong>Status:</strong> <span class="status-badge">${
+                          isApproved ? "Approved" : "Rejected"
+                        }</span></p>
+                        <p><strong>Date:</strong> ${new Date(
+                          event.startDate
+                        ).toLocaleDateString()}</p>
+                        <p><strong>Venue:</strong> ${event.venue.name}</p>
+                    </div>
+                    
+                    ${
+                      isApproved
+                        ? `
+                    <div style="background-color: #d1ecf1; border: 1px solid #bee5eb; padding: 15px; border-radius: 5px; margin: 15px 0;">
+                        <h4>🎉 Congratulations!</h4>
+                        <p>Your event is now live and available to the public. Users can now ${
+                          event.isFreeEvent
+                            ? "register for"
+                            : "purchase tickets for"
+                        } your event.</p>
+                        <p>We've also notified our user base about your new event!</p>
+                    </div>
+                    `
+                        : `
+                    ${
+                      rejectionReason
+                        ? `
+                    <div class="rejection-reason">
+                        <h4>Rejection Reason:</h4>
+                        <p>${rejectionReason}</p>
+                    </div>
+                    <p>You can edit your event and resubmit it for review. Please address the concerns mentioned above.</p>
+                    `
+                        : ""
+                    }
+                    `
+                    }
+                    
+                    <p>You can manage your events from your organizer dashboard.</p>
                 </div>
                 <div class="footer">
                     <p>© 2024 ShowPass. All rights reserved.</p>
@@ -570,4 +894,7 @@ module.exports = {
   sendPasswordResetEmail,
   sendWelcomeEmail,
   sendEventCreationNotification,
+  sendAdminEventNotification,
+  sendEventApprovalNotification,
+  sendOrganizerApprovalNotification,
 };

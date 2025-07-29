@@ -1,7 +1,7 @@
 require("dotenv").config();
 const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs");
-const User = require("../models/User");
+const UserManager = require("./UserManager");
 const Event = require("../models/Event");
 const connectDB = require("../config/database");
 const {
@@ -17,12 +17,18 @@ const seedData = async () => {
     console.log("🌱 Starting database seeding...");
 
     // Clear existing data
-    await User.deleteMany({});
+    const Admin = require("../models/Admin");
+    const Organizer = require("../models/Organizer");
+    const RegularUser = require("../models/RegularUser");
+
+    await Admin.deleteMany({});
+    await Organizer.deleteMany({});
+    await RegularUser.deleteMany({});
     await Event.deleteMany({});
     console.log("🗑️  Cleared existing data");
 
     // Create Admin User
-    const adminUser = new User({
+    const { user: adminUser } = await UserManager.createUser({
       firstName: process.env.ADMIN_FIRST_NAME || "Mustapha",
       lastName: process.env.ADMIN_LAST_NAME || "Muhammed",
       email: process.env.ADMIN_EMAIL || "mustapha.muhammed@bowen.edu.ng",
@@ -30,7 +36,6 @@ const seedData = async () => {
       role: "admin",
       isVerified: true,
     });
-    await adminUser.save();
     console.log("👑 Admin user created:", adminUser.email);
 
     // Send welcome email to admin
@@ -42,15 +47,15 @@ const seedData = async () => {
     }
 
     // Create Organizer User
-    const organizerUser = new User({
+    const { user: organizerUser } = await UserManager.createUser({
       firstName: "Louis",
       lastName: "Diaz",
       email: process.env.ORGANIZER_EMAIL || "louisdiaz43@gmail.com",
       password: process.env.ORGANIZER_PASSWORD || "Balikiss12",
       role: "organizer",
       phone: "+2348123456789",
+      isVerified: true,
     });
-    await organizerUser.save();
     console.log("🎯 Organizer user created:", organizerUser.email);
 
     // Send welcome email to organizer
@@ -65,15 +70,15 @@ const seedData = async () => {
     }
 
     // Create Regular User
-    const regularUser = new User({
+    const { user: regularUser } = await UserManager.createUser({
       firstName: "Muhammed",
       lastName: "Abiodun",
       email: process.env.USER_EMAIL || "muhammedabiodun42@gmail.com",
       password: process.env.USER_PASSWORD || "Balikiss12",
       role: "user",
       phone: "+2348087654321",
+      isVerified: true,
     });
-    await regularUser.save();
     console.log("👤 Regular user created:", regularUser.email);
 
     // Send welcome email to user
@@ -113,8 +118,7 @@ const seedData = async () => {
     ];
 
     for (const userData of additionalUsers) {
-      const user = new User(userData);
-      await user.save();
+      const { user } = await UserManager.createUser(userData);
       console.log(`👥 User created: ${user.email}`);
 
       // Send welcome email to additional user
@@ -130,7 +134,7 @@ const seedData = async () => {
     }
 
     // Get all organizers for event creation
-    const organizers = await User.find({ role: "organizer" });
+    const organizers = await UserManager.getAllOrganizers();
 
     // Create Sample Events
     const sampleEvents = [
@@ -322,19 +326,99 @@ const seedData = async () => {
         approvedAt: new Date(),
         tags: ["food", "festival", "cuisine", "family"],
       },
+      {
+        title: "Free Community Meetup",
+        description:
+          "Join our free community meetup to network with like-minded individuals in the tech space. No payment required - just bring your enthusiasm!",
+        organizer: organizers[0]._id,
+        category: "Technology",
+        venue: {
+          name: "Co-Creation Hub",
+          address: "294 Herbert Macaulay Way, Sabo, Yaba",
+          city: "Lagos",
+          state: "Lagos",
+        },
+        startDate: new Date("2024-11-25T18:00:00"),
+        endDate: new Date("2024-11-25T21:00:00"),
+        startTime: "18:00",
+        endTime: "21:00",
+        ticketTypes: [
+          {
+            name: "Free",
+            price: 0,
+            quantity: 100,
+            description: "Free admission - no payment required",
+            isFree: true,
+          },
+        ],
+        approved: true,
+        status: "approved",
+        approvedBy: adminUser._id,
+        approvedAt: new Date(),
+        isFreeEvent: true,
+        tags: ["free", "networking", "community", "tech"],
+      },
+      {
+        title: "Open Art Gallery Night",
+        description:
+          "Free art gallery event showcasing local artists. Come and enjoy art, music, and refreshments at no cost!",
+        organizer: organizers[1]._id,
+        category: "Arts",
+        venue: {
+          name: "National Theatre",
+          address: "National Arts Theatre, Iganmu",
+          city: "Lagos",
+          state: "Lagos",
+        },
+        startDate: new Date("2024-12-01T19:00:00"),
+        endDate: new Date("2024-12-01T23:00:00"),
+        startTime: "19:00",
+        endTime: "23:00",
+        ticketTypes: [
+          {
+            name: "Free",
+            price: 0,
+            quantity: 200,
+            description: "Free entry to gallery night",
+            isFree: true,
+          },
+        ],
+        status: "pending",
+        isFreeEvent: true,
+        tags: ["free", "art", "gallery", "culture"],
+      },
     ];
 
     for (const eventData of sampleEvents) {
       const event = new Event(eventData);
       await event.save();
+
+      // Update organizer's created events array using UserManager
+      await UserManager.updateUserEventArrays(
+        event.organizer,
+        event._id,
+        "created"
+      );
+
+      // If approved, update admin's approved events array
+      if (event.approved && event.approvedBy) {
+        await UserManager.updateUserEventArrays(
+          event.approvedBy,
+          event._id,
+          "approved"
+        );
+      }
+
       console.log(`🎪 Event created: ${event.title}`);
 
       // Send event creation notification to organizer
       try {
-        const organizer = await User.findById(event.organizer);
-        if (organizer) {
-          await sendEventCreationNotification(organizer, event);
-          console.log(`📧 Event creation email sent to: ${organizer.email}`);
+        const organizerResult = await UserManager.findById(event.organizer);
+        if (organizerResult) {
+          await sendEventCreationNotification(organizerResult.user, event);
+          console.log(
+            `📧 Event creation email sent to: ${organizerResult.user.email}`
+          );
         }
       } catch (emailError) {
         console.log(
@@ -348,7 +432,14 @@ const seedData = async () => {
 ✅ Database seeding completed successfully!
 
 📊 Summary:
-- Users created: ${await User.countDocuments()}
+- Total users created: ${
+      (await UserManager.getAllAdmins()).length +
+      (await UserManager.getAllOrganizers()).length +
+      (await UserManager.getAllRegularUsers()).length
+    }
+  - Admins: ${(await UserManager.getAllAdmins()).length}
+  - Organizers: ${(await UserManager.getAllOrganizers()).length}
+  - Regular Users: ${(await UserManager.getAllRegularUsers()).length}
 - Events created: ${await Event.countDocuments()}
 
 🔐 Default Login Credentials:

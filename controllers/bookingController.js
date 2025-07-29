@@ -1,11 +1,12 @@
 const Booking = require("../models/Booking");
 const Event = require("../models/Event");
-const User = require("../models/User");
+const UserManager = require("../utils/UserManager");
 const {
   sendSuccess,
   sendError,
   getPagination,
   calculateFees,
+  updateUserEventArrays,
 } = require("../utils/helpers");
 const { generateTicketQR } = require("../utils/qrGenerator");
 const { sendTicketConfirmation } = require("../utils/emailService");
@@ -188,6 +189,14 @@ const confirmBookingPayment = async (req, res) => {
     booking.qrCodeImage = qrCodeImage;
 
     await booking.save();
+
+    // Update user's attending events array
+    await updateUserEventArrays(
+      booking.user._id,
+      booking.event._id,
+      "attending",
+      User
+    );
 
     // Update event ticket sales
     const event = await Event.findById(booking.event._id);
@@ -400,6 +409,123 @@ const verifyQRCode = async (req, res) => {
   }
 };
 
+// Register for free event
+const registerForFreeEvent = async (req, res) => {
+  try {
+    const { eventId, ticketType, quantity, attendeeInfo } = req.body;
+
+    // Get event
+    const event = await Event.findById(eventId);
+    if (!event) {
+      return sendError(res, 404, "Event not found");
+    }
+
+    if (!event.approved) {
+      return sendError(res, 400, "Event is not yet approved for registration");
+    }
+
+    if (!event.isFreeEvent) {
+      return sendError(res, 400, "This endpoint is only for free events");
+    }
+
+    // Check if event is in the future
+    if (new Date(event.startDate) <= new Date()) {
+      return sendError(res, 400, "Cannot register for past events");
+    }
+
+    // Find ticket type
+    const ticketTypeData = event.ticketTypes.find(
+      (tt) => tt.name === ticketType
+    );
+    if (!ticketTypeData) {
+      return sendError(res, 400, "Invalid ticket type");
+    }
+
+    if (!ticketTypeData.isFree && ticketTypeData.price > 0) {
+      return sendError(res, 400, "This ticket type is not free");
+    }
+
+    // Check availability
+    const availableTickets = ticketTypeData.quantity - ticketTypeData.sold;
+    if (availableTickets < quantity) {
+      return sendError(
+        res,
+        400,
+        `Only ${availableTickets} tickets available for ${ticketType}`
+      );
+    }
+
+    // Check for duplicate booking
+    const existingBooking = await Booking.findOne({
+      user: req.user._id,
+      event: eventId,
+      status: { $in: ["pending", "confirmed"] },
+    });
+
+    if (existingBooking) {
+      return sendError(res, 400, "You have already registered for this event");
+    }
+
+    // Create booking for free event
+    const booking = new Booking({
+      user: req.user._id,
+      event: eventId,
+      ticketType,
+      quantity,
+      attendeeInfo: attendeeInfo || [
+        {
+          name: req.user.firstName + " " + req.user.lastName,
+          email: req.user.email,
+        },
+      ],
+      totalAmount: 0,
+      finalAmount: 0,
+      paymentStatus: "not_required",
+      status: "confirmed", // Free events are auto-confirmed
+    });
+
+    // Generate QR code immediately for free events
+    const { qrCode, qrCodeImage } = await generateTicketQR(booking);
+    booking.qrCode = qrCode;
+    booking.qrCodeImage = qrCodeImage;
+
+    await booking.save();
+
+    // Update user's attending events array
+    await updateUserEventArrays(req.user._id, eventId, "attending", User);
+
+    // Update event ticket sales
+    ticketTypeData.sold += quantity;
+    event.currentAttendees += quantity;
+    await event.save();
+
+    // Populate booking for response
+    await booking.populate("event", "title startDate venue");
+
+    // Send confirmation email
+    try {
+      await sendTicketConfirmation(req.user, booking);
+      console.log(
+        `📧 Free event registration confirmation sent to: ${req.user.email}`
+      );
+    } catch (emailError) {
+      console.log(
+        "⚠️ Failed to send registration confirmation email:",
+        emailError.message
+      );
+    }
+
+    sendSuccess(
+      res,
+      "Successfully registered for free event! Your tickets have been confirmed.",
+      booking
+    );
+  } catch (error) {
+    console.error("Register for free event error:", error);
+    sendError(res, 500, "Failed to register for free event", error.message);
+  }
+};
+
 module.exports = {
   createBooking,
   getUserBookings,
@@ -408,4 +534,5 @@ module.exports = {
   cancelBooking,
   checkInBooking,
   verifyQRCode,
+  registerForFreeEvent,
 };

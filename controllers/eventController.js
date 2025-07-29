@@ -1,7 +1,18 @@
 const Event = require("../models/Event");
-const User = require("../models/User");
+const UserManager = require("../utils/UserManager");
 const Booking = require("../models/Booking");
-const { sendSuccess, sendError, getPagination } = require("../utils/helpers");
+const {
+  sendSuccess,
+  sendError,
+  getPagination,
+  updateUserEventArrays,
+  checkEventIsFree,
+  validateFreeEventTickets,
+} = require("../utils/helpers");
+const {
+  sendEventCreationNotification,
+  sendAdminEventNotification,
+} = require("../utils/emailService");
 
 // Create new event
 const createEvent = async (req, res) => {
@@ -31,6 +42,20 @@ const createEvent = async (req, res) => {
       );
     }
 
+    // Validate ticket types for free events
+    const ticketValidation = validateFreeEventTickets(ticketTypes);
+    if (!ticketValidation.isValid) {
+      return sendError(
+        res,
+        400,
+        "Ticket validation failed",
+        ticketValidation.errors
+      );
+    }
+
+    // Check if event is free
+    const isFreeEvent = checkEventIsFree(ticketTypes);
+
     const event = new Event({
       title,
       description,
@@ -46,14 +71,41 @@ const createEvent = async (req, res) => {
       tags: tags || [],
       maxAttendees,
       isPublic,
+      isFreeEvent,
     });
 
     await event.save();
     await event.populate("organizer", "firstName lastName email");
 
+    // Update organizer's created events array
+    await updateUserEventArrays(req.user._id, event._id, "created");
+
+    // Send notification to organizer
+    try {
+      await sendEventCreationNotification(req.user, event);
+      console.log(
+        `📧 Event creation notification sent to organizer: ${req.user.email}`
+      );
+    } catch (emailError) {
+      console.error("Failed to send organizer notification:", emailError);
+    }
+
+    // Send notification to all admins
+    try {
+      const admins = await UserManager.getAllAdmins();
+      for (const admin of admins) {
+        await sendAdminEventNotification(admin, event, req.user);
+        console.log(`📧 Admin notification sent to: ${admin.email}`);
+      }
+    } catch (emailError) {
+      console.error("Failed to send admin notifications:", emailError);
+    }
+
     sendSuccess(
       res,
-      "Event created successfully! It will be visible after admin approval.",
+      `Event created successfully! ${
+        isFreeEvent ? "Your free event" : "Your event"
+      } will be visible to users after admin approval.`,
       event
     );
   } catch (error) {
@@ -384,6 +436,201 @@ const getEventCategories = async (req, res) => {
   }
 };
 
+// Get user's created events (for organizers)
+const getUserCreatedEvents = async (req, res) => {
+  try {
+    const { page, limit, skip } = getPagination(req);
+
+    const user = await UserManager.findById(req.user._id);
+
+    if (!user) {
+      return sendError(res, 404, "User not found");
+    }
+
+    // Get user's created events with pagination
+    const Event = require("../models/Event");
+    const events = await Event.find({ organizer: req.user._id })
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit);
+
+    const total = await Event.countDocuments({ organizer: req.user._id });
+
+    sendSuccess(res, "Created events retrieved successfully", events, {
+      pagination: {
+        page,
+        limit,
+        total,
+        pages: Math.ceil(total / limit),
+      },
+    });
+  } catch (error) {
+    console.error("Get user created events error:", error);
+    sendError(res, 500, "Failed to retrieve created events", error.message);
+  }
+};
+
+// Get user's approved events (for admins)
+const getUserApprovedEvents = async (req, res) => {
+  try {
+    const { page, limit, skip } = getPagination(req);
+
+    if (req.user.role !== "admin") {
+      return sendError(res, 403, "Only admins can access approved events");
+    }
+
+    const user = await UserManager.findById(req.user._id);
+
+    if (!user) {
+      return sendError(res, 404, "User not found");
+    }
+
+    // Get approved events with pagination
+    const Event = require("../models/Event");
+    const events = await Event.find({ approved: true })
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit);
+
+    const total = await Event.countDocuments({ approved: true });
+
+    sendSuccess(res, "Approved events retrieved successfully", events, {
+      pagination: {
+        page,
+        limit,
+        total,
+        pages: Math.ceil(total / limit),
+      },
+    });
+  } catch (error) {
+    console.error("Get user approved events error:", error);
+    sendError(res, 500, "Failed to retrieve approved events", error.message);
+  }
+};
+
+// Get user's attending events
+const getUserAttendingEvents = async (req, res) => {
+  try {
+    const { page, limit, skip } = getPagination(req);
+
+    const user = await UserManager.findById(req.user._id);
+
+    if (!user) {
+      return sendError(res, 404, "User not found");
+    }
+
+    // Get user's attending events through bookings
+    const Booking = require("../models/Booking");
+    const bookings = await Booking.find({
+      user: req.user._id,
+      status: "confirmed",
+    })
+      .populate("event")
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit);
+
+    const events = bookings.map((booking) => booking.event);
+    const total = await Booking.countDocuments({
+      user: req.user._id,
+      status: "confirmed",
+    });
+
+    sendSuccess(res, "Attending events retrieved successfully", events, {
+      pagination: {
+        page,
+        limit,
+        total,
+        pages: Math.ceil(total / limit),
+      },
+    });
+  } catch (error) {
+    console.error("Get user attending events error:", error);
+    sendError(res, 500, "Failed to retrieve attending events", error.message);
+  }
+};
+
+// Get free events
+const getFreeEvents = async (req, res) => {
+  try {
+    const { page, limit, skip } = getPagination(req);
+    const {
+      category,
+      city,
+      state,
+      startDate,
+      endDate,
+      search,
+      sortBy = "startDate",
+      sortOrder = "asc",
+    } = req.query;
+
+    // Build query for free events
+    let query = {
+      approved: true,
+      isPublic: true,
+      status: "approved",
+      isFreeEvent: true,
+    };
+
+    // Apply filters
+    if (category) {
+      query.category = category;
+    }
+
+    if (city) {
+      query["venue.city"] = new RegExp(city, "i");
+    }
+    if (state) {
+      query["venue.state"] = new RegExp(state, "i");
+    }
+
+    // Date range filter
+    if (startDate || endDate) {
+      query.startDate = {};
+      if (startDate) {
+        query.startDate.$gte = new Date(startDate);
+      }
+      if (endDate) {
+        query.startDate.$lte = new Date(endDate);
+      }
+    }
+
+    // Search filter
+    if (search) {
+      query.$or = [
+        { title: new RegExp(search, "i") },
+        { description: new RegExp(search, "i") },
+        { tags: { $in: [new RegExp(search, "i")] } },
+      ];
+    }
+
+    // Build sort object
+    const sort = {};
+    sort[sortBy] = sortOrder === "desc" ? -1 : 1;
+
+    const events = await Event.find(query)
+      .populate("organizer", "firstName lastName")
+      .sort(sort)
+      .skip(skip)
+      .limit(limit);
+
+    const total = await Event.countDocuments(query);
+
+    sendSuccess(res, "Free events retrieved successfully", events, {
+      pagination: {
+        page,
+        limit,
+        total,
+        pages: Math.ceil(total / limit),
+      },
+    });
+  } catch (error) {
+    console.error("Get free events error:", error);
+    sendError(res, 500, "Failed to retrieve free events", error.message);
+  }
+};
+
 module.exports = {
   createEvent,
   getEvents,
@@ -393,4 +640,8 @@ module.exports = {
   getOrganizerEvents,
   getEventAttendees,
   getEventCategories,
+  getUserCreatedEvents,
+  getUserApprovedEvents,
+  getUserAttendingEvents,
+  getFreeEvents,
 };

@@ -9,7 +9,7 @@ const refundRequestSchema = new mongoose.Schema(
     },
     user: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
+      ref: "RegularUser",
       required: true,
     },
     event: {
@@ -54,7 +54,7 @@ const refundRequestSchema = new mongoose.Schema(
     adminResponse: String,
     resolvedBy: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
+      ref: "Admin",
     },
     resolvedAt: Date,
     paystackRefundId: String,

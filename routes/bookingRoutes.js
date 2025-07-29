@@ -19,6 +19,26 @@ router.post(
   bookingController.createBooking
 );
 
+// @route   POST /api/booking/free-event
+// @desc    Register for free event
+// @access  Private (User)
+router.post(
+  "/free-event",
+  [
+    requireAuth,
+    body("eventId").isMongoId().withMessage("Valid event ID is required"),
+    body("ticketType").notEmpty().withMessage("Ticket type is required"),
+    body("quantity")
+      .isInt({ min: 1, max: 10 })
+      .withMessage("Quantity must be between 1 and 10"),
+    body("attendeeInfo")
+      .optional()
+      .isArray()
+      .withMessage("Attendee info must be an array"),
+  ],
+  bookingController.registerForFreeEvent
+);
+
 // @route   GET /api/booking/my-tickets
 // @desc    Get user's bookings/tickets
 // @access  Private (User)

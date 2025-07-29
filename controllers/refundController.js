@@ -1,7 +1,7 @@
 const RefundRequest = require("../models/RefundRequest");
 const Booking = require("../models/Booking");
 const Event = require("../models/Event");
-const User = require("../models/User");
+const UserManager = require("../utils/UserManager");
 const { sendSuccess, sendError, getPagination } = require("../utils/helpers");
 const { initiateRefund } = require("../utils/paystack");
 const { sendRefundConfirmation } = require("../utils/emailService");

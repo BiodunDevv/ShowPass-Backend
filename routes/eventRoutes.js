@@ -22,6 +22,39 @@ router.get("/", optionalAuth, eventController.getEvents);
 // @access  Public
 router.get("/categories", eventController.getEventCategories);
 
+// @route   GET /api/events/free
+// @desc    Get all free events
+// @access  Public
+router.get("/free", optionalAuth, eventController.getFreeEvents);
+
+// @route   GET /api/events/user/created
+// @desc    Get user's created events
+// @access  Private (Organizer/Admin)
+router.get(
+  "/user/created",
+  requireAuth,
+  isOrganizer,
+  eventController.getUserCreatedEvents
+);
+
+// @route   GET /api/events/user/approved
+// @desc    Get user's approved events
+// @access  Private (Admin only)
+router.get(
+  "/user/approved",
+  requireAuth,
+  eventController.getUserApprovedEvents
+);
+
+// @route   GET /api/events/user/attending
+// @desc    Get user's attending events
+// @access  Private
+router.get(
+  "/user/attending",
+  requireAuth,
+  eventController.getUserAttendingEvents
+);
+
 // @route   POST /api/events
 // @desc    Create new event
 // @access  Private (Organizer/Admin)

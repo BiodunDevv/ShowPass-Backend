@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
-const bcrypt = require("bcryptjs");
 
-const userSchema = new mongoose.Schema(
+// Organizer Model - stored in 'organizers' collection
+const organizerSchema = new mongoose.Schema(
   {
     firstName: {
       type: String,
@@ -27,8 +27,8 @@ const userSchema = new mongoose.Schema(
     },
     role: {
       type: String,
-      enum: ["user", "organizer", "admin"],
-      default: "user",
+      default: "organizer",
+      immutable: true,
     },
     isVerified: {
       type: Boolean,
@@ -50,19 +50,14 @@ const userSchema = new mongoose.Schema(
       state: String,
       country: String,
     },
-    // Event arrays for different user roles
+    // Events created by organizer
     createdEvents: [
       {
         type: mongoose.Schema.Types.ObjectId,
         ref: "Event",
       },
     ],
-    approvedEvents: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Event",
-      },
-    ],
+    // Events organizer is attending (as attendee)
     attendingEvents: [
       {
         type: mongoose.Schema.Types.ObjectId,
@@ -83,33 +78,90 @@ const userSchema = new mongoose.Schema(
         type: Boolean,
         default: true,
       },
+      eventApprovals: {
+        type: Boolean,
+        default: true,
+      },
+    },
+    // Organizer-specific fields
+    organizationInfo: {
+      companyName: String,
+      businessRegistration: String,
+      website: String,
+      socialMedia: {
+        facebook: String,
+        twitter: String,
+        instagram: String,
+        linkedin: String,
+      },
+    },
+    bankDetails: {
+      accountName: String,
+      accountNumber: String,
+      bankName: String,
+      bankCode: String,
+    },
+    verified: {
+      type: Boolean,
+      default: false,
+    },
+    verificationDocuments: [String], // File paths
+    rating: {
+      type: Number,
+      default: 0,
+      min: 0,
+      max: 5,
+    },
+    totalEventsCreated: {
+      type: Number,
+      default: 0,
+    },
+    totalTicketsSold: {
+      type: Number,
+      default: 0,
     },
   },
   {
     timestamps: true,
+    collection: "organizers", // Explicit collection name
   }
 );
 
 // Hash password before saving
-userSchema.pre("save", async function (next) {
+organizerSchema.pre("save", async function (next) {
   if (!this.isModified("password")) return next();
 
+  const bcrypt = require("bcryptjs");
   const salt = await bcrypt.genSalt(12);
   this.password = await bcrypt.hash(this.password, salt);
   next();
 });
 
 // Compare password method
-userSchema.methods.comparePassword = async function (candidatePassword) {
+organizerSchema.methods.comparePassword = async function (candidatePassword) {
+  const bcrypt = require("bcryptjs");
   return await bcrypt.compare(candidatePassword, this.password);
 };
 
 // Virtual for full name
-userSchema.virtual("fullName").get(function () {
+organizerSchema.virtual("fullName").get(function () {
   return `${this.firstName} ${this.lastName}`;
 });
 
-// Ensure virtual fields are serialized
-userSchema.set("toJSON", { virtuals: true });
+// Update stats when events are added
+organizerSchema.methods.updateStats = async function () {
+  const Event = require("./Event");
+  const events = await Event.find({ organizer: this._id });
 
-module.exports = mongoose.model("User", userSchema);
+  this.totalEventsCreated = events.length;
+  this.totalTicketsSold = events.reduce((total, event) => {
+    return total + event.ticketsSold;
+  }, 0);
+
+  await this.save();
+};
+
+// Ensure virtual fields are serialized
+organizerSchema.set("toJSON", { virtuals: true });
+
+module.exports = mongoose.model("Organizer", organizerSchema);

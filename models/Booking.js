@@ -4,7 +4,7 @@ const bookingSchema = new mongoose.Schema(
   {
     user: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
+      ref: "RegularUser",
       required: true,
     },
     event: {
@@ -66,7 +66,7 @@ const bookingSchema = new mongoose.Schema(
     },
     checkedInBy: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
+      ref: "Organizer",
     },
     refundReason: String,
     refundAmount: Number,

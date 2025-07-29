@@ -1,4 +1,4 @@
-const User = require("../models/User");
+const UserManager = require("../utils/UserManager");
 const {
   generateToken,
   generateVerificationToken,
@@ -10,24 +10,24 @@ const {
   sendVerificationEmail,
   sendPasswordResetEmail,
 } = require("../utils/emailService");
-const crypto = require("crypto");
+const { randomBytes, createHash } = require("crypto");
 
 // Register new user
 const register = async (req, res) => {
   try {
     const { firstName, lastName, email, password, role = "user" } = req.body;
 
-    // Check if user already exists
-    const existingUser = await User.findOne({ email });
-    if (existingUser) {
+    // Check if user already exists across all collections
+    const existingUserResult = await UserManager.findByEmail(email);
+    if (existingUserResult) {
       return sendError(res, 400, "User with this email already exists");
     }
 
     // Generate verification token
     const verificationToken = generateVerificationToken();
 
-    // Create user
-    const user = new User({
+    // Create user in appropriate collection
+    const { user } = await UserManager.createUser({
       firstName,
       lastName,
       email,
@@ -35,8 +35,6 @@ const register = async (req, res) => {
       role,
       verificationToken,
     });
-
-    await user.save();
 
     // Send verification email
     try {
@@ -68,11 +66,13 @@ const login = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    // Find user
-    const user = await User.findOne({ email });
-    if (!user) {
+    // Find user across all collections
+    const userResult = await UserManager.findByEmail(email);
+    if (!userResult) {
       return sendError(res, 401, "Invalid email or password");
     }
+
+    const { user } = userResult;
 
     // Check if user is blocked
     if (user.blocked) {
@@ -87,6 +87,12 @@ const login = async (req, res) => {
     const isPasswordValid = await user.comparePassword(password);
     if (!isPasswordValid) {
       return sendError(res, 401, "Invalid email or password");
+    }
+
+    // Update last login for admins
+    if (user.role === "admin") {
+      user.lastLogin = new Date();
+      await user.save();
     }
 
     // Generate token
@@ -105,7 +111,12 @@ const login = async (req, res) => {
 // Get current user
 const getMe = async (req, res) => {
   try {
-    const user = await User.findById(req.user._id).select("-password");
+    const userResult = await UserManager.findById(req.user._id);
+    if (!userResult) {
+      return sendError(res, 404, "User not found");
+    }
+
+    const { user } = userResult;
     sendSuccess(res, "User profile retrieved successfully", sanitizeUser(user));
   } catch (error) {
     console.error("Get profile error:", error);
@@ -118,10 +129,12 @@ const updateProfile = async (req, res) => {
   try {
     const { firstName, lastName, phone, dateOfBirth, address } = req.body;
 
-    const user = await User.findById(req.user._id);
-    if (!user) {
+    const userResult = await UserManager.findById(req.user._id);
+    if (!userResult) {
       return sendError(res, 404, "User not found");
     }
+
+    const { user, model } = userResult;
 
     // Update allowed fields
     if (firstName) user.firstName = firstName;
@@ -148,10 +161,12 @@ const verifyEmail = async (req, res) => {
       return sendError(res, 400, "Verification token is required");
     }
 
-    const user = await User.findOne({ verificationToken: token });
-    if (!user) {
+    const userResult = await UserManager.findByVerificationToken(token);
+    if (!userResult) {
       return sendError(res, 400, "Invalid or expired verification token");
     }
+
+    const { user } = userResult;
 
     // Update user
     user.isVerified = true;
@@ -171,11 +186,12 @@ const verifyEmail = async (req, res) => {
 // Resend verification email
 const resendVerification = async (req, res) => {
   try {
-    const user = await User.findById(req.user._id);
-
-    if (!user) {
+    const userResult = await UserManager.findById(req.user._id);
+    if (!userResult) {
       return sendError(res, 404, "User not found");
     }
+
+    const { user } = userResult;
 
     if (user.isVerified) {
       return sendError(res, 400, "Email is already verified");
@@ -201,15 +217,16 @@ const forgotPassword = async (req, res) => {
   try {
     const { email } = req.body;
 
-    const user = await User.findOne({ email });
-    if (!user) {
+    const userResult = await UserManager.findByEmail(email);
+    if (!userResult) {
       return sendError(res, 404, "No user found with this email address");
     }
 
+    const { user } = userResult;
+
     // Generate reset token
-    const resetToken = crypto.randomBytes(32).toString("hex");
-    user.resetPasswordToken = crypto
-      .createHash("sha256")
+    const resetToken = randomBytes(32).toString("hex");
+    user.resetPasswordToken = createHash("sha256")
       .update(resetToken)
       .digest("hex");
     user.resetPasswordExpire = Date.now() + 60 * 60 * 1000; // 1 hour
@@ -251,14 +268,12 @@ const resetPassword = async (req, res) => {
     // Hash token to compare with database
     const hashedToken = crypto.createHash("sha256").update(token).digest("hex");
 
-    const user = await User.findOne({
-      resetPasswordToken: hashedToken,
-      resetPasswordExpire: { $gt: Date.now() },
-    });
-
-    if (!user) {
+    const userResult = await UserManager.findByResetToken(hashedToken);
+    if (!userResult) {
       return sendError(res, 400, "Invalid or expired reset token");
     }
+
+    const { user } = userResult;
 
     // Update password
     user.password = password;
@@ -292,7 +307,12 @@ const changePassword = async (req, res) => {
       );
     }
 
-    const user = await User.findById(req.user._id);
+    const userResult = await UserManager.findById(req.user._id);
+    if (!userResult) {
+      return sendError(res, 404, "User not found");
+    }
+
+    const { user } = userResult;
 
     // Verify current password
     const isCurrentPasswordValid = await user.comparePassword(currentPassword);

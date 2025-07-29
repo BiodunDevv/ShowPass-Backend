@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
-const bcrypt = require("bcryptjs");
 
-const userSchema = new mongoose.Schema(
+// Regular User Model - stored in 'regularusers' collection
+const regularUserSchema = new mongoose.Schema(
   {
     firstName: {
       type: String,
@@ -27,8 +27,8 @@ const userSchema = new mongoose.Schema(
     },
     role: {
       type: String,
-      enum: ["user", "organizer", "admin"],
       default: "user",
+      immutable: true,
     },
     isVerified: {
       type: Boolean,
@@ -50,19 +50,7 @@ const userSchema = new mongoose.Schema(
       state: String,
       country: String,
     },
-    // Event arrays for different user roles
-    createdEvents: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Event",
-      },
-    ],
-    approvedEvents: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Event",
-      },
-    ],
+    // Events user is attending
     attendingEvents: [
       {
         type: mongoose.Schema.Types.ObjectId,
@@ -84,32 +72,43 @@ const userSchema = new mongoose.Schema(
         default: true,
       },
     },
+    // User-specific fields
+    preferences: {
+      favoriteCategories: [String],
+      eventNotificationRadius: {
+        type: Number,
+        default: 50, // km
+      },
+    },
   },
   {
     timestamps: true,
+    collection: 'regularusers' // Explicit collection name
   }
 );
 
 // Hash password before saving
-userSchema.pre("save", async function (next) {
+regularUserSchema.pre("save", async function (next) {
   if (!this.isModified("password")) return next();
 
+  const bcrypt = require("bcryptjs");
   const salt = await bcrypt.genSalt(12);
   this.password = await bcrypt.hash(this.password, salt);
   next();
 });
 
 // Compare password method
-userSchema.methods.comparePassword = async function (candidatePassword) {
+regularUserSchema.methods.comparePassword = async function (candidatePassword) {
+  const bcrypt = require("bcryptjs");
   return await bcrypt.compare(candidatePassword, this.password);
 };
 
 // Virtual for full name
-userSchema.virtual("fullName").get(function () {
+regularUserSchema.virtual("fullName").get(function () {
   return `${this.firstName} ${this.lastName}`;
 });
 
 // Ensure virtual fields are serialized
-userSchema.set("toJSON", { virtuals: true });
+regularUserSchema.set("toJSON", { virtuals: true });
 
-module.exports = mongoose.model("User", userSchema);
+module.exports = mongoose.model("RegularUser", regularUserSchema);

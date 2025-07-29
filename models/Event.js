@@ -4,7 +4,7 @@ const ticketTypeSchema = new mongoose.Schema({
   name: {
     type: String,
     required: true,
-    enum: ["VIP", "Regular", "Premium", "Standard", "Early Bird"],
+    enum: ["VIP", "Regular", "Premium", "Standard", "Early Bird", "Free"],
   },
   price: {
     type: Number,
@@ -22,6 +22,10 @@ const ticketTypeSchema = new mongoose.Schema({
   },
   description: String,
   benefits: [String],
+  isFree: {
+    type: Boolean,
+    default: false,
+  },
 });
 
 const eventSchema = new mongoose.Schema(
@@ -37,7 +41,7 @@ const eventSchema = new mongoose.Schema(
     },
     organizer: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
+      ref: "Organizer",
       required: true,
     },
     category: {
@@ -102,7 +106,7 @@ const eventSchema = new mongoose.Schema(
     },
     approvedBy: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
+      ref: "Admin",
     },
     approvedAt: Date,
     status: {
@@ -136,6 +140,14 @@ const eventSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    isFreeEvent: {
+      type: Boolean,
+      default: false,
+    },
+    notificationsSent: {
+      type: Boolean,
+      default: false,
+    },
   },
   {
     timestamps: true,
@@ -157,6 +169,13 @@ eventSchema.virtual("totalRevenue").get(function () {
   return this.ticketTypes.reduce(
     (total, ticket) => total + ticket.sold * ticket.price,
     0
+  );
+});
+
+// Check if event is free
+eventSchema.virtual("isFree").get(function () {
+  return this.ticketTypes.every(
+    (ticket) => ticket.price === 0 || ticket.isFree
   );
 });
 

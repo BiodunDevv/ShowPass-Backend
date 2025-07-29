@@ -1,16 +1,24 @@
-const User = require("../models/User");
+const UserManager = require("../utils/UserManager");
 const Event = require("../models/Event");
 const Booking = require("../models/Booking");
 const RefundRequest = require("../models/RefundRequest");
-const { sendSuccess, sendError, getPagination } = require("../utils/helpers");
-const { sendEventUpdateNotification } = require("../utils/emailService");
+const {
+  sendSuccess,
+  sendError,
+  getPagination,
+  updateUserEventArrays,
+} = require("../utils/helpers");
+const {
+  sendEventUpdateNotification,
+  sendEventApprovalNotification,
+  sendOrganizerApprovalNotification,
+} = require("../utils/emailService");
 
 // Get dashboard statistics
 const getDashboardStats = async (req, res) => {
   try {
-    // Total counts
-    const totalUsers = await User.countDocuments({ role: "user" });
-    const totalOrganizers = await User.countDocuments({ role: "organizer" });
+    // Total counts using UserManager
+    const userCounts = await UserManager.countUsersByRole();
     const totalEvents = await Event.countDocuments();
     const totalBookings = await Booking.countDocuments();
 
@@ -87,8 +95,9 @@ const getDashboardStats = async (req, res) => {
 
     const stats = {
       overview: {
-        totalUsers,
-        totalOrganizers,
+        totalUsers: userCounts.users,
+        totalOrganizers: userCounts.organizers,
+        totalAdmins: userCounts.admins,
         totalEvents,
         totalBookings,
         pendingEvents,
@@ -121,10 +130,6 @@ const getAllUsers = async (req, res) => {
 
     let query = {};
 
-    if (role) {
-      query.role = role;
-    }
-
     if (status === "blocked") {
       query.blocked = true;
     } else if (status === "active") {
@@ -139,13 +144,39 @@ const getAllUsers = async (req, res) => {
       ];
     }
 
-    const users = await User.find(query)
-      .select("-password -verificationToken -resetPasswordToken")
-      .sort({ createdAt: -1 })
-      .skip(skip)
-      .limit(limit);
+    let users, total;
 
-    const total = await User.countDocuments(query);
+    if (role) {
+      // Get users from specific role collection
+      users = await UserManager.getUsersByRole(role, query, {
+        sort: { createdAt: -1 },
+        skip: skip,
+        limit: limit,
+      });
+
+      const UserModel = UserManager.getUserModel(role);
+      total = await UserModel.countDocuments(query);
+    } else {
+      // Get all users from all collections
+      const searchResults = await UserManager.searchUsers(search || "", null);
+
+      // Combine and paginate results
+      const allUsers = [
+        ...searchResults.users,
+        ...searchResults.organizers,
+        ...searchResults.admins,
+      ];
+
+      // Apply status filter
+      const filteredUsers = allUsers.filter((user) => {
+        if (status === "blocked") return user.blocked === true;
+        if (status === "active") return user.blocked === false;
+        return true;
+      });
+
+      total = filteredUsers.length;
+      users = filteredUsers.slice(skip, skip + limit);
+    }
 
     sendSuccess(res, "Users retrieved successfully", users, {
       pagination: {
@@ -167,12 +198,14 @@ const toggleUserStatus = async (req, res) => {
     const { id } = req.params;
     const { blocked } = req.body;
 
-    const user = await User.findById(id);
-    if (!user) {
+    const userResult = await UserManager.findById(id);
+    if (!userResult) {
       return sendError(res, 404, "User not found");
     }
 
-    if (user.role === "admin") {
+    const { user, role } = userResult;
+
+    if (role === "admin") {
       return sendError(res, 403, "Cannot modify admin users");
     }
 
@@ -186,6 +219,7 @@ const toggleUserStatus = async (req, res) => {
         firstName: user.firstName,
         lastName: user.lastName,
         email: user.email,
+        role: role,
         blocked: user.blocked,
       },
     });
@@ -269,6 +303,9 @@ const reviewEvent = async (req, res) => {
       event.status = "approved";
       event.approvedBy = req.user._id;
       event.approvedAt = new Date();
+
+      // Update admin's approved events array
+      await updateUserEventArrays(req.user._id, event._id, "approved");
     } else {
       event.status = "rejected";
       event.rejectionReason = rejectionReason;
@@ -276,10 +313,59 @@ const reviewEvent = async (req, res) => {
 
     await event.save();
 
-    // TODO: Send notification email to organizer
+    // Send notification to organizer
+    try {
+      await sendOrganizerApprovalNotification(
+        event.organizer,
+        event,
+        approved,
+        rejectionReason
+      );
+      console.log(
+        `📧 Approval notification sent to organizer: ${event.organizer.email}`
+      );
+    } catch (emailError) {
+      console.error(
+        "Failed to send organizer approval notification:",
+        emailError
+      );
+    }
+
+    // If approved, send notification to all users
+    if (approved && !event.notificationsSent) {
+      try {
+        const users = await UserManager.getAllRegularUsers();
+        const eligibleUsers = users.filter(
+          (user) => user.notifications?.newEvents !== false
+        );
+
+        if (eligibleUsers.length > 0) {
+          await sendEventApprovalNotification(
+            eligibleUsers,
+            event,
+            event.organizer
+          );
+          console.log(
+            `📧 Event approval notifications sent to ${eligibleUsers.length} users`
+          );
+
+          // Mark notifications as sent
+          event.notificationsSent = true;
+          await event.save();
+        }
+      } catch (emailError) {
+        console.error("Failed to send user notifications:", emailError);
+      }
+    }
 
     const action = approved ? "approved" : "rejected";
-    sendSuccess(res, `Event ${action} successfully`, event);
+    sendSuccess(
+      res,
+      `Event ${action} successfully. ${
+        approved ? "Users have been notified about this new event." : ""
+      }`,
+      event
+    );
   } catch (error) {
     console.error("Review event error:", error);
     sendError(res, 500, "Failed to review event", error.message);
@@ -497,16 +583,30 @@ const sendSystemNotification = async (req, res) => {
   try {
     const { title, message, userType = "all" } = req.body;
 
-    let userFilter = {};
-    if (userType === "users") {
-      userFilter.role = "user";
+    // Get users based on type using UserManager
+    let users = [];
+    if (userType === "all") {
+      const [admins, organizers, regularUsers] = await Promise.all([
+        UserManager.getAllAdmins(),
+        UserManager.getAllOrganizers(),
+        UserManager.getAllRegularUsers(),
+      ]);
+      users = [...admins, ...organizers, ...regularUsers];
+    } else if (userType === "admins") {
+      users = await UserManager.getAllAdmins();
     } else if (userType === "organizers") {
-      userFilter.role = "organizer";
+      users = await UserManager.getAllOrganizers();
+    } else {
+      users = await UserManager.getAllRegularUsers();
     }
 
-    const users = await User.find(userFilter).select(
-      "email firstName lastName"
-    );
+    // Filter users by email if provided (simple text search)
+    const { email } = req.query;
+    if (email) {
+      users = users.filter((user) =>
+        user.email.toLowerCase().includes(email.toLowerCase())
+      );
+    }
 
     // TODO: Implement system notification (email, push notification, etc.)
     // For now, we'll just return success

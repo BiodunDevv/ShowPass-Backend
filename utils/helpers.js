@@ -107,6 +107,44 @@ const sendSuccess = (res, message, data = null, meta = null) => {
   return sendResponse(res, 200, true, message, data, meta);
 };
 
+// Update user event arrays
+const updateUserEventArrays = async (userId, eventId, action) => {
+  try {
+    const UserManager = require("./UserManager");
+    return await UserManager.updateUserEventArrays(userId, eventId, action);
+  } catch (error) {
+    console.error("Error updating user event arrays:", error);
+    return false;
+  }
+};
+
+// Check if event is free
+const checkEventIsFree = (ticketTypes) => {
+  return ticketTypes.every(
+    (ticket) => ticket.price === 0 || ticket.isFree === true
+  );
+};
+
+// Validate free event ticket types
+const validateFreeEventTickets = (ticketTypes) => {
+  const errors = [];
+
+  ticketTypes.forEach((ticket, index) => {
+    if (ticket.isFree && ticket.price > 0) {
+      errors.push(
+        `Ticket type ${
+          index + 1
+        }: Cannot have price greater than 0 for free tickets`
+      );
+    }
+    if (ticket.price === 0) {
+      ticket.isFree = true;
+    }
+  });
+
+  return { isValid: errors.length === 0, errors };
+};
+
 module.exports = {
   generateToken,
   generateVerificationToken,
@@ -120,4 +158,7 @@ module.exports = {
   sendResponse,
   sendError,
   sendSuccess,
+  updateUserEventArrays,
+  checkEventIsFree,
+  validateFreeEventTickets,
 };

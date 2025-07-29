@@ -1,7 +1,8 @@
 const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs");
 
-const userSchema = new mongoose.Schema(
+// Base user schema with common fields
+const baseUserSchema = new mongoose.Schema(
   {
     firstName: {
       type: String,
@@ -25,11 +26,6 @@ const userSchema = new mongoose.Schema(
       required: [true, "Password is required"],
       minlength: 6,
     },
-    role: {
-      type: String,
-      enum: ["user", "organizer", "admin"],
-      default: "user",
-    },
     isVerified: {
       type: Boolean,
       default: false,
@@ -50,25 +46,6 @@ const userSchema = new mongoose.Schema(
       state: String,
       country: String,
     },
-    // Event arrays for different user roles
-    createdEvents: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Event",
-      },
-    ],
-    approvedEvents: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Event",
-      },
-    ],
-    attendingEvents: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Event",
-      },
-    ],
     // Notification preferences
     notifications: {
       email: {
@@ -87,11 +64,12 @@ const userSchema = new mongoose.Schema(
   },
   {
     timestamps: true,
+    discriminatorKey: "userType", // This will help with inheritance
   }
 );
 
 // Hash password before saving
-userSchema.pre("save", async function (next) {
+baseUserSchema.pre("save", async function (next) {
   if (!this.isModified("password")) return next();
 
   const salt = await bcrypt.genSalt(12);
@@ -100,16 +78,16 @@ userSchema.pre("save", async function (next) {
 });
 
 // Compare password method
-userSchema.methods.comparePassword = async function (candidatePassword) {
+baseUserSchema.methods.comparePassword = async function (candidatePassword) {
   return await bcrypt.compare(candidatePassword, this.password);
 };
 
 // Virtual for full name
-userSchema.virtual("fullName").get(function () {
+baseUserSchema.virtual("fullName").get(function () {
   return `${this.firstName} ${this.lastName}`;
 });
 
 // Ensure virtual fields are serialized
-userSchema.set("toJSON", { virtuals: true });
+baseUserSchema.set("toJSON", { virtuals: true });
 
-module.exports = mongoose.model("User", userSchema);
+module.exports = baseUserSchema;
