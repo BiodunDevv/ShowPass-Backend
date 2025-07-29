@@ -229,6 +229,43 @@ const toggleUserStatus = async (req, res) => {
   }
 };
 
+// Update user status (block/unblock) - Alternative endpoint
+const updateUserStatus = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { blocked } = req.body;
+
+    const userResult = await UserManager.findById(id);
+    if (!userResult) {
+      return sendError(res, 404, "User not found");
+    }
+
+    const { user, role } = userResult;
+
+    if (role === "admin") {
+      return sendError(res, 403, "Cannot modify admin users");
+    }
+
+    user.blocked = blocked;
+    await user.save();
+
+    const action = blocked ? "blocked" : "unblocked";
+    sendSuccess(res, `User ${action} successfully`, {
+      user: {
+        _id: user._id,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        email: user.email,
+        role: role,
+        blocked: user.blocked,
+      },
+    });
+  } catch (error) {
+    console.error("Update user status error:", error);
+    sendError(res, 500, "Failed to update user status", error.message);
+  }
+};
+
 // Get all events (admin view)
 const getAllEvents = async (req, res) => {
   try {
@@ -630,6 +667,7 @@ module.exports = {
   getDashboardStats,
   getAllUsers,
   toggleUserStatus,
+  updateUserStatus,
   getAllEvents,
   reviewEvent,
   toggleEventFeatured,

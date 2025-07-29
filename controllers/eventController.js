@@ -12,6 +12,9 @@ const {
 const {
   sendEventCreationNotification,
   sendAdminEventNotification,
+  sendEventUpdateNotification,
+  sendOrganizerEventUpdateNotification,
+  sendAdminEventUpdateNotification,
 } = require("../utils/emailService");
 
 // Create new event
@@ -266,8 +269,13 @@ const updateEvent = async (req, res) => {
       }
     });
 
-    // If major changes are made, reset approval status
+    // Define major change fields first
     const majorChangeFields = ["startDate", "endDate", "venue", "ticketTypes"];
+
+    // Generate change details for all notifications
+    let changeDetails = generateChangeDetails(updates, majorChangeFields);
+
+    // If major changes are made, reset approval status
     const hasMajorChanges = majorChangeFields.some(
       (field) => updates[field] !== undefined
     );
@@ -275,7 +283,130 @@ const updateEvent = async (req, res) => {
     if (hasMajorChanges && event.approved) {
       event.approved = false;
       event.status = "pending";
-      // TODO: Notify attendees about changes
+
+      // Notify all attendees about major changes
+      try {
+        // Get all confirmed bookings for this event
+        const bookings = await Booking.find({
+          event: event._id,
+          status: "confirmed",
+        }).populate("user", "firstName lastName email");
+
+        if (bookings.length > 0) {
+          // Use the change details message already generated
+          // Send notifications to all attendees
+          for (const booking of bookings) {
+            try {
+              await sendEventUpdateNotification(
+                booking.user,
+                event,
+                changeDetails
+              );
+            } catch (emailError) {
+              console.error(
+                `Failed to send update notification to ${booking.user.email}:`,
+                emailError
+              );
+            }
+          }
+
+          console.log(
+            `📧 Event update notifications sent to ${bookings.length} attendees`
+          );
+        }
+      } catch (notificationError) {
+        console.error(
+          "Failed to send event update notifications:",
+          notificationError
+        );
+      }
+    } else if (Object.keys(updates).length > 0 && event.approved) {
+      // For minor changes, still notify attendees but don't reset approval
+      try {
+        // Check if there are any meaningful changes to notify about
+        const notifiableFields = [
+          "title",
+          "description",
+          "startTime",
+          "endTime",
+          "category",
+        ];
+        const hasNotifiableChanges = notifiableFields.some(
+          (field) => updates[field] !== undefined
+        );
+
+        if (hasNotifiableChanges) {
+          // Get all confirmed bookings for this event
+          const bookings = await Booking.find({
+            event: event._id,
+            status: "confirmed",
+          }).populate("user", "firstName lastName email");
+
+          if (bookings.length > 0) {
+            // Use the change details message already generated for minor changes
+            // Send notifications to all attendees
+            for (const booking of bookings) {
+              try {
+                await sendEventUpdateNotification(
+                  booking.user,
+                  event,
+                  changeDetails
+                );
+              } catch (emailError) {
+                console.error(
+                  `Failed to send minor update notification to ${booking.user.email}:`,
+                  emailError
+                );
+              }
+            }
+
+            console.log(
+              `📧 Minor event update notifications sent to ${bookings.length} attendees`
+            );
+          }
+        }
+      } catch (notificationError) {
+        console.error(
+          "Failed to send minor event update notifications:",
+          notificationError
+        );
+      }
+    }
+
+    // Send organizer notification for event update (regardless of approval status)
+    try {
+      await sendOrganizerEventUpdateNotification(
+        event.organizer,
+        event,
+        changeDetails
+      );
+      console.log(
+        `📧 Organizer update notification sent to: ${event.organizer.email}`
+      );
+    } catch (orgNotificationError) {
+      console.error(
+        "Failed to send organizer update notification:",
+        orgNotificationError
+      );
+    }
+
+    // Send admin notifications for event update (regardless of approval status)
+    try {
+      const admins = await UserManager.getAllAdmins();
+      for (const admin of admins) {
+        await sendAdminEventUpdateNotification(
+          admin,
+          event,
+          event.organizer,
+          changeDetails
+        );
+        console.log(`📧 Admin update notification sent to: ${admin.email}`);
+      }
+    } catch (adminNotificationError) {
+      console.error(
+        "Failed to send admin update notifications:",
+        adminNotificationError
+      );
     }
 
     await event.save();
@@ -629,6 +760,69 @@ const getFreeEvents = async (req, res) => {
     console.error("Get free events error:", error);
     sendError(res, 500, "Failed to retrieve free events", error.message);
   }
+};
+
+// Helper function to generate change details message
+const generateChangeDetails = (updates, majorChangeFields) => {
+  const changes = [];
+
+  if (updates.startDate || updates.endDate) {
+    if (updates.startDate) {
+      changes.push(
+        `📅 Event date changed to ${new Date(
+          updates.startDate
+        ).toLocaleDateString()}`
+      );
+    }
+    if (updates.endDate) {
+      changes.push(
+        `📅 Event end date changed to ${new Date(
+          updates.endDate
+        ).toLocaleDateString()}`
+      );
+    }
+  }
+
+  if (updates.startTime || updates.endTime) {
+    if (updates.startTime) {
+      changes.push(`🕐 Start time changed to ${updates.startTime}`);
+    }
+    if (updates.endTime) {
+      changes.push(`🕐 End time changed to ${updates.endTime}`);
+    }
+  }
+
+  if (updates.venue) {
+    if (updates.venue.name) {
+      changes.push(`📍 Venue changed to ${updates.venue.name}`);
+    }
+    if (updates.venue.address) {
+      changes.push(`🗺️ Address changed to ${updates.venue.address}`);
+    }
+    if (updates.venue.city) {
+      changes.push(`🏙️ City changed to ${updates.venue.city}`);
+    }
+  }
+
+  if (updates.ticketTypes) {
+    changes.push(`🎟️ Ticket types and pricing have been updated`);
+  }
+
+  if (updates.title) {
+    changes.push(`📝 Event title changed to "${updates.title}"`);
+  }
+
+  if (updates.description) {
+    changes.push(`📄 Event description has been updated`);
+  }
+
+  if (updates.category) {
+    changes.push(`🏷️ Event category changed to ${updates.category}`);
+  }
+
+  return changes.length > 0
+    ? changes.join("<br/>")
+    : "Event details have been updated. Please review the current information above.";
 };
 
 module.exports = {

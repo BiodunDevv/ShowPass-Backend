@@ -886,6 +886,165 @@ const sendOrganizerApprovalNotification = async (
   await transporter.sendMail(mailOptions);
 };
 
+// Send organizer notification for event updates
+const sendOrganizerEventUpdateNotification = async (
+  organizer,
+  event,
+  changeDetails
+) => {
+  const mailOptions = {
+    from: "ShowPass <noreply@showpass.com>",
+    to: organizer.email,
+    subject: `📝 Event Update Confirmation: ${event.title} - ShowPass`,
+    html: `
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="utf-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Event Update Confirmation - ShowPass</title>
+            <style>
+                body { font-family: Arial, sans-serif; line-height: 1.6; margin: 0; padding: 0; background-color: #f4f4f4; }
+                .container { max-width: 100%; margin: 0 auto; background-color: white; }
+                .header { background: linear-gradient(135deg, #17a2b8 0%, #138496 100%); color: white; padding: 20px; text-align: center; border-radius: 10px 10px 0 0; }
+                .content { padding: 10px; }
+                .changes { background-color: #e8f4fd; padding: 20px; border-radius: 10px; margin: 20px 0; border-left: 4px solid #17a2b8; }
+                .change-item { margin: 10px 0; padding: 10px; background-color: white; border-radius: 5px; }
+                .footer { text-align: center; padding: 20px; color: #666; font-size: 12px; }
+                .logo { font-size: 24px; font-weight: bold; }
+                .status-note { background-color: #fff3cd; border: 1px solid #ffeaa7; padding: 15px; border-radius: 8px; margin: 20px 0; }
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <div class="header">
+                    <div class="logo">📝 ShowPass Organizer</div>
+                    <h2>Event Update Confirmation</h2>
+                </div>
+                <div class="content">
+                    <h3>Hello ${organizer.firstName}! ✅</h3>
+                    <p>Your event "<strong>${
+                      event.title
+                    }</strong>" has been successfully updated.</p>
+                    
+                    <div class="changes">
+                        <h4>📋 Changes Made:</h4>
+                        ${changeDetails}
+                    </div>
+
+                    ${
+                      event.isApproved
+                        ? "<p><strong>Status:</strong> ✅ Your event is approved and attendees have been notified of the changes.</p>"
+                        : '<div class="status-note"><strong>Status:</strong> ⏳ Your event is still pending approval. Changes will be visible to attendees once approved by our admin team.</div>'
+                    }
+                    
+                    <p>Thank you for keeping your event information up to date!</p>
+                </div>
+                <div class="footer">
+                    <p>Best regards,<br>The ShowPass Team</p>
+                    <p>This is an automated message. Please do not reply to this email.</p>
+                </div>
+            </div>
+        </body>
+        </html>
+        `,
+  };
+
+  await transporter.sendMail(mailOptions);
+};
+
+// Send admin notification for event updates
+const sendAdminEventUpdateNotification = async (
+  admin,
+  event,
+  organizer,
+  changeDetails
+) => {
+  const mailOptions = {
+    from: "ShowPass <noreply@showpass.com>",
+    to: admin.email,
+    subject: `🔄 Event Updated: ${event.title} - ShowPass Admin`,
+    html: `
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="utf-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Event Update Notification - ShowPass Admin</title>
+            <style>
+                body { font-family: Arial, sans-serif; line-height: 1.6; margin: 0; padding: 0; background-color: #f4f4f4; }
+                .container { max-width: 100%; margin: 0 auto; background-color: white; }
+                .header { background: linear-gradient(135deg, #dc3545 0%, #bd2130 100%); color: white; padding: 20px; text-align: center; border-radius: 10px 10px 0 0; }
+                .content { padding: 10px; }
+                .event-info { background-color: #f8f9fa; padding: 20px; border-radius: 10px; margin: 20px 0; }
+                .changes { background-color: #fff3cd; padding: 20px; border-radius: 10px; margin: 20px 0; border-left: 4px solid #ffc107; }
+                .change-item { margin: 10px 0; padding: 10px; background-color: white; border-radius: 5px; }
+                .footer { text-align: center; padding: 20px; color: #666; font-size: 12px; }
+                .logo { font-size: 24px; font-weight: bold; }
+                .approval-status { padding: 15px; border-radius: 8px; margin: 20px 0; }
+                .approved { background-color: #d4edda; border: 1px solid #c3e6cb; }
+                .pending { background-color: #fff3cd; border: 1px solid #ffeaa7; }
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <div class="header">
+                    <div class="logo">👑 ShowPass Admin</div>
+                    <h2>Event Update Notification</h2>
+                </div>
+                <div class="content">
+                    <h3>Hello Admin! 🔄</h3>
+                    <p>An organizer has updated their event details.</p>
+                    
+                    <div class="event-info">
+                        <h4>📅 Event Information</h4>
+                        <p><strong>Event Title:</strong> ${event.title}</p>
+                        <p><strong>Organizer:</strong> ${organizer.firstName} ${
+      organizer.lastName
+    } (${organizer.email})</p>
+                        <p><strong>Category:</strong> ${event.category}</p>
+                        <p><strong>Date:</strong> ${new Date(
+                          event.startDate
+                        ).toLocaleDateString()}</p>
+                        <p><strong>Time:</strong> ${event.startTime} - ${
+      event.endTime
+    }</p>
+                    </div>
+
+                    <div class="changes">
+                        <h4>🔄 Changes Made by Organizer:</h4>
+                        ${changeDetails}
+                    </div>
+
+                    <div class="approval-status ${
+                      event.isApproved ? "approved" : "pending"
+                    }">
+                        <strong>Current Status:</strong> ${
+                          event.isApproved
+                            ? "✅ Event is approved - attendees have been notified of changes"
+                            : "⏳ Event is pending approval - changes are not yet visible to attendees"
+                        }
+                    </div>
+                    
+                    <p>Please review these changes${
+                      event.isApproved
+                        ? " and ensure they are appropriate"
+                        : " as part of the approval process"
+                    }.</p>
+                </div>
+                <div class="footer">
+                    <p>Best regards,<br>The ShowPass System</p>
+                    <p>This is an automated notification. Please review the event in the admin panel.</p>
+                </div>
+            </div>
+        </body>
+        </html>
+        `,
+  };
+
+  await transporter.sendMail(mailOptions);
+};
+
 module.exports = {
   sendVerificationEmail,
   sendTicketConfirmation,
@@ -897,4 +1056,6 @@ module.exports = {
   sendAdminEventNotification,
   sendEventApprovalNotification,
   sendOrganizerApprovalNotification,
+  sendOrganizerEventUpdateNotification,
+  sendAdminEventUpdateNotification,
 };

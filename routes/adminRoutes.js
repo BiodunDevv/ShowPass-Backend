@@ -41,6 +41,20 @@ router.put(
   adminController.toggleUserStatus
 );
 
+// @route   PUT /api/admin/users/:id/status
+// @desc    Update user status (block/unblock)
+// @access  Private (Admin)
+router.put(
+  "/users/:id/status",
+  [
+    validateObjectId(param("id")),
+    requireAuth,
+    isAdmin,
+    body("blocked").isBoolean().withMessage("Blocked status must be boolean"),
+  ],
+  adminController.updateUserStatus
+);
+
 // Event Management
 // @route   GET /api/admin/events
 // @desc    Get all events (admin view)
