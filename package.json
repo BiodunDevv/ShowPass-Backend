@@ -1,0 +1,40 @@
+{
+  "name": "showpass-backend",
+  "version": "1.0.0",
+  "description": "Event Ticketing Platform Backend with Node.js, Express, and MongoDB",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js",
+    "seed": "node utils/seedData.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "mongoose": "^8.0.3",
+    "bcryptjs": "^2.4.3",
+    "jsonwebtoken": "^9.0.2",
+    "nodemailer": "^6.9.7",
+    "dotenv": "^16.3.1",
+    "qrcode": "^1.5.3",
+    "axios": "^1.6.2",
+    "cors": "^2.8.5",
+    "morgan": "^1.10.0",
+    "body-parser": "^1.20.2",
+    "crypto": "^1.0.1",
+    "multer": "^1.4.5-lts.1",
+    "express-validator": "^7.0.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.2"
+  },
+  "keywords": [
+    "event",
+    "ticketing",
+    "nodejs",
+    "express",
+    "mongodb",
+    "paystack"
+  ],
+  "author": "Mustapha Muhammed",
+  "license": "MIT"
+}
