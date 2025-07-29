@@ -192,6 +192,192 @@ const getAllUsers = async (req, res) => {
   }
 };
 
+// Search users by various criteria
+const searchUsers = async (req, res) => {
+  try {
+    const { page, limit, skip } = getPagination(req);
+    const {
+      email,
+      name,
+      firstName,
+      lastName,
+      role,
+      status,
+      phone,
+      search, // General search term
+    } = req.query;
+
+    console.log("🔍 Admin User Search Parameters:", req.query);
+
+    let searchQuery = {};
+    let searchConditions = [];
+
+    // Build search conditions based on provided parameters
+    if (email) {
+      searchConditions.push({ email: new RegExp(email, "i") });
+    }
+
+    if (firstName) {
+      searchConditions.push({ firstName: new RegExp(firstName, "i") });
+    }
+
+    if (lastName) {
+      searchConditions.push({ lastName: new RegExp(lastName, "i") });
+    }
+
+    if (name) {
+      // Search in both first name and last name for general name query
+      searchConditions.push(
+        { firstName: new RegExp(name, "i") },
+        { lastName: new RegExp(name, "i") }
+      );
+    }
+
+    if (phone) {
+      searchConditions.push({ phone: new RegExp(phone, "i") });
+    }
+
+    // General search across multiple fields
+    if (search) {
+      searchConditions.push(
+        { firstName: new RegExp(search, "i") },
+        { lastName: new RegExp(search, "i") },
+        { email: new RegExp(search, "i") },
+        { phone: new RegExp(search, "i") }
+      );
+    }
+
+    // Combine search conditions with OR
+    if (searchConditions.length > 0) {
+      searchQuery.$or = searchConditions;
+    }
+
+    // Add status filter
+    if (status === "blocked") {
+      searchQuery.blocked = true;
+    } else if (status === "active") {
+      searchQuery.blocked = false;
+    }
+
+    console.log("🔍 Final Search Query:", JSON.stringify(searchQuery, null, 2));
+
+    let users = [];
+    let total = 0;
+
+    if (role && role !== "all") {
+      // Search in specific role collection
+      console.log(`🔍 Searching in ${role} collection...`);
+
+      const UserModel = UserManager.getUserModel(role);
+      users = await UserModel.find(searchQuery)
+        .select("-password")
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit)
+        .lean();
+
+      // Add role information to each user
+      users = users.map((user) => ({ ...user, role }));
+
+      total = await UserModel.countDocuments(searchQuery);
+
+      console.log(`✅ Found ${users.length} ${role}s (${total} total)`);
+    } else {
+      // Search across all role collections
+      console.log("🔍 Searching across all user types...");
+
+      const [userResults, organizerResults, adminResults] = await Promise.all([
+        UserManager.getUserModel("user")
+          .find(searchQuery)
+          .select("-password")
+          .sort({ createdAt: -1 })
+          .lean(),
+        UserManager.getUserModel("organizer")
+          .find(searchQuery)
+          .select("-password")
+          .sort({ createdAt: -1 })
+          .lean(),
+        UserManager.getUserModel("admin")
+          .find(searchQuery)
+          .select("-password")
+          .sort({ createdAt: -1 })
+          .lean(),
+      ]);
+
+      // Add role information and combine results
+      const allUsers = [
+        ...userResults.map((user) => ({ ...user, role: "user" })),
+        ...organizerResults.map((user) => ({ ...user, role: "organizer" })),
+        ...adminResults.map((user) => ({ ...user, role: "admin" })),
+      ];
+
+      // Sort by creation date
+      allUsers.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+      total = allUsers.length;
+      users = allUsers.slice(skip, skip + limit);
+
+      console.log(
+        `✅ Found ${userResults.length} users, ${organizerResults.length} organizers, ${adminResults.length} admins`
+      );
+      console.log(
+        `📄 Returning ${users.length} results (page ${
+          Math.floor(skip / limit) + 1
+        })`
+      );
+    }
+
+    // Enhance user data with additional info
+    const enhancedUsers = users.map((user) => ({
+      _id: user._id,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      email: user.email,
+      phone: user.phone || "N/A",
+      role: user.role,
+      blocked: user.blocked || false,
+      verified: user.verified || false,
+      createdAt: user.createdAt,
+      lastLogin: user.lastLogin || "Never",
+      // Add full name for easier display
+      fullName: `${user.firstName} ${user.lastName}`,
+      // Add account status
+      accountStatus: user.blocked ? "Blocked" : "Active",
+    }));
+
+    const response = {
+      users: enhancedUsers,
+      searchCriteria: {
+        email,
+        name,
+        firstName,
+        lastName,
+        role: role || "all",
+        status,
+        phone,
+        generalSearch: search,
+      },
+      pagination: {
+        page,
+        limit,
+        total,
+        pages: Math.ceil(total / limit),
+        hasNext: skip + limit < total,
+        hasPrev: skip > 0,
+      },
+    };
+
+    sendSuccess(
+      res,
+      `Found ${total} user(s) matching search criteria`,
+      response
+    );
+  } catch (error) {
+    console.error("🚨 Search users error:", error);
+    sendError(res, 500, "Failed to search users", error.message);
+  }
+};
+
 // Block/Unblock user
 const toggleUserStatus = async (req, res) => {
   try {
@@ -666,6 +852,7 @@ const sendSystemNotification = async (req, res) => {
 module.exports = {
   getDashboardStats,
   getAllUsers,
+  searchUsers,
   toggleUserStatus,
   updateUserStatus,
   getAllEvents,

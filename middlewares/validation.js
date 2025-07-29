@@ -29,9 +29,7 @@ const validateRegister = [
     .isLength({ min: 2, max: 50 })
     .withMessage("Last name must be between 2 and 50 characters"),
 
-  body("email")
-    .isEmail()
-    .withMessage("Please provide a valid email"),
+  body("email").isEmail().withMessage("Please provide a valid email"),
 
   body("password")
     .isLength({ min: 6 })
@@ -51,9 +49,7 @@ const validateRegister = [
 
 // User login validation
 const validateLogin = [
-  body("email")
-    .isEmail()
-    .withMessage("Please provide a valid email"),
+  body("email").isEmail().withMessage("Please provide a valid email"),
 
   body("password").notEmpty().withMessage("Password is required"),
 
@@ -135,7 +131,7 @@ const validateEvent = [
     .withMessage("At least one ticket type is required"),
 
   body("ticketTypes.*.name")
-    .isIn(["VIP", "Regular", "Premium", "Standard", "Early Bird"])
+    .isIn(["VIP", "Regular", "Premium", "Standard", "Early Bird", "Free"])
     .withMessage("Invalid ticket type"),
 
   body("ticketTypes.*.price")

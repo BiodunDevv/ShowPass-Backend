@@ -27,6 +27,11 @@ router.get("/analytics", requireAuth, isAdmin, adminController.getAnalytics);
 // @access  Private (Admin)
 router.get("/users", requireAuth, isAdmin, adminController.getAllUsers);
 
+// @route   GET /api/admin/users/search
+// @desc    Search users by email, name, or other details
+// @access  Private (Admin)
+router.get("/users/search", requireAuth, isAdmin, adminController.searchUsers);
+
 // @route   PUT /api/admin/users/:id/toggle-status
 // @desc    Block/Unblock user
 // @access  Private (Admin)
