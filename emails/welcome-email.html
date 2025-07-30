@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Welcome to ShowPass</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        line-height: 1.6;
+        margin: 0;
+        padding: 0;
+        background-color: #f4f4f4;
+      }
+      .container {
+        max-width: 100%;
+        margin: 0 auto;
+        background-color: white;
+      }
+      .header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 20px;
+        text-align: center;
+        border-radius: 10px 10px 0 0;
+      }
+      .content {
+        padding: 10px;
+      }
+      .role-badge {
+        display: inline-block;
+        padding: 5px 15px;
+        background-color: #28a745;
+        color: white;
+        border-radius: 15px;
+        font-size: 12px;
+        text-transform: uppercase;
+      }
+      .features {
+        background-color: #f8f9fa;
+        padding: 20px;
+        border-radius: 10px;
+        margin: 20px 0;
+      }
+      .features ul {
+        list-style-type: none;
+        padding: 0;
+      }
+      .features li {
+        margin: 5px 0;
+      }
+      .footer {
+        text-align: center;
+        padding: 20px;
+        color: #666;
+        font-size: 12px;
+      }
+      .logo {
+        font-size: 24px;
+        font-weight: bold;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <div class="logo">🎟️ ShowPass</div>
+        <h2>Welcome to ShowPass!</h2>
+      </div>
+      <div class="content">
+        <h3>Hello {{firstName}}! 👋</h3>
+        <p>Your ShowPass account has been successfully created!</p>
+        <p>
+          <strong>Account Type:</strong>
+          <span class="role-badge">{{role}}</span>
+        </p>
+
+        <div class="features">
+          <h4>🎯 What you can do with ShowPass:</h4>
+          {{roleFeatures}}
+        </div>
+
+        <p><strong>Login Credentials:</strong></p>
+        <p>📧 Email: {{email}}</p>
+        <p>🔒 Password: Use {{password}} to log in</p>
+
+        <p>
+          Ready to get started? Log in to your account and explore what ShowPass
+          has to offer!
+        </p>
+      </div>
+      <div class="footer">
+        <p>© 2024 ShowPass. All rights reserved.</p>
+        <p>Questions? Contact us at {{supportEmail}}</p>
+      </div>
+    </div>
+  </body>
+</html>

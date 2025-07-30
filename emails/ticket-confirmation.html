@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Ticket Confirmation - ShowPass</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        line-height: 1.6;
+        margin: 0;
+        padding: 0;
+        background-color: #f4f4f4;
+      }
+      .container {
+        max-width: 100%;
+        margin: 0 auto;
+        background-color: white;
+      }
+      .header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 20px;
+        text-align: center;
+        border-radius: 10px 10px 0 0;
+      }
+      .content {
+        padding: 10px;
+      }
+      .ticket-details {
+        background-color: #f8f9fa;
+        padding: 20px;
+        border-radius: 10px;
+        margin: 20px 0;
+      }
+      .qr-code {
+        text-align: center;
+        margin: 20px 0;
+      }
+      .footer {
+        text-align: center;
+        padding: 20px;
+        color: #666;
+        font-size: 12px;
+      }
+      .logo {
+        font-size: 24px;
+        font-weight: bold;
+      }
+      .important {
+        background-color: #fff3cd;
+        border: 1px solid #ffeaa7;
+        padding: 10px;
+        border-radius: 5px;
+        margin: 10px 0;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <div class="logo">🎟️ ShowPass</div>
+        <h2>Your Ticket is Ready!</h2>
+      </div>
+      <div class="content">
+        <h3>Hello {{firstName}}!</h3>
+        <p>
+          Great news! Your ticket purchase was successful. Here are your ticket
+          details:
+        </p>
+
+        <div class="ticket-details">
+          <h4>📅 Event Details</h4>
+          <p><strong>Event:</strong> {{eventTitle}}</p>
+          <p><strong>Date:</strong> {{eventDate}}</p>
+          <p><strong>Time:</strong> {{startTime}} - {{endTime}}</p>
+          <p><strong>Venue:</strong> {{venueName}}, {{venueAddress}}</p>
+
+          <h4>🎟️ Ticket Information</h4>
+          <p><strong>Ticket Type:</strong> {{ticketType}}</p>
+          <p><strong>Quantity:</strong> {{quantity}}</p>
+          <p><strong>Amount Paid:</strong> {{finalAmount}}</p>
+          <p><strong>Booking Reference:</strong> {{paymentReference}}</p>
+        </div>
+
+        <div class="qr-code">
+          <h4>📱 Your Digital Ticket</h4>
+          <p>Show this QR code at the event entrance:</p>
+          <img
+            src="{{qrCodeImage}}"
+            alt="Ticket QR Code"
+            style="max-width: 200px; height: auto"
+          />
+        </div>
+
+        <div class="important">
+          <h4>⚠️ Important Information</h4>
+          <ul>
+            <li>Please arrive at least 30 minutes before the event starts</li>
+            <li>Bring a valid ID for verification</li>
+            <li>Screenshot or print this email for backup</li>
+            <li>This ticket is non-transferable</li>
+          </ul>
+        </div>
+
+        <p>
+          We're excited to see you at the event! If you have any questions,
+          please contact our support team.
+        </p>
+      </div>
+      <div class="footer">
+        <p>© 2024 ShowPass. All rights reserved.</p>
+        <p>Event support: {{supportEmail}}</p>
+      </div>
+    </div>
+  </body>
+</html>

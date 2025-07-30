@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Email Verification - ShowPass</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        line-height: 1.6;
+        margin: 0;
+        padding: 0;
+        background-color: #f4f4f4;
+      }
+      .container {
+        max-width: 100%;
+        margin: 0 auto;
+        background-color: white;
+      }
+      .header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 20px;
+        text-align: center;
+        border-radius: 10px 10px 0 0;
+      }
+      .content {
+        padding: 10px;
+      }
+      .button {
+        display: inline-block;
+        padding: 12px 30px;
+        background-color: #667eea;
+        color: white;
+        text-decoration: none;
+        border-radius: 5px;
+        margin: 20px 0;
+      }
+      .footer {
+        text-align: center;
+        padding: 20px;
+        color: #666;
+        font-size: 12px;
+      }
+      .logo {
+        font-size: 24px;
+        font-weight: bold;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <div class="logo">🎟️ ShowPass</div>
+        <h2>Welcome to ShowPass!</h2>
+      </div>
+      <div class="content">
+        <h3>Hello {{firstName}}!</h3>
+        <p>
+          Thank you for joining ShowPass, your premier event ticketing platform!
+        </p>
+        <p>
+          To complete your registration and start exploring amazing events,
+          please verify your email address by clicking the button below:
+        </p>
+        <div style="text-align: center">
+          <a href="{{verificationURL}}" class="button">Verify Email Address</a>
+        </div>
+        <p>
+          If you can't click the button, copy and paste this link into your
+          browser:
+        </p>
+        <p style="word-break: break-all; color: #667eea">{{verificationURL}}</p>
+        <p><strong>This link will expire in 24 hours.</strong></p>
+        <p>
+          If you didn't create an account with ShowPass, please ignore this
+          email.
+        </p>
+      </div>
+      <div class="footer">
+        <p>© 2024 ShowPass. All rights reserved.</p>
+        <p>This is an automated email, please do not reply.</p>
+      </div>
+    </div>
+  </body>
+</html>

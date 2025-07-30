@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Event Update - ShowPass</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        line-height: 1.6;
+        margin: 0;
+        padding: 0;
+        background-color: #f4f4f4;
+      }
+      .container {
+        max-width: 100%;
+        margin: 0 auto;
+        background-color: white;
+      }
+      .header {
+        background: linear-gradient(135deg, #ffc107 0%, #ff8f00 100%);
+        color: white;
+        padding: 20px;
+        text-align: center;
+        border-radius: 10px 10px 0 0;
+      }
+      .content {
+        padding: 10px;
+      }
+      .update-details {
+        background-color: #fff3cd;
+        border: 1px solid #ffeaa7;
+        padding: 20px;
+        border-radius: 10px;
+        margin: 20px 0;
+      }
+      .footer {
+        text-align: center;
+        padding: 20px;
+        color: #666;
+        font-size: 12px;
+      }
+      .logo {
+        font-size: 24px;
+        font-weight: bold;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <div class="logo">🎟️ ShowPass</div>
+        <h2>Event Update Notification</h2>
+      </div>
+      <div class="content">
+        <h3>Hello {{firstName}}!</h3>
+        <p>
+          We wanted to inform you about an important update to an event you have
+          tickets for:
+        </p>
+
+        <div class="update-details">
+          <h4>📅 Event: {{eventTitle}}</h4>
+          <h4>🔄 What Changed:</h4>
+          <p>{{changeDetails}}</p>
+
+          <h4>📍 Current Event Details:</h4>
+          <p><strong>Date:</strong> {{eventDate}}</p>
+          <p><strong>Time:</strong> {{startTime}} - {{endTime}}</p>
+          <p><strong>Venue:</strong> {{venueName}}, {{venueAddress}}</p>
+        </div>
+
+        <p>
+          If these changes significantly impact your ability to attend, you may
+          request a refund through your ShowPass account.
+        </p>
+
+        <p>
+          Thank you for your understanding, and we apologize for any
+          inconvenience.
+        </p>
+      </div>
+      <div class="footer">
+        <p>© 2024 ShowPass. All rights reserved.</p>
+        <p>Support: {{supportEmail}}</p>
+      </div>
+    </div>
+  </body>
+</html>

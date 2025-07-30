@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Warning Notice - ShowPass</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        line-height: 1.6;
+        margin: 0;
+        padding: 0;
+        background-color: #f4f4f4;
+      }
+      .container {
+        max-width: 100%;
+        margin: 0 auto;
+        background-color: white;
+      }
+      .header {
+        color: white;
+        padding: 20px;
+        text-align: center;
+        border-radius: 10px 10px 0 0;
+      }
+      .header.minor {
+        background: linear-gradient(135deg, #ffc107 0%, #e74c3c 100%);
+      }
+      .header.major {
+        background: linear-gradient(135deg, #fd7e14 0%, #e74c3c 100%);
+      }
+      .header.critical {
+        background: linear-gradient(135deg, #dc3545 0%, #e74c3c 100%);
+      }
+      .content {
+        padding: 10px;
+      }
+      .warning-box {
+        background-color: #fff3cd;
+        padding: 20px;
+        border-radius: 10px;
+        margin: 20px 0;
+      }
+      .warning-box.minor {
+        border: 2px solid #ffc107;
+      }
+      .warning-box.major {
+        border: 2px solid #fd7e14;
+      }
+      .warning-box.critical {
+        border: 2px solid #dc3545;
+      }
+      .event-details {
+        background-color: #f8f9fa;
+        padding: 15px;
+        border-radius: 8px;
+        margin: 15px 0;
+      }
+      .footer {
+        text-align: center;
+        padding: 20px;
+        color: #666;
+        font-size: 12px;
+      }
+      .logo {
+        font-size: 24px;
+        font-weight: bold;
+      }
+      .severity-badge {
+        color: white;
+        padding: 5px 10px;
+        border-radius: 15px;
+        font-weight: bold;
+      }
+      .severity-badge.minor {
+        background-color: #ffc107;
+      }
+      .severity-badge.major {
+        background-color: #fd7e14;
+      }
+      .severity-badge.critical {
+        background-color: #dc3545;
+      }
+      .consequences {
+        background-color: #f8d7da;
+        border: 1px solid #f5c6cb;
+        padding: 15px;
+        border-radius: 8px;
+        margin: 15px 0;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header {{severity}}">
+        <div class="logo">{{severityIcon}} ShowPass Warning</div>
+        <h2>{{severityUpper}} Policy Violation</h2>
+      </div>
+      <div class="content">
+        <h3>Hello {{firstName}},</h3>
+        <p>
+          We need to bring to your attention a policy violation regarding your
+          event on ShowPass.
+        </p>
+
+        <div class="event-details">
+          <h4>📅 Event Information</h4>
+          <p><strong>Event:</strong> {{eventTitle}}</p>
+          <p><strong>Event ID:</strong> {{eventId}}</p>
+          <p>
+            <strong>Warning Level:</strong>
+            <span class="severity-badge {{severity}}">{{severityUpper}}</span>
+          </p>
+          <p><strong>Date Issued:</strong> {{issuedDate}}</p>
+        </div>
+
+        <div class="warning-box {{severity}}">
+          <h4>{{severityIcon}} Violation Details</h4>
+          <p><strong>Reason:</strong> {{reason}}</p>
+        </div>
+
+        {{consequencesSection}}
+
+        <p>
+          If you believe this warning was issued in error, please contact our
+          support team with details.
+        </p>
+        <p>
+          Thank you for your cooperation in maintaining the quality of events on
+          ShowPass.
+        </p>
+      </div>
+      <div class="footer">
+        <p>© 2024 ShowPass. All rights reserved.</p>
+        <p>Support: {{supportEmail}} | This is an automated notice.</p>
+      </div>
+    </div>
+  </body>
+</html>

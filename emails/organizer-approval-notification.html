@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Event {{approvalStatus}} - ShowPass</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        line-height: 1.6;
+        margin: 0;
+        padding: 0;
+        background-color: #f4f4f4;
+      }
+      .container {
+        max-width: 100%;
+        margin: 0 auto;
+        background-color: white;
+      }
+      .header {
+        color: white;
+        padding: 20px;
+        text-align: center;
+        border-radius: 10px 10px 0 0;
+      }
+      .header.approved {
+        background: linear-gradient(135deg, #28a745, #20c997);
+      }
+      .header.rejected {
+        background: linear-gradient(135deg, #dc3545, #c82333);
+      }
+      .content {
+        padding: 10px;
+      }
+      .event-details {
+        background-color: #f8f9fa;
+        padding: 20px;
+        border-radius: 10px;
+        margin: 20px 0;
+      }
+      .status-badge {
+        display: inline-block;
+        padding: 5px 15px;
+        color: white;
+        border-radius: 15px;
+        font-size: 12px;
+        text-transform: uppercase;
+      }
+      .status-badge.approved {
+        background-color: #28a745;
+      }
+      .status-badge.rejected {
+        background-color: #dc3545;
+      }
+      .footer {
+        text-align: center;
+        padding: 20px;
+        color: #666;
+        font-size: 12px;
+      }
+      .logo {
+        font-size: 24px;
+        font-weight: bold;
+      }
+      .rejection-reason {
+        background-color: #f8d7da;
+        border: 1px solid #f5c6cb;
+        padding: 15px;
+        border-radius: 5px;
+        margin: 15px 0;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header {{statusClass}}">
+        <div class="logo">🎟️ ShowPass</div>
+        <h2>Event {{approvalStatus}}</h2>
+      </div>
+      <div class="content">
+        <h3>Hello {{firstName}}! {{emoji}}</h3>
+        <p>We have reviewed your event submission and {{statusMessage}}.</p>
+
+        <div class="event-details">
+          <h4>📅 Event Information</h4>
+          <p><strong>Event Title:</strong> {{eventTitle}}</p>
+          <p>
+            <strong>Status:</strong>
+            <span class="status-badge {{statusClass}}">{{approvalStatus}}</span>
+          </p>
+          <p><strong>Date:</strong> {{eventDate}}</p>
+          <p><strong>Venue:</strong> {{venueName}}</p>
+        </div>
+
+        {{statusSpecificContent}}
+
+        <p>You can manage your events from your organizer dashboard.</p>
+      </div>
+      <div class="footer">
+        <p>© 2024 ShowPass. All rights reserved.</p>
+        <p>Need help? Contact us at {{supportEmail}}</p>
+      </div>
+    </div>
+  </body>
+</html>

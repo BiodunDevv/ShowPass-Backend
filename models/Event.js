@@ -180,6 +180,7 @@ const eventSchema = new mongoose.Schema(
       ref: "Admin",
     },
     flaggedAt: Date,
+    deletionDeadline: Date,
     deletionReason: String,
     // Track post-approval modifications
     postApprovalModifications: [

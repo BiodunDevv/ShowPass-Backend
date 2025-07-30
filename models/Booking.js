@@ -106,6 +106,9 @@ bookingSchema.virtual("statusDisplay").get(function () {
 bookingSchema.virtual("canCancel").get(function () {
   if (this.status !== "confirmed") return false;
 
+  // Check if event exists and has startDate
+  if (!this.event || !this.event.startDate) return false;
+
   // Can cancel up to 24 hours before event
   const eventDate = new Date(this.event.startDate);
   const now = new Date();

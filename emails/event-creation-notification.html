@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Event Created - ShowPass</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        line-height: 1.6;
+        margin: 0;
+        padding: 0;
+        background-color: #f4f4f4;
+      }
+      .container {
+        max-width: 100%;
+        margin: 0 auto;
+        background-color: white;
+      }
+      .header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 20px;
+        text-align: center;
+        border-radius: 10px 10px 0 0;
+      }
+      .content {
+        padding: 10px;
+      }
+      .event-details {
+        background-color: #f8f9fa;
+        padding: 20px;
+        border-radius: 10px;
+        margin: 20px 0;
+      }
+      .status-badge {
+        display: inline-block;
+        padding: 5px 15px;
+        background-color: #ffc107;
+        color: #212529;
+        border-radius: 15px;
+        font-size: 12px;
+        text-transform: uppercase;
+      }
+      .footer {
+        text-align: center;
+        padding: 20px;
+        color: #666;
+        font-size: 12px;
+      }
+      .logo {
+        font-size: 24px;
+        font-weight: bold;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <div class="logo">🎟️ ShowPass</div>
+        <h2>Event Created Successfully!</h2>
+      </div>
+      <div class="content">
+        <h3>Hello {{firstName}}! 🎉</h3>
+        <p>Great news! Your event has been created successfully on ShowPass.</p>
+
+        <div class="event-details">
+          <h4>📅 Event Information</h4>
+          <p><strong>Event Title:</strong> {{eventTitle}}</p>
+          <p><strong>Category:</strong> {{category}}</p>
+          <p><strong>Date:</strong> {{eventDate}}</p>
+          <p><strong>Time:</strong> {{startTime}} - {{endTime}}</p>
+          <p><strong>Venue:</strong> {{venueName}}</p>
+          <p>
+            <strong>Status:</strong>
+            <span class="status-badge">{{status}}</span>
+          </p>
+          <p><strong>Event Type:</strong> {{eventType}}</p>
+
+          <h4>🎟️ Ticket Types</h4>
+          {{ticketTypes}}
+        </div>
+
+        {{nextStepsSection}}
+
+        <p>
+          You can manage your event, track {{salesType}}, and view analytics
+          from your organizer dashboard.
+        </p>
+      </div>
+      <div class="footer">
+        <p>© 2024 ShowPass. All rights reserved.</p>
+        <p>Need help? Contact us at {{supportEmail}}</p>
+      </div>
+    </div>
+  </body>
+</html>

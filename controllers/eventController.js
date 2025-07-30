@@ -17,6 +17,7 @@ const {
   sendAdminEventUpdateNotification,
   sendOrganizerWarningNotification,
   sendEventDeletionNotification,
+  sendAdminEventDeletionNotification,
 } = require("../utils/emailService");
 
 // Create new event
@@ -38,13 +39,9 @@ const createEvent = async (req, res) => {
       isPublic = true,
     } = req.body;
 
-    // Validate that user is organizer or admin
-    if (req.user.role === "user") {
-      return sendError(
-        res,
-        403,
-        "Only organizers and admins can create events"
-      );
+    // Validate that user is organizer only
+    if (req.user.role !== "organizer") {
+      return sendError(res, 403, "Only organizers can create events");
     }
 
     // Validate ticket types for free events
@@ -447,15 +444,19 @@ const updateEvent = async (req, res) => {
 const deleteEvent = async (req, res) => {
   try {
     const { id } = req.params;
+    const { reason } = req.body; // Optional deletion reason
 
-    const event = await Event.findById(id);
+    const event = await Event.findById(id).populate(
+      "organizer",
+      "firstName lastName email"
+    );
     if (!event) {
       return sendError(res, 404, "Event not found");
     }
 
     // Check if user owns the event or is admin
     if (
-      event.organizer.toString() !== req.user._id.toString() &&
+      event.organizer._id.toString() !== req.user._id.toString() &&
       req.user.role !== "admin"
     ) {
       return sendError(res, 403, "You can only delete your own events");
@@ -474,9 +475,63 @@ const deleteEvent = async (req, res) => {
       );
     }
 
+    // Store event details before deletion for notifications
+    const eventDetails = {
+      _id: event._id,
+      title: event.title,
+      description: event.description,
+      startDate: event.startDate,
+      venue: event.venue,
+      organizer: event.organizer,
+      deletedBy: req.user,
+      deletionReason: reason || "Event deleted by organizer",
+      isAdminDeletion: req.user.role === "admin",
+    };
+
     await Event.findByIdAndDelete(id);
 
-    sendSuccess(res, "Event deleted successfully");
+    // Always send deletion notification to organizer (confirmation email)
+    try {
+      await sendEventDeletionNotification(
+        event.organizer,
+        eventDetails,
+        eventDetails.deletionReason
+      );
+      console.log(
+        `📧 Event deletion notification sent to organizer: ${event.organizer.email}`
+      );
+    } catch (emailError) {
+      console.error(
+        "Failed to send organizer deletion notification:",
+        emailError
+      );
+    }
+
+    // Send deletion notification to all admins (if organizer deleted their own event)
+    if (req.user.role !== "admin") {
+      try {
+        const admins = await UserManager.getAllAdmins();
+        for (const admin of admins) {
+          await sendAdminEventDeletionNotification(
+            admin,
+            eventDetails,
+            event.organizer
+          );
+          console.log(`📧 Admin deletion notification sent to: ${admin.email}`);
+        }
+      } catch (emailError) {
+        console.error(
+          "Failed to send admin deletion notifications:",
+          emailError
+        );
+      }
+    }
+
+    sendSuccess(res, "Event deleted successfully", {
+      eventTitle: event.title,
+      deletedBy: req.user.role,
+      reason: eventDetails.deletionReason,
+    });
   } catch (error) {
     console.error("Delete event error:", error);
     sendError(res, 500, "Failed to delete event", error.message);

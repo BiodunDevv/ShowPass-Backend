@@ -1,8 +1,8 @@
 {
   "info": {
-    "name": "ShowPass Backend API",
-    "description": "Complete API collection for ShowPass event management system with user separation (Admin, Organizer, Regular Users)",
-    "version": "1.0.0",
+    "name": "ShowPass Backend API - Complete Event Management System",
+    "description": "# ShowPass Event Management API - Complete Documentation\n\nThis comprehensive Postman collection covers all aspects of the ShowPass event management system, with detailed examples for both **Free Events** and **Paid Events** workflows.\n\n## 🚀 Quick Start Guide\n\n### Prerequisites\n1. Start your ShowPass backend server on `http://localhost:3000`\n2. Ensure MongoDB is running and connected\n3. Configure your environment variables (email, Paystack, etc.)\n\n### Collection Structure\n\n#### 1. **Authentication** 🔐\n- User registration (Admin, Organizer, Regular User)\n- Login with different user roles\n- Email verification\n- Password reset workflows\n\n#### 2. **Event Discovery & Management** 🎪\n- Browse all public events with filtering\n- Search events by category, location, and keywords\n- Get free events specifically\n- Detailed event views with complete information\n- Event categories management\n\n#### 3. **Event Creation** ✨\n- **Create Free Events**: Complete examples with proper ticket configuration\n- **Create Paid Events**: Multi-tier pricing with VIP, Regular, Premium options\n- Event approval workflows\n- Event updates and management\n\n#### 4. **Bookings & Ticket Management** 🎫\n- **Free Event Registration**: Instant confirmation with QR codes\n- **Paid Event Booking**: Full payment integration workflow\n- Ticket management and viewing\n- Booking cancellation\n- QR code generation and verification\n\n#### 5. **Payment Processing** 💳\n- Paystack integration for paid events\n- Payment initialization and verification\n- Webhook handling\n- Fee calculation (platform fees, VAT)\n\n#### 6. **Organizer Workflows** 👨‍💼\n- Organizer dashboard with event statistics\n- Event attendee management\n- Check-in functionality with QR scanning\n- Event performance analytics\n\n#### 7. **Admin Management** 👑\n- Admin dashboard with system overview\n- User management (block/unblock users)\n- Event approval/rejection workflows\n- System-wide analytics and reporting\n\n#### 8. **Refund Management** 💰\n- Refund request submission\n- Admin refund processing\n- Refund status tracking\n- Financial impact management\n\n#### 9. **Complete Workflow Examples** 🔄\n- **Free Event Workflow**: End-to-end process from creation to attendance\n- **Paid Event Workflow**: Complete commercial event lifecycle\n\n## 🎯 Key Features Covered\n\n### Free Events\n- ✅ Zero-cost event creation\n- ✅ Instant registration without payment\n- ✅ QR code generation for entry\n- ✅ Attendee management\n- ✅ Email notifications\n\n### Paid Events\n- ✅ Multi-tier pricing (Regular, VIP, Premium)\n- ✅ Secure payment processing via Paystack\n- ✅ Automated fee calculation\n- ✅ Payment verification\n- ✅ Refund management\n- ✅ Revenue tracking\n\n### Admin Features\n- ✅ Event approval system\n- ✅ User management\n- ✅ System analytics\n- ✅ Refund processing\n- ✅ Platform oversight\n\n### Organizer Features\n- ✅ Event creation and management\n- ✅ Attendee check-in\n- ✅ Performance analytics\n- ✅ QR code verification\n\n## 🔧 Environment Variables\n\nThe collection uses these variables (automatically set by requests):\n\n- `baseUrl`: API base URL\n- `authToken`: JWT authentication token\n- `eventId`: General event ID\n- `freeEventId`: Free event specific ID\n- `paidEventId`: Paid event specific ID\n- `bookingId`: Booking reference\n- `paymentReference`: Paystack payment reference\n- `userId`: User identification\n\n## 📋 Testing Scenarios\n\n### Scenario 1: Free Community Event\n1. Organizer creates free tech meetup\n2. Admin approves the event\n3. Users register for free\n4. Organizer manages check-ins\n5. Post-event analytics\n\n### Scenario 2: Premium Business Conference\n1. Organizer creates paid conference with multiple ticket tiers\n2. Admin reviews and approves\n3. Users purchase tickets via Paystack\n4. Payment verification and confirmation\n5. Event day check-in management\n6. Refund processing if needed\n\n## 💡 Best Practices\n\n1. **Always authenticate first** - Use login endpoints before testing other features\n2. **Test with different user roles** - Admin, Organizer, and Regular User perspectives\n3. **Follow the workflow examples** - Use the complete workflow folders for end-to-end testing\n4. **Check response logs** - All requests include detailed console logging for debugging\n5. **Environment variables** - Let the collection manage IDs automatically\n\n## 🐛 Troubleshooting\n\n- **Authentication errors**: Ensure you're logged in with the correct role\n- **Event not found**: Check that event IDs are properly set in environment variables\n- **Payment issues**: Verify Paystack configuration in your backend\n- **Permission denied**: Make sure you're using the appropriate user role for each endpoint\n\n## 📞 Support\n\nThis collection provides comprehensive coverage of the ShowPass API. Each request includes detailed test scripts that log important information to help with debugging and understanding the system behavior.\n\n---\n\n**Version**: 2.0.0  \n**Last Updated**: January 2025  \n**Coverage**: Complete Free & Paid Event Workflows",
+    "version": "2.0.0",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "auth": {
@@ -24,22 +24,74 @@
     {
       "key": "authToken",
       "value": "",
-      "type": "string"
+      "type": "string",
+      "description": "JWT authentication token - automatically set by login requests"
     },
     {
       "key": "eventId",
       "value": "",
-      "type": "string"
+      "type": "string",
+      "description": "General event ID for testing - set by event creation requests"
+    },
+    {
+      "key": "freeEventId",
+      "value": "",
+      "type": "string",
+      "description": "Free event ID - set by free event creation request"
+    },
+    {
+      "key": "paidEventId",
+      "value": "",
+      "type": "string",
+      "description": "Paid event ID - set by paid event creation request"
     },
     {
       "key": "userId",
       "value": "",
-      "type": "string"
+      "type": "string",
+      "description": "User ID - automatically set by login requests"
     },
     {
       "key": "bookingId",
       "value": "",
-      "type": "string"
+      "type": "string",
+      "description": "General booking ID for testing"
+    },
+    {
+      "key": "freeBookingId",
+      "value": "",
+      "type": "string",
+      "description": "Free event booking ID"
+    },
+    {
+      "key": "paidBookingId",
+      "value": "",
+      "type": "string",
+      "description": "Paid event booking ID"
+    },
+    {
+      "key": "vipBookingId",
+      "value": "",
+      "type": "string",
+      "description": "VIP ticket booking ID"
+    },
+    {
+      "key": "paymentReference",
+      "value": "",
+      "type": "string",
+      "description": "Payment reference from Paystack"
+    },
+    {
+      "key": "authorizationUrl",
+      "value": "",
+      "type": "string",
+      "description": "Paystack authorization URL for payment"
+    },
+    {
+      "key": "refundId",
+      "value": "",
+      "type": "string",
+      "description": "Refund request ID"
     }
   ],
   "item": [
@@ -276,46 +328,226 @@
       ]
     },
     {
-      "name": "Events",
+      "name": "Event Discovery & Management",
       "item": [
         {
-          "name": "Get All Events (Public)",
-          "request": {
-            "method": "GET",
-            "url": {
-              "raw": "{{baseUrl}}/events",
-              "host": ["{{baseUrl}}"],
-              "path": ["events"]
+          "name": "Get All Public Events (With Filters)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    console.log('✅ Public events retrieved successfully');",
+                  "    console.log('📊 Event Discovery Results:');",
+                  "    console.log('- Total Events Found:', response.data.length);",
+                  "    console.log('- Current Page:', response.meta?.pagination?.page || 1);",
+                  "    console.log('- Total Pages:', response.meta?.pagination?.pages || 1);",
+                  "    console.log('- Total Events in Database:', response.meta?.pagination?.total || 0);",
+                  "    ",
+                  "    let freeEvents = 0;",
+                  "    let paidEvents = 0;",
+                  "    ",
+                  "    response.data.forEach((event, index) => {",
+                  "        console.log(`\\n🎪 Event ${index + 1}:`);",
+                  "        console.log('- Title:', event.title);",
+                  "        console.log('- Category:', event.category);",
+                  "        console.log('- Location:', event.venue.city + ', ' + event.venue.state);",
+                  "        console.log('- Date:', new Date(event.startDate).toLocaleDateString());",
+                  "        console.log('- Time:', event.startTime + ' - ' + event.endTime);",
+                  "        console.log('- Is Free:', event.isFreeEvent);",
+                  "        console.log('- Status:', event.status);",
+                  "        console.log('- Featured:', !!event.featured);",
+                  "        console.log('- Current Attendees:', event.currentAttendees || 0);",
+                  "        ",
+                  "        if (event.isFreeEvent) freeEvents++;",
+                  "        else paidEvents++;",
+                  "    });",
+                  "    ",
+                  "    console.log(`\\n📈 Event Type Summary:`);",
+                  "    console.log('- Free Events:', freeEvents);",
+                  "    console.log('- Paid Events:', paidEvents);",
+                  "} else {",
+                  "    console.log('❌ Failed to retrieve events');",
+                  "}"
+                ]
+              }
             }
-          }
-        },
-        {
-          "name": "Get Event by ID",
+          ],
           "request": {
             "method": "GET",
             "url": {
-              "raw": "{{baseUrl}}/events/{{eventId}}",
-              "host": ["{{baseUrl}}"],
-              "path": ["events", "{{eventId}}"]
-            }
-          }
-        },
-        {
-          "name": "Search Events",
-          "request": {
-            "method": "GET",
-            "url": {
-              "raw": "{{baseUrl}}/events?search=technology&category=Technology&location=Lagos",
+              "raw": "{{baseUrl}}/events?page=1&limit=10&sortBy=startDate&sortOrder=asc",
               "host": ["{{baseUrl}}"],
               "path": ["events"],
               "query": [
                 {
-                  "key": "search",
-                  "value": "technology"
+                  "key": "page",
+                  "value": "1",
+                  "description": "Page number for pagination"
+                },
+                {
+                  "key": "limit",
+                  "value": "10",
+                  "description": "Number of events per page"
+                },
+                {
+                  "key": "sortBy",
+                  "value": "startDate",
+                  "description": "Sort field: startDate, title, category"
+                },
+                {
+                  "key": "sortOrder",
+                  "value": "asc",
+                  "description": "Sort order: asc or desc"
                 },
                 {
                   "key": "category",
+                  "value": "",
+                  "description": "Filter by category",
+                  "disabled": true
+                },
+                {
+                  "key": "city",
+                  "value": "",
+                  "description": "Filter by city",
+                  "disabled": true
+                },
+                {
+                  "key": "state",
+                  "value": "",
+                  "description": "Filter by state",
+                  "disabled": true
+                },
+                {
+                  "key": "search",
+                  "value": "",
+                  "description": "Search in title, description, and tags",
+                  "disabled": true
+                },
+                {
+                  "key": "featured",
+                  "value": "",
+                  "description": "Filter featured events (true/false)",
+                  "disabled": true
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get All Free Events",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    console.log('✅ Free events retrieved successfully');",
+                  "    console.log('🆓 Free Events Summary:');",
+                  "    console.log('- Total Free Events:', response.data.length);",
+                  "    ",
+                  "    response.data.forEach((event, index) => {",
+                  "        console.log(`\\n🎪 Free Event ${index + 1}:`);",
+                  "        console.log('- Title:', event.title);",
+                  "        console.log('- Category:', event.category);",
+                  "        console.log('- Location:', event.venue.city);",
+                  "        console.log('- Date:', new Date(event.startDate).toLocaleDateString());",
+                  "        console.log('- Is Free Event:', event.isFreeEvent);",
+                  "        console.log('- Available Seats:', (event.maxAttendees || 0) - (event.currentAttendees || 0));",
+                  "    });",
+                  "    ",
+                  "    console.log('\\n💡 All events returned should be free (isFreeEvent: true)');",
+                  "} else {",
+                  "    console.log('❌ Failed to retrieve free events');",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/events/free?page=1&limit=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["events", "free"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                },
+                {
+                  "key": "category",
+                  "value": "",
+                  "description": "Filter by category",
+                  "disabled": true
+                },
+                {
+                  "key": "city",
+                  "value": "",
+                  "description": "Filter by city",
+                  "disabled": true
+                },
+                {
+                  "key": "search",
+                  "value": "",
+                  "description": "Search term",
+                  "disabled": true
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Search Events by Technology Category",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    console.log('✅ Technology events search completed');",
+                  "    console.log('🔍 Search Results:');",
+                  "    console.log('- Events Found:', response.data.length);",
+                  "    ",
+                  "    response.data.forEach((event, index) => {",
+                  "        console.log(`\\n💻 Tech Event ${index + 1}:`);",
+                  "        console.log('- Title:', event.title);",
+                  "        console.log('- Category:', event.category);",
+                  "        console.log('- Location:', event.venue.city);",
+                  "        console.log('- Type:', event.isFreeEvent ? 'Free' : 'Paid');",
+                  "        console.log('- Tags:', event.tags?.join(', ') || 'None');",
+                  "    });",
+                  "    ",
+                  "    console.log('\\n🎯 All events should be in Technology category');",
+                  "} else {",
+                  "    console.log('❌ Technology events search failed');",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/events?category=Technology&search=tech&location=Lagos",
+              "host": ["{{baseUrl}}"],
+              "path": ["events"],
+              "query": [
+                {
+                  "key": "category",
                   "value": "Technology"
+                },
+                {
+                  "key": "search",
+                  "value": "tech"
                 },
                 {
                   "key": "location",
@@ -326,7 +558,104 @@
           }
         },
         {
-          "name": "Create Event (Organizer)",
+          "name": "Get Event Categories",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    console.log('✅ Event categories retrieved successfully');",
+                  "    console.log('📂 Available Categories:');",
+                  "    response.data.forEach((category, index) => {",
+                  "        console.log(`${index + 1}. ${category}`);",
+                  "    });",
+                  "    console.log('\\n💡 Use these categories when creating or filtering events');",
+                  "} else {",
+                  "    console.log('❌ Failed to retrieve categories');",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/events/categories",
+              "host": ["{{baseUrl}}"],
+              "path": ["events", "categories"]
+            }
+          }
+        },
+        {
+          "name": "Get Event by ID (Detailed View)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    const event = response.data;",
+                  "    console.log('✅ Event details retrieved successfully');",
+                  "    console.log('\\n📋 Complete Event Information:');",
+                  "    console.log('- Event ID:', event._id);",
+                  "    console.log('- Title:', event.title);",
+                  "    console.log('- Description Length:', event.description?.length + ' characters');",
+                  "    console.log('- Category:', event.category);",
+                  "    console.log('- Organizer:', event.organizer?.firstName + ' ' + event.organizer?.lastName);",
+                  "    console.log('- Organizer Email:', event.organizer?.email);",
+                  "    ",
+                  "    console.log('\\n📍 Venue Information:');",
+                  "    console.log('- Name:', event.venue?.name);",
+                  "    console.log('- Address:', event.venue?.address);",
+                  "    console.log('- City:', event.venue?.city);",
+                  "    console.log('- State:', event.venue?.state);",
+                  "    ",
+                  "    console.log('\\n📅 Date & Time:');",
+                  "    console.log('- Start Date:', new Date(event.startDate).toLocaleDateString());",
+                  "    console.log('- End Date:', new Date(event.endDate).toLocaleDateString());",
+                  "    console.log('- Start Time:', event.startTime);",
+                  "    console.log('- End Time:', event.endTime);",
+                  "    ",
+                  "    console.log('\\n🎟️ Ticket Information:');",
+                  "    console.log('- Is Free Event:', event.isFreeEvent);",
+                  "    console.log('- Ticket Types:', event.ticketTypes?.length || 0);",
+                  "    event.ticketTypes?.forEach((ticket, index) => {",
+                  "        console.log(`  ${index + 1}. ${ticket.name}: ₦${ticket.price} (${ticket.sold}/${ticket.quantity} sold)`);",
+                  "    });",
+                  "    ",
+                  "    console.log('\\n📊 Event Status:');",
+                  "    console.log('- Status:', event.status);",
+                  "    console.log('- Approved:', event.approved);",
+                  "    console.log('- Featured:', !!event.featured);",
+                  "    console.log('- Public:', event.isPublic);",
+                  "    console.log('- Current Attendees:', event.currentAttendees || 0);",
+                  "    console.log('- Max Attendees:', event.maxAttendees || 'Unlimited');",
+                  "    ",
+                  "    if (event.tags?.length > 0) {",
+                  "        console.log('\\n🏷️ Tags:', event.tags.join(', '));",
+                  "    }",
+                  "} else {",
+                  "    console.log('❌ Failed to retrieve event details');",
+                  "    console.log('Response:', pm.response.text());",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/events/{{eventId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["events", "{{eventId}}"]
+            }
+          }
+        },
+        {
+          "name": "Create Paid Event (Organizer) - Complete Example",
           "event": [
             {
               "listen": "test",
@@ -335,6 +664,27 @@
                   "if (pm.response.code === 200 || pm.response.code === 201) {",
                   "    const response = pm.response.json();",
                   "    pm.environment.set('eventId', response.data._id);",
+                  "    pm.environment.set('paidEventId', response.data._id);",
+                  "    console.log('✅ Paid event created successfully with ID:', response.data._id);",
+                  "    ",
+                  "    // Log event details for verification",
+                  "    console.log('📋 Event Details:');",
+                  "    console.log('- Title:', response.data.title);",
+                  "    console.log('- Category:', response.data.category);",
+                  "    console.log('- Venue:', response.data.venue.name);",
+                  "    console.log('- Start Date:', response.data.startDate);",
+                  "    console.log('- Is Free Event:', response.data.isFreeEvent);",
+                  "    console.log('- Status:', response.data.status);",
+                  "    console.log('- Approved:', response.data.approved);",
+                  "    ",
+                  "    // Log ticket types",
+                  "    console.log('🎟️ Ticket Types:');",
+                  "    response.data.ticketTypes.forEach((ticket, index) => {",
+                  "        console.log(`${index + 1}. ${ticket.name}: ₦${ticket.price} (${ticket.quantity} available)`);",
+                  "    });",
+                  "} else {",
+                  "    console.log('❌ Failed to create paid event');",
+                  "    console.log('Response:', pm.response.text());",
                   "}"
                 ]
               }
@@ -360,7 +710,71 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"title\": \"Postman Test Event\",\n  \"description\": \"This is a test event created via Postman to test the API integration.\",\n  \"category\": \"Technology\",\n  \"venue\": {\n    \"name\": \"Postman Test Venue\",\n    \"address\": \"123 Test Street, Lagos\",\n    \"city\": \"Lagos\",\n    \"state\": \"Lagos\"\n  },\n  \"startDate\": \"2024-12-20T10:00:00.000Z\",\n  \"endDate\": \"2024-12-20T18:00:00.000Z\",\n  \"startTime\": \"10:00\",\n  \"endTime\": \"18:00\",\n  \"ticketTypes\": [\n    {\n      \"name\": \"Regular\",\n      \"price\": 5000,\n      \"quantity\": 100,\n      \"description\": \"General admission\"\n    },\n    {\n      \"name\": \"VIP\",\n      \"price\": 15000,\n      \"quantity\": 25,\n      \"description\": \"VIP access with premium benefits\"\n    }\n  ],\n  \"tags\": [\"postman\", \"test\", \"api\", \"technology\"]\n}"
+              "raw": "{\n  \"title\": \"Lagos Tech Conference 2025 - Paid Event\",\n  \"description\": \"Join us for the biggest technology conference in Lagos! This premium event features world-class speakers, networking opportunities, hands-on workshops, and exclusive tech demos. Perfect for developers, entrepreneurs, and tech enthusiasts looking to advance their careers and connect with industry leaders. Includes breakfast, lunch, and evening networking cocktail.\",\n  \"category\": \"Technology\",\n  \"venue\": {\n    \"name\": \"Eko Convention Centre\",\n    \"address\": \"Eko Hotel & Suites, Plot 1415, Adetokunbo Ademola Street\",\n    \"city\": \"Lagos\",\n    \"state\": \"Lagos\",\n    \"coordinates\": {\n      \"latitude\": 6.4474,\n      \"longitude\": 3.4553\n    }\n  },\n  \"startDate\": \"2025-03-15T08:00:00.000Z\",\n  \"endDate\": \"2025-03-15T18:00:00.000Z\",\n  \"startTime\": \"08:00\",\n  \"endTime\": \"18:00\",\n  \"ticketTypes\": [\n    {\n      \"name\": \"Early Bird\",\n      \"price\": 25000,\n      \"quantity\": 50,\n      \"description\": \"Limited time early bird pricing - includes all conference sessions, meals, and networking\",\n      \"benefits\": [\"Priority seating\", \"Welcome breakfast\", \"Lunch included\", \"Networking cocktail\", \"Conference swag bag\"],\n      \"isFree\": false\n    },\n    {\n      \"name\": \"Regular\",\n      \"price\": 35000,\n      \"quantity\": 200,\n      \"description\": \"Standard conference admission with full access to all sessions and meals\",\n      \"benefits\": [\"All conference sessions\", \"Lunch included\", \"Networking opportunities\", \"Digital resources\"],\n      \"isFree\": false\n    },\n    {\n      \"name\": \"VIP\",\n      \"price\": 75000,\n      \"quantity\": 30,\n      \"description\": \"Premium experience with exclusive access to speaker meet & greet and VIP lounge\",\n      \"benefits\": [\"Front row seating\", \"Speaker meet & greet\", \"VIP lounge access\", \"Premium meals\", \"Exclusive networking\", \"Premium swag bag\", \"1-on-1 mentor session\"],\n      \"isFree\": false\n    },\n    {\n      \"name\": \"Premium\",\n      \"price\": 120000,\n      \"quantity\": 10,\n      \"description\": \"Ultimate conference experience with backstage access and private dinner\",\n      \"benefits\": [\"Backstage access\", \"Private dinner with speakers\", \"All VIP benefits\", \"Personal concierge\", \"Professional photos\", \"Lifetime alumni network access\"],\n      \"isFree\": false\n    }\n  ],\n  \"images\": [\n    \"https://example.com/tech-conference-banner.jpg\",\n    \"https://example.com/venue-photo.jpg\"\n  ],\n  \"tags\": [\"technology\", \"conference\", \"networking\", \"innovation\", \"startup\", \"AI\", \"blockchain\", \"fintech\"],\n  \"maxAttendees\": 290,\n  \"isPublic\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/events",
+              "host": ["{{baseUrl}}"],
+              "path": ["events"]
+            }
+          }
+        },
+        {
+          "name": "Create Free Event (Organizer) - Complete Example",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200 || pm.response.code === 201) {",
+                  "    const response = pm.response.json();",
+                  "    pm.environment.set('freeEventId', response.data._id);",
+                  "    console.log('✅ Free event created successfully with ID:', response.data._id);",
+                  "    ",
+                  "    // Log event details for verification",
+                  "    console.log('📋 Event Details:');",
+                  "    console.log('- Title:', response.data.title);",
+                  "    console.log('- Category:', response.data.category);",
+                  "    console.log('- Venue:', response.data.venue.name);",
+                  "    console.log('- Start Date:', response.data.startDate);",
+                  "    console.log('- Is Free Event:', response.data.isFreeEvent);",
+                  "    console.log('- Status:', response.data.status);",
+                  "    console.log('- Approved:', response.data.approved);",
+                  "    ",
+                  "    // Log ticket types",
+                  "    console.log('🆓 Free Ticket Types:');",
+                  "    response.data.ticketTypes.forEach((ticket, index) => {",
+                  "        console.log(`${index + 1}. ${ticket.name}: ₦${ticket.price} (${ticket.quantity} available) - Free: ${ticket.isFree}`);",
+                  "    });",
+                  "} else {",
+                  "    console.log('❌ Failed to create free event');",
+                  "    console.log('Response:', pm.response.text());",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{authToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Lagos Open Source Meetup - Free Community Event\",\n  \"description\": \"Join our vibrant open source community for an evening of learning, sharing, and networking! This free event is perfect for developers of all levels who are passionate about open source technologies. We'll have lightning talks, live coding sessions, and plenty of opportunities to connect with fellow developers. Refreshments and networking opportunities provided.\",\n  \"category\": \"Technology\",\n  \"venue\": {\n    \"name\": \"Co-Creation Hub (CcHUB)\",\n    \"address\": \"294 Herbert Macaulay Way, Sabo\",\n    \"city\": \"Lagos\",\n    \"state\": \"Lagos\",\n    \"coordinates\": {\n      \"latitude\": 6.5568,\n      \"longitude\": 3.3515\n    }\n  },\n  \"startDate\": \"2025-02-20T17:00:00.000Z\",\n  \"endDate\": \"2025-02-20T21:00:00.000Z\",\n  \"startTime\": \"17:00\",\n  \"endTime\": \"21:00\",\n  \"ticketTypes\": [\n    {\n      \"name\": \"Free\",\n      \"price\": 0,\n      \"quantity\": 100,\n      \"description\": \"Free admission to all sessions and networking\",\n      \"benefits\": [\"All sessions access\", \"Networking opportunities\", \"Light refreshments\", \"Open source swag\"],\n      \"isFree\": true\n    },\n    {\n      \"name\": \"Regular\",\n      \"price\": 0,\n      \"quantity\": 50,\n      \"description\": \"Standard free admission with reserved seating\",\n      \"benefits\": [\"Reserved seating\", \"All sessions access\", \"Priority networking\", \"Welcome drink\"],\n      \"isFree\": true\n    }\n  ],\n  \"images\": [\n    \"https://example.com/open-source-meetup.jpg\",\n    \"https://example.com/cchub-venue.jpg\"\n  ],\n  \"tags\": [\"opensource\", \"community\", \"meetup\", \"networking\", \"free\", \"technology\", \"programming\", \"collaboration\"],\n  \"maxAttendees\": 150,\n  \"isPublic\": true\n}"
             },
             "url": {
               "raw": "{{baseUrl}}/events",
@@ -484,33 +898,62 @@
           }
         },
         {
-          "name": "Get Organizer Events",
-          "request": {
-            "auth": {
-              "type": "bearer",
-              "bearer": [
-                {
-                  "key": "token",
-                  "value": "{{authToken}}",
-                  "type": "string"
-                }
-              ]
-            },
-            "method": "GET",
-            "url": {
-              "raw": "{{baseUrl}}/events/organizer",
-              "host": ["{{baseUrl}}"],
-              "path": ["events", "organizer"]
+          "name": "Get Organizer's Events",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    console.log('✅ Organizer events retrieved successfully');",
+                  "    console.log('📊 Organizer Dashboard Summary:');",
+                  "    console.log('- Total Events Created:', response.data.length);",
+                  "    ",
+                  "    let approved = 0, pending = 0, rejected = 0, freeEvents = 0, paidEvents = 0;",
+                  "    let totalRevenue = 0, totalAttendees = 0;",
+                  "    ",
+                  "    response.data.forEach((event, index) => {",
+                  "        console.log(`\\n🎪 Event ${index + 1}:`);",
+                  "        console.log('- Title:', event.title);",
+                  "        console.log('- Status:', event.status);",
+                  "        console.log('- Approved:', event.approved);",
+                  "        console.log('- Type:', event.isFreeEvent ? 'Free' : 'Paid');",
+                  "        console.log('- Attendees:', event.currentAttendees || 0);",
+                  "        console.log('- Created:', new Date(event.createdAt).toLocaleDateString());",
+                  "        ",
+                  "        // Count statistics",
+                  "        if (event.approved) approved++;",
+                  "        else if (event.status === 'pending') pending++;",
+                  "        else if (event.status === 'rejected') rejected++;",
+                  "        ",
+                  "        if (event.isFreeEvent) freeEvents++;",
+                  "        else {",
+                  "            paidEvents++;",
+                  "            // Calculate revenue for paid events",
+                  "            event.ticketTypes?.forEach(ticket => {",
+                  "                totalRevenue += (ticket.sold || 0) * (ticket.price || 0);",
+                  "            });",
+                  "        }",
+                  "        ",
+                  "        totalAttendees += event.currentAttendees || 0;",
+                  "    });",
+                  "    ",
+                  "    console.log('\\n📈 Organizer Statistics:');",
+                  "    console.log('- Approved Events:', approved);",
+                  "    console.log('- Pending Events:', pending);",
+                  "    console.log('- Rejected Events:', rejected);",
+                  "    console.log('- Free Events:', freeEvents);",
+                  "    console.log('- Paid Events:', paidEvents);",
+                  "    console.log('- Total Attendees:', totalAttendees);",
+                  "    console.log('- Total Revenue: ₦' + totalRevenue.toLocaleString());",
+                  "} else {",
+                  "    console.log('❌ Failed to retrieve organizer events');",
+                  "}"
+                ]
+              }
             }
-          }
-        }
-      ]
-    },
-    {
-      "name": "Admin",
-      "item": [
-        {
-          "name": "Admin Dashboard",
+          ],
           "request": {
             "auth": {
               "type": "bearer",
@@ -524,211 +967,180 @@
             },
             "method": "GET",
             "url": {
-              "raw": "{{baseUrl}}/admin/dashboard",
+              "raw": "{{baseUrl}}/events/organizer?page=1&limit=20",
               "host": ["{{baseUrl}}"],
-              "path": ["admin", "dashboard"]
-            }
-          }
-        },
-        {
-          "name": "Get All Users",
-          "request": {
-            "auth": {
-              "type": "bearer",
-              "bearer": [
-                {
-                  "key": "token",
-                  "value": "{{authToken}}",
-                  "type": "string"
-                }
-              ]
-            },
-            "method": "GET",
-            "url": {
-              "raw": "{{baseUrl}}/admin/users?role=user&page=1&limit=10",
-              "host": ["{{baseUrl}}"],
-              "path": ["admin", "users"],
+              "path": ["events", "organizer"],
               "query": [
-                {
-                  "key": "role",
-                  "value": "user",
-                  "description": "Filter by role: admin, organizer, user"
-                },
                 {
                   "key": "page",
                   "value": "1"
                 },
                 {
                   "key": "limit",
-                  "value": "10"
-                }
-              ]
-            }
-          }
-        },
-        {
-          "name": "Block/Unblock User",
-          "request": {
-            "auth": {
-              "type": "bearer",
-              "bearer": [
-                {
-                  "key": "token",
-                  "value": "{{authToken}}",
-                  "type": "string"
-                }
-              ]
-            },
-            "method": "PUT",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"blocked\": true\n}"
-            },
-            "url": {
-              "raw": "{{baseUrl}}/admin/users/{{userId}}/status",
-              "host": ["{{baseUrl}}"],
-              "path": ["admin", "users", "{{userId}}", "status"]
-            }
-          }
-        },
-        {
-          "name": "Get All Events (Admin)",
-          "request": {
-            "auth": {
-              "type": "bearer",
-              "bearer": [
-                {
-                  "key": "token",
-                  "value": "{{authToken}}",
-                  "type": "string"
-                }
-              ]
-            },
-            "method": "GET",
-            "url": {
-              "raw": "{{baseUrl}}/admin/events?status=pending",
-              "host": ["{{baseUrl}}"],
-              "path": ["admin", "events"],
-              "query": [
+                  "value": "20"
+                },
                 {
                   "key": "status",
-                  "value": "pending",
-                  "description": "Filter by status: pending, approved, rejected"
+                  "value": "",
+                  "description": "Filter by status: pending, approved, rejected",
+                  "disabled": true
                 }
               ]
             }
           }
         },
         {
-          "name": "Approve Event",
-          "request": {
-            "auth": {
-              "type": "bearer",
-              "bearer": [
-                {
-                  "key": "token",
-                  "value": "{{authToken}}",
-                  "type": "string"
-                }
-              ]
-            },
-            "method": "PUT",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"approved\": true,\n  \"comments\": \"Event looks great! Approved for publication.\"\n}"
-            },
-            "url": {
-              "raw": "{{baseUrl}}/admin/events/{{eventId}}/review",
-              "host": ["{{baseUrl}}"],
-              "path": ["admin", "events", "{{eventId}}", "review"]
-            }
-          }
-        },
-        {
-          "name": "Reject Event",
-          "request": {
-            "auth": {
-              "type": "bearer",
-              "bearer": [
-                {
-                  "key": "token",
-                  "value": "{{authToken}}",
-                  "type": "string"
-                }
-              ]
-            },
-            "method": "PUT",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"approved\": false,\n  \"rejectionReason\": \"Event description needs more details. Please provide more information about speakers and agenda.\"\n}"
-            },
-            "url": {
-              "raw": "{{baseUrl}}/admin/events/{{eventId}}/review",
-              "host": ["{{baseUrl}}"],
-              "path": ["admin", "events", "{{eventId}}", "review"]
-            }
-          }
-        },
-        {
-          "name": "Search Users",
-          "request": {
-            "auth": {
-              "type": "bearer",
-              "bearer": [
-                {
-                  "key": "token",
-                  "value": "{{authToken}}",
-                  "type": "string"
-                }
-              ]
-            },
-            "method": "GET",
-            "url": {
-              "raw": "{{baseUrl}}/admin/users/search?email=user@example.com",
-              "host": ["{{baseUrl}}"],
-              "path": ["admin", "users", "search"],
-              "query": [
-                {
-                  "key": "email",
-                  "value": "user@example.com"
-                }
-              ]
-            }
-          }
-        }
-      ]
-    },
-    {
-      "name": "Bookings",
-      "item": [
-        {
-          "name": "Create Booking",
+          "name": "Get Event Attendees (Organizer)",
           "event": [
             {
               "listen": "test",
               "script": {
                 "exec": [
-                  "if (pm.response.code === 200 || pm.response.code === 201) {",
+                  "if (pm.response.code === 200) {",
                   "    const response = pm.response.json();",
-                  "    pm.environment.set('bookingId', response.data._id);",
+                  "    console.log('✅ Event attendees retrieved successfully');",
+                  "    console.log('👥 Attendee Management Dashboard:');",
+                  "    console.log('- Total Confirmed Attendees:', response.data.length);",
+                  "    console.log('- Page:', response.meta?.pagination?.page || 1);",
+                  "    console.log('- Total Attendees:', response.meta?.pagination?.total || 0);",
+                  "    ",
+                  "    let checkedIn = 0, pending = 0;",
+                  "    let ticketTypeCounts = {};",
+                  "    ",
+                  "    response.data.forEach((booking, index) => {",
+                  "        console.log(`\\n🎫 Attendee ${index + 1}:`);",
+                  "        console.log('- Name:', booking.user?.firstName + ' ' + booking.user?.lastName);",
+                  "        console.log('- Email:', booking.user?.email);",
+                  "        console.log('- Phone:', booking.user?.phone || 'Not provided');",
+                  "        console.log('- Ticket Type:', booking.ticketType);",
+                  "        console.log('- Quantity:', booking.quantity);",
+                  "        console.log('- Status:', booking.status);",
+                  "        console.log('- Checked In:', !!booking.isCheckedIn);",
+                  "        console.log('- Booking Date:', new Date(booking.createdAt).toLocaleDateString());",
+                  "        ",
+                  "        if (booking.isCheckedIn) checkedIn++;",
+                  "        else pending++;",
+                  "        ",
+                  "        // Count ticket types",
+                  "        if (!ticketTypeCounts[booking.ticketType]) {",
+                  "            ticketTypeCounts[booking.ticketType] = 0;",
+                  "        }",
+                  "        ticketTypeCounts[booking.ticketType] += booking.quantity;",
+                  "    });",
+                  "    ",
+                  "    console.log('\\n📊 Check-in Statistics:');",
+                  "    console.log('- Checked In:', checkedIn);",
+                  "    console.log('- Not Checked In:', pending);",
+                  "    console.log('- Check-in Rate:', Math.round((checkedIn / response.data.length) * 100) + '%');",
+                  "    ",
+                  "    console.log('\\n🎟️ Ticket Type Distribution:');",
+                  "    Object.entries(ticketTypeCounts).forEach(([type, count]) => {",
+                  "        console.log(`- ${type}: ${count} tickets`);",
+                  "    });",
+                  "} else {",
+                  "    console.log('❌ Failed to retrieve event attendees');",
+                  "    console.log('Make sure you are the organizer of this event');",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{authToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/events/{{eventId}}/attendees?page=1&limit=50",
+              "host": ["{{baseUrl}}"],
+              "path": ["events", "{{eventId}}", "attendees"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "50"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Check-in Attendee (Organizer/Admin)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    console.log('✅ Attendee checked in successfully');",
+                  "    console.log('🎫 Check-in Details:');",
+                  "    console.log('- Attendee:', response.data.attendee?.firstName + ' ' + response.data.attendee?.lastName);",
+                  "    console.log('- Email:', response.data.attendee?.email);",
+                  "    console.log('- Ticket Type:', response.data.booking?.ticketType);",
+                  "    console.log('- Quantity:', response.data.booking?.quantity);",
+                  "    console.log('- Check-in Time:', new Date(response.data.checkInTime).toLocaleString());",
+                  "    console.log('- Booking Status:', response.data.booking?.status);",
+                  "} else {",
+                  "    console.log('❌ Check-in failed');",
+                  "    console.log('Response:', pm.response.text());",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{authToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "url": {
+              "raw": "{{baseUrl}}/bookings/{{bookingId}}/checkin",
+              "host": ["{{baseUrl}}"],
+              "path": ["bookings", "{{bookingId}}", "checkin"]
+            }
+          }
+        },
+        {
+          "name": "Verify QR Code for Check-in",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    console.log('✅ QR Code verified successfully');",
+                  "    console.log('🔍 QR Verification Results:');",
+                  "    console.log('- Valid:', response.data.valid);",
+                  "    if (response.data.booking) {",
+                  "        console.log('- Booking ID:', response.data.booking._id);",
+                  "        console.log('- Attendee:', response.data.booking.attendee?.firstName + ' ' + response.data.booking.attendee?.lastName);",
+                  "        console.log('- Ticket Type:', response.data.booking.ticketType);",
+                  "        console.log('- Quantity:', response.data.booking.quantity);",
+                  "        console.log('- Already Checked In:', response.data.booking.isCheckedIn);",
+                  "        console.log('- Event:', response.data.booking.event?.title);",
+                  "    }",
+                  "} else {",
+                  "    console.log('❌ QR Code verification failed');",
+                  "    console.log('Response:', pm.response.text());",
                   "}"
                 ]
               }
@@ -754,17 +1166,112 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"eventId\": \"{{eventId}}\",\n  \"ticketType\": \"Regular\",\n  \"quantity\": 2\n}"
+              "raw": "{\n  \"qrCode\": \"{\\\"bookingId\\\":\\\"{{bookingId}}\\\",\\\"eventId\\\":\\\"{{eventId}}\\\",\\\"reference\\\":\\\"{{paymentReference}}\\\",\\\"generatedAt\\\":\\\"2025-01-30T10:30:00.000Z\\\"}\"\n}",
+              "description": "QR code data in JSON string format"
             },
             "url": {
-              "raw": "{{baseUrl}}/bookings",
+              "raw": "{{baseUrl}}/bookings/verify-qr",
               "host": ["{{baseUrl}}"],
-              "path": ["bookings"]
+              "path": ["bookings", "verify-qr"]
             }
           }
         },
         {
-          "name": "Get User Bookings",
+          "name": "Delete Event (Organizer/Admin)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    console.log('✅ Event deleted successfully');",
+                  "    console.log('\\n🗑️ Deletion Details:');",
+                  "    console.log('Event Title:', response.data.eventTitle);",
+                  "    console.log('Deleted By:', response.data.deletedBy === 'admin' ? 'Administrator' : 'Organizer');",
+                  "    console.log('Reason:', response.data.reason);",
+                  "    console.log('\\n📧 Notifications have been sent to relevant parties');",
+                  "} else {",
+                  "    console.log('❌ Failed to delete event');",
+                  "    const errorResponse = pm.response.json();",
+                  "    console.log('Error:', errorResponse.message);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\\n  \\\"reason\\\": \\\"Event no longer needed - organizer decision\\\"\\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/events/{{eventId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["events", "{{eventId}}"]
+            },
+            "description": "Delete an event. Only the organizer or admin can delete events. Events with confirmed bookings cannot be deleted and must be cancelled instead. Sends notifications to organizer (if admin deletes) or all admins (if organizer deletes)."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Admin Management",
+      "item": [
+        {
+          "name": "Admin Dashboard Overview",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    console.log('✅ Admin dashboard data retrieved successfully');",
+                  "    console.log('\\n📊 Admin Dashboard Overview:');",
+                  "    ",
+                  "    const stats = response.data;",
+                  "    console.log('👥 User Statistics:');",
+                  "    console.log('- Total Users:', stats.totalUsers || 0);",
+                  "    console.log('- Total Organizers:', stats.totalOrganizers || 0);",
+                  "    console.log('- Active Users:', stats.activeUsers || 0);",
+                  "    console.log('- Blocked Users:', stats.blockedUsers || 0);",
+                  "    ",
+                  "    console.log('\\n🎪 Event Statistics:');",
+                  "    console.log('- Total Events:', stats.totalEvents || 0);",
+                  "    console.log('- Approved Events:', stats.approvedEvents || 0);",
+                  "    console.log('- Pending Approval:', stats.pendingEvents || 0);",
+                  "    console.log('- Rejected Events:', stats.rejectedEvents || 0);",
+                  "    console.log('- Free Events:', stats.freeEvents || 0);",
+                  "    console.log('- Paid Events:', stats.paidEvents || 0);",
+                  "    ",
+                  "    console.log('\\n🎫 Booking Statistics:');",
+                  "    console.log('- Total Bookings:', stats.totalBookings || 0);",
+                  "    console.log('- Confirmed Bookings:', stats.confirmedBookings || 0);",
+                  "    console.log('- Total Revenue: ₦' + (stats.totalRevenue || 0).toLocaleString());",
+                  "    console.log('- Platform Fees: ₦' + (stats.platformFees || 0).toLocaleString());",
+                  "    ",
+                  "    if (stats.recentEvents) {",
+                  "        console.log('\\n📅 Recent Events Requiring Review:');",
+                  "        stats.recentEvents.forEach((event, index) => {",
+                  "            console.log(`${index + 1}. ${event.title} - ${event.status}`);",
+                  "        });",
+                  "    }",
+                  "} else {",
+                  "    console.log('❌ Failed to retrieve admin dashboard data');",
+                  "    console.log('Make sure you are logged in as an admin');",
+                  "}"
+                ]
+              }
+            }
+          ],
           "request": {
             "auth": {
               "type": "bearer",
@@ -778,14 +1285,62 @@
             },
             "method": "GET",
             "url": {
-              "raw": "{{baseUrl}}/bookings",
+              "raw": "{{baseUrl}}/admin/dashboard",
               "host": ["{{baseUrl}}"],
-              "path": ["bookings"]
+              "path": ["admin", "dashboard"]
             }
           }
         },
         {
-          "name": "Get Booking by ID",
+          "name": "Get All Users (Admin)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    console.log('✅ User list retrieved successfully');",
+                  "    console.log('\\n👥 User Management Dashboard:');",
+                  "    console.log('- Users on this page:', response.data.length);",
+                  "    console.log('- Current page:', response.meta?.pagination?.page || 1);",
+                  "    console.log('- Total users:', response.meta?.pagination?.total || 0);",
+                  "    ",
+                  "    let activeUsers = 0, blockedUsers = 0;",
+                  "    let roleCount = {};",
+                  "    ",
+                  "    response.data.forEach((user, index) => {",
+                  "        console.log(`\\n👤 User ${index + 1}:`);",
+                  "        console.log('- Name:', user.firstName + ' ' + user.lastName);",
+                  "        console.log('- Email:', user.email);",
+                  "        console.log('- Role:', user.role);",
+                  "        console.log('- Verified:', !!user.isVerified);",
+                  "        console.log('- Blocked:', !!user.blocked);",
+                  "        console.log('- Joined:', new Date(user.createdAt).toLocaleDateString());",
+                  "        ",
+                  "        if (user.blocked) blockedUsers++;",
+                  "        else activeUsers++;",
+                  "        ",
+                  "        if (!roleCount[user.role]) roleCount[user.role] = 0;",
+                  "        roleCount[user.role]++;",
+                  "    });",
+                  "    ",
+                  "    console.log('\\n📊 User Statistics:');",
+                  "    console.log('- Active Users:', activeUsers);",
+                  "    console.log('- Blocked Users:', blockedUsers);",
+                  "    ",
+                  "    console.log('\\n👔 Role Distribution:');",
+                  "    Object.entries(roleCount).forEach(([role, count]) => {",
+                  "        console.log(`- ${role}s: ${count}`);",
+                  "    });",
+                  "} else {",
+                  "    console.log('❌ Failed to retrieve users');",
+                  "    console.log('Make sure you are logged in as an admin');",
+                  "}"
+                ]
+              }
+            }
+          ],
           "request": {
             "auth": {
               "type": "bearer",
@@ -799,14 +1354,153 @@
             },
             "method": "GET",
             "url": {
-              "raw": "{{baseUrl}}/bookings/{{bookingId}}",
+              "raw": "{{baseUrl}}/admin/users?page=1&limit=10",
               "host": ["{{baseUrl}}"],
-              "path": ["bookings", "{{bookingId}}"]
+              "path": ["admin", "users"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                },
+                {
+                  "key": "role",
+                  "value": "",
+                  "description": "Filter by role: admin, organizer, user",
+                  "disabled": true
+                }
+              ]
             }
           }
         },
         {
-          "name": "Cancel Booking",
+          "name": "Get All Events for Review (Admin)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    console.log('✅ Events for admin review retrieved successfully');",
+                  "    console.log('\\n📋 Event Review Dashboard:');",
+                  "    console.log('- Events requiring review:', response.data.length);",
+                  "    ",
+                  "    let pendingCount = 0, approvedCount = 0, rejectedCount = 0;",
+                  "    let freeEventCount = 0, paidEventCount = 0;",
+                  "    ",
+                  "    response.data.forEach((event, index) => {",
+                  "        console.log(`\\n🎪 Event ${index + 1}:`);",
+                  "        console.log('- Title:', event.title);",
+                  "        console.log('- Organizer:', event.organizer?.firstName + ' ' + event.organizer?.lastName);",
+                  "        console.log('- Organizer Email:', event.organizer?.email);",
+                  "        console.log('- Category:', event.category);",
+                  "        console.log('- Type:', event.isFreeEvent ? 'Free Event' : 'Paid Event');",
+                  "        console.log('- Status:', event.status);",
+                  "        console.log('- Approved:', event.approved);",
+                  "        console.log('- Venue:', event.venue?.name + ', ' + event.venue?.city);",
+                  "        console.log('- Event Date:', new Date(event.startDate).toLocaleDateString());",
+                  "        console.log('- Created:', new Date(event.createdAt).toLocaleDateString());",
+                  "        ",
+                  "        // Count ticket types and prices",
+                  "        if (event.ticketTypes?.length > 0) {",
+                  "            console.log('- Ticket Types:');",
+                  "            event.ticketTypes.forEach(ticket => {",
+                  "                console.log(`  • ${ticket.name}: ₦${ticket.price} (${ticket.quantity} available)`);",
+                  "            });",
+                  "        }",
+                  "        ",
+                  "        // Statistics",
+                  "        if (event.status === 'pending') pendingCount++;",
+                  "        else if (event.approved) approvedCount++;",
+                  "        else rejectedCount++;",
+                  "        ",
+                  "        if (event.isFreeEvent) freeEventCount++;",
+                  "        else paidEventCount++;",
+                  "    });",
+                  "    ",
+                  "    console.log('\\n📊 Review Statistics:');",
+                  "    console.log('- Pending Approval:', pendingCount);",
+                  "    console.log('- Already Approved:', approvedCount);",
+                  "    console.log('- Rejected:', rejectedCount);",
+                  "    console.log('- Free Events:', freeEventCount);",
+                  "    console.log('- Paid Events:', paidEventCount);",
+                  "} else {",
+                  "    console.log('❌ Failed to retrieve events for review');",
+                  "    console.log('Make sure you are logged in as an admin');",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{authToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/admin/events?page=1&limit=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "events"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                },
+                {
+                  "key": "status",
+                  "value": "",
+                  "description": "Filter by status: pending, approved, rejected",
+                  "disabled": true
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Approve Event (Admin)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    console.log('✅ Event approved successfully');",
+                  "    console.log('\\n🎉 Event Approval Details:');",
+                  "    console.log('- Event ID:', response.data.eventId || 'N/A');",
+                  "    console.log('- Event Title:', response.data.eventTitle || 'N/A');",
+                  "    console.log('- New Status:', response.data.status || 'approved');",
+                  "    console.log('- Approved By:', response.data.approvedBy || 'Current Admin');",
+                  "    console.log('- Approval Time:', new Date().toLocaleString());",
+                  "    console.log('- Comments:', response.data.comments || 'Event approved for publication');",
+                  "    ",
+                  "    console.log('\\n📧 Notifications Sent:');",
+                  "    console.log('- ✅ Organizer notified of approval');",
+                  "    console.log('- ✅ Event now visible to public');",
+                  "    console.log('- ✅ User base notified of new event');",
+                  "} else {",
+                  "    console.log('❌ Event approval failed');",
+                  "    console.log('Response:', pm.response.text());",
+                  "}"
+                ]
+              }
+            }
+          ],
           "request": {
             "auth": {
               "type": "bearer",
@@ -827,7 +1521,743 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"reason\": \"Change of plans\"\n}"
+              "raw": "{\n  \"approved\": true,\n  \"comments\": \"Excellent event! Well-structured agenda and appropriate pricing. Approved for immediate publication. The event meets all our quality standards and should attract good attendance.\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/admin/events/{{eventId}}/review",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "events", "{{eventId}}", "review"]
+            }
+          }
+        },
+        {
+          "name": "Reject Event (Admin)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    console.log('✅ Event rejected successfully');",
+                  "    console.log('\\n❌ Event Rejection Details:');",
+                  "    console.log('- Event ID:', response.data.eventId || 'N/A');",
+                  "    console.log('- Event Title:', response.data.eventTitle || 'N/A');",
+                  "    console.log('- New Status:', response.data.status || 'rejected');",
+                  "    console.log('- Rejected By:', response.data.rejectedBy || 'Current Admin');",
+                  "    console.log('- Rejection Time:', new Date().toLocaleString());",
+                  "    console.log('- Rejection Reason:', response.data.rejectionReason || 'See rejection details');",
+                  "    ",
+                  "    console.log('\\n📧 Notifications:');",
+                  "    console.log('- ✅ Organizer notified of rejection with feedback');",
+                  "    console.log('- ✅ Organizer can edit and resubmit event');",
+                  "} else {",
+                  "    console.log('❌ Event rejection failed');",
+                  "    console.log('Response:', pm.response.text());",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{authToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"approved\": false,\n  \"rejectionReason\": \"Event description needs more details about the agenda and speakers. Please provide:\n\n1. Detailed schedule with session times\n2. Speaker profiles and credentials  \n3. Clear learning outcomes for attendees\n4. Venue accessibility information\n5. Refund policy details\n\nOnce these details are added, please resubmit for review. The event concept is good but needs more comprehensive information for attendees.\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/admin/events/{{eventId}}/review",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "events", "{{eventId}}", "review"]
+            }
+          }
+        },
+        {
+          "name": "Block/Unblock User (Admin)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    console.log('✅ User status updated successfully');",
+                  "    console.log('\\n👤 User Status Change:');",
+                  "    console.log('- User ID:', response.data.userId || 'N/A');",
+                  "    console.log('- User Email:', response.data.email || 'N/A');",
+                  "    console.log('- New Status:', response.data.blocked ? 'BLOCKED' : 'ACTIVE');",
+                  "    console.log('- Action By:', 'Current Admin');",
+                  "    console.log('- Action Time:', new Date().toLocaleString());",
+                  "    ",
+                  "    if (response.data.blocked) {",
+                  "        console.log('\\n🚫 User Account Blocked:');",
+                  "        console.log('- User cannot login');",
+                  "        console.log('- User cannot create events');",
+                  "        console.log('- User cannot make bookings');",
+                  "        console.log('- Existing bookings remain valid');",
+                  "    } else {",
+                  "        console.log('\\n✅ User Account Unblocked:');",
+                  "        console.log('- User can now login');",
+                  "        console.log('- User can create events (if organizer)');",
+                  "        console.log('- User can make new bookings');",
+                  "        console.log('- Full platform access restored');",
+                  "    }",
+                  "} else {",
+                  "    console.log('❌ User status update failed');",
+                  "    console.log('Response:', pm.response.text());",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{authToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"blocked\": true\n}",
+              "description": "Set to true to block user, false to unblock"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/admin/users/{{userId}}/status",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "users", "{{userId}}", "status"]
+            }
+          }
+        },
+        {
+          "name": "Search Users (Admin)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    console.log('✅ User search completed successfully');",
+                  "    console.log('\\n🔍 Search Results:');",
+                  "    console.log('- Users found:', response.data.length);",
+                  "    ",
+                  "    response.data.forEach((user, index) => {",
+                  "        console.log(`\\n👤 User ${index + 1}:`);",
+                  "        console.log('- Name:', user.firstName + ' ' + user.lastName);",
+                  "        console.log('- Email:', user.email);",
+                  "        console.log('- Role:', user.role);",
+                  "        console.log('- Status:', user.blocked ? 'Blocked' : 'Active');",
+                  "        console.log('- Verified:', !!user.isVerified);",
+                  "        console.log('- Member since:', new Date(user.createdAt).toLocaleDateString());",
+                  "        ",
+                  "        if (user.role === 'organizer') {",
+                  "            console.log('- Events created:', user.eventsCreated?.length || 0);",
+                  "        }",
+                  "        if (user.role === 'user') {",
+                  "            console.log('- Events attended:', user.eventsAttended?.length || 0);",
+                  "        }",
+                  "    });",
+                  "} else {",
+                  "    console.log('❌ User search failed');",
+                  "    console.log('Response:', pm.response.text());",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{authToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/admin/users/search?email=user@example.com",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "users", "search"],
+              "query": [
+                {
+                  "key": "email",
+                  "value": "user@example.com",
+                  "description": "Search by email address"
+                },
+                {
+                  "key": "name",
+                  "value": "",
+                  "description": "Search by name",
+                  "disabled": true
+                },
+                {
+                  "key": "role",
+                  "value": "",
+                  "description": "Filter by role",
+                  "disabled": true
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Organizer Warning System",
+          "item": [
+            {
+              "name": "Send Warning to Organizer",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "if (pm.response.code === 200) {",
+                      "    const response = pm.response.json();",
+                      "    console.log('✅ Warning sent to organizer successfully');",
+                      "    console.log('\\n⚠️ Warning Details:');",
+                      "    console.log('Event:', response.data.eventTitle);",
+                      "    console.log('Organizer:', response.data.organizer.name);",
+                      "    console.log('Email:', response.data.organizer.email);",
+                      "    console.log('Reason:', response.data.warning.reason);",
+                      "    console.log('Severity:', response.data.warning.severity);",
+                      "    console.log('Warning Count:', response.data.warning.warningCount);",
+                      "    console.log('Flagged for Deletion:', response.data.warning.flaggedForDeletion);",
+                      "    if (response.data.warning.deletionDeadline) {",
+                      "        console.log('Deletion Deadline:', new Date(response.data.warning.deletionDeadline).toLocaleDateString());",
+                      "    }",
+                      "} else {",
+                      "    console.log('❌ Failed to send warning');",
+                      "}"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\\n  \\\"reason\\\": \\\"Your event does not meet our community guidelines. Please ensure your event description is professional and includes accurate venue information. Also, your event pricing seems inappropriate for the type of event advertised.\\\",\\n  \\\"severity\\\": \\\"major\\\",\\n  \\\"autoDeleteAfterDays\\\": 7\\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/admin/events/{{eventId}}/warn",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["admin", "events", "{{eventId}}", "warn"]
+                },
+                "description": "Send a warning to an organizer when their event doesn't meet business standards. Can include auto-deletion deadline."
+              }
+            },
+            {
+              "name": "Get Event Warnings History",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "if (pm.response.code === 200) {",
+                      "    const response = pm.response.json();",
+                      "    console.log('✅ Event warnings retrieved successfully');",
+                      "    console.log('\\n📋 Event Warning History:');",
+                      "    console.log('Event:', response.data.eventTitle);",
+                      "    console.log('Organizer:', response.data.organizer.name);",
+                      "    console.log('Total Warnings:', response.data.warningCount);",
+                      "    console.log('Flagged for Deletion:', response.data.flaggedForDeletion);",
+                      "    ",
+                      "    if (response.data.warnings && response.data.warnings.length > 0) {",
+                      "        console.log('\\n⚠️ Warning Details:');",
+                      "        response.data.warnings.forEach((warning, index) => {",
+                      "            console.log(`${index + 1}. ${warning.severity.toUpperCase()} - ${warning.reason}`);",
+                      "            console.log(`   Issued by: ${warning.issuedBy} on ${new Date(warning.issuedAt).toLocaleDateString()}`);",
+                      "        });",
+                      "    }",
+                      "} else {",
+                      "    console.log('❌ Failed to retrieve event warnings');",
+                      "}"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/admin/events/{{eventId}}/warnings",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["admin", "events", "{{eventId}}", "warnings"]
+                },
+                "description": "Get the complete warning history for a specific event."
+              }
+            },
+            {
+              "name": "Get Events Flagged for Deletion",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "if (pm.response.code === 200) {",
+                      "    const response = pm.response.json();",
+                      "    console.log('✅ Flagged events retrieved successfully');",
+                      "    console.log('\\n🚩 Events Flagged for Deletion:');",
+                      "    console.log('Total flagged events:', response.data.length);",
+                      "    ",
+                      "    if (response.data && response.data.length > 0) {",
+                      "        response.data.forEach((event, index) => {",
+                      "            console.log(`\\n${index + 1}. ${event.title}`);",
+                      "            console.log(`   Organizer: ${event.organizer.firstName} ${event.organizer.lastName}`);",
+                      "            console.log(`   Warnings: ${event.warningCount}`);",
+                      "            console.log(`   Days Remaining: ${event.daysRemaining}`);",
+                      "            console.log(`   Status: ${event.overdue ? 'OVERDUE' : 'Active'}`);",
+                      "            if (event.deletionDeadline) {",
+                      "                console.log(`   Deadline: ${new Date(event.deletionDeadline).toLocaleDateString()}`);",
+                      "            }",
+                      "        });",
+                      "    } else {",
+                      "        console.log('No events currently flagged for deletion');",
+                      "    }",
+                      "} else {",
+                      "    console.log('❌ Failed to retrieve flagged events');",
+                      "}"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/admin/events/flagged?page=1&limit=10",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["admin", "events", "flagged"],
+                  "query": [
+                    {
+                      "key": "page",
+                      "value": "1",
+                      "description": "Page number"
+                    },
+                    {
+                      "key": "limit",
+                      "value": "10",
+                      "description": "Items per page"
+                    }
+                  ]
+                },
+                "description": "Get all events that have been flagged for deletion due to warnings."
+              }
+            },
+            {
+              "name": "Auto-Delete Overdue Events",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "if (pm.response.code === 200) {",
+                      "    const response = pm.response.json();",
+                      "    console.log('✅ Auto-deletion process completed');",
+                      "    console.log('\\n🗑️ Deletion Summary:');",
+                      "    console.log('Events deleted:', response.data.deletedEventsCount);",
+                      "    ",
+                      "    if (response.data.deletedEvents && response.data.deletedEvents.length > 0) {",
+                      "        console.log('\\nDeleted Events:');",
+                      "        response.data.deletedEvents.forEach((event, index) => {",
+                      "            console.log(`${index + 1}. ${event.title} (Organizer: ${event.organizer})`);",
+                      "        });",
+                      "    } else {",
+                      "        console.log('No overdue events found for deletion');",
+                      "    }",
+                      "} else {",
+                      "    console.log('❌ Failed to process auto-deletion');",
+                      "}"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/admin/events/auto-delete",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["admin", "events", "auto-delete"]
+                },
+                "description": "Automatically delete all events that have passed their deletion deadline."
+              }
+            },
+            {
+              "name": "Remove Deletion Flag (Unflag Event)",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "if (pm.response.code === 200) {",
+                      "    const response = pm.response.json();",
+                      "    console.log('✅ Event unflagged successfully');",
+                      "    console.log('\\n🎯 Unflag Details:');",
+                      "    console.log('Event:', response.data.title);",
+                      "    console.log('Flagged for Deletion:', response.data.flaggedForDeletion);",
+                      "    console.log('Status: Event is now safe from auto-deletion');",
+                      "} else {",
+                      "    console.log('❌ Failed to unflag event');",
+                      "}"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/admin/events/{{eventId}}/unflag",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["admin", "events", "{{eventId}}", "unflag"]
+                },
+                "description": "Remove the deletion flag from an event, preventing auto-deletion."
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Bookings & Ticket Management",
+      "item": [
+        {
+          "name": "Create Booking for Paid Event",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200 || pm.response.code === 201) {",
+                  "    const response = pm.response.json();",
+                  "    pm.environment.set('bookingId', response.data._id);",
+                  "    pm.environment.set('paidBookingId', response.data._id);",
+                  "    console.log('✅ Paid event booking created successfully');",
+                  "    console.log('📋 Booking Details:');",
+                  "    console.log('- Booking ID:', response.data._id);",
+                  "    console.log('- Event ID:', response.data.event);",
+                  "    console.log('- Ticket Type:', response.data.ticketType);",
+                  "    console.log('- Quantity:', response.data.quantity);",
+                  "    console.log('- Total Amount: ₦' + response.data.totalAmount);",
+                  "    console.log('- Platform Fee: ₦' + response.data.platformFee);",
+                  "    console.log('- VAT: ₦' + response.data.vat);",
+                  "    console.log('- Final Amount: ₦' + response.data.finalAmount);",
+                  "    console.log('- Payment Status:', response.data.paymentStatus);",
+                  "    console.log('- Booking Status:', response.data.status);",
+                  "} else {",
+                  "    console.log('❌ Failed to create paid event booking');",
+                  "    console.log('Response:', pm.response.text());",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{authToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"eventId\": \"{{paidEventId}}\",\n  \"ticketType\": \"Regular\",\n  \"quantity\": 2,\n  \"attendeeInfo\": {\n    \"name\": \"John Doe\",\n    \"email\": \"john.doe@example.com\",\n    \"phone\": \"+2348123456789\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/bookings",
+              "host": ["{{baseUrl}}"],
+              "path": ["bookings"]
+            }
+          }
+        },
+        {
+          "name": "Register for Free Event",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200 || pm.response.code === 201) {",
+                  "    const response = pm.response.json();",
+                  "    pm.environment.set('freeBookingId', response.data._id);",
+                  "    console.log('✅ Free event registration successful');",
+                  "    console.log('📋 Registration Details:');",
+                  "    console.log('- Booking ID:', response.data._id);",
+                  "    console.log('- Event ID:', response.data.event);",
+                  "    console.log('- Ticket Type:', response.data.ticketType);",
+                  "    console.log('- Quantity:', response.data.quantity);",
+                  "    console.log('- Total Amount: ₦' + response.data.totalAmount);",
+                  "    console.log('- Final Amount: ₦' + response.data.finalAmount);",
+                  "    console.log('- Payment Status:', response.data.paymentStatus);",
+                  "    console.log('- Booking Status:', response.data.status);",
+                  "    console.log('- QR Code Generated:', !!response.data.qrCode);",
+                  "} else {",
+                  "    console.log('❌ Failed to register for free event');",
+                  "    console.log('Response:', pm.response.text());",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{authToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"eventId\": \"{{freeEventId}}\",\n  \"ticketType\": \"Free\",\n  \"quantity\": 1,\n  \"attendeeInfo\": [\n    {\n      \"name\": \"Jane Smith\",\n      \"email\": \"jane.smith@example.com\",\n      \"phone\": \"+2348087654321\"\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/bookings/free-event",
+              "host": ["{{baseUrl}}"],
+              "path": ["bookings", "free-event"]
+            }
+          }
+        },
+        {
+          "name": "Create VIP Booking for Paid Event",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200 || pm.response.code === 201) {",
+                  "    const response = pm.response.json();",
+                  "    pm.environment.set('vipBookingId', response.data._id);",
+                  "    console.log('✅ VIP booking created successfully');",
+                  "    console.log('📋 VIP Booking Details:');",
+                  "    console.log('- Booking ID:', response.data._id);",
+                  "    console.log('- Ticket Type:', response.data.ticketType);",
+                  "    console.log('- Quantity:', response.data.quantity);",
+                  "    console.log('- Total Amount: ₦' + response.data.totalAmount);",
+                  "    console.log('- Final Amount: ₦' + response.data.finalAmount);",
+                  "    console.log('💰 VIP ticket price is significantly higher than regular tickets');",
+                  "} else {",
+                  "    console.log('❌ Failed to create VIP booking');",
+                  "    console.log('Response:', pm.response.text());",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{authToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"eventId\": \"{{paidEventId}}\",\n  \"ticketType\": \"VIP\",\n  \"quantity\": 1,\n  \"attendeeInfo\": {\n    \"name\": \"Premium Customer\",\n    \"email\": \"premium@example.com\",\n    \"phone\": \"+2348111222333\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/bookings",
+              "host": ["{{baseUrl}}"],
+              "path": ["bookings"]
+            }
+          }
+        },
+        {
+          "name": "Get User Bookings & Tickets",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    console.log('✅ User bookings retrieved successfully');",
+                  "    console.log('📊 Booking Summary:');",
+                  "    console.log('- Total Bookings:', response.data.length);",
+                  "    ",
+                  "    let paidBookings = 0;",
+                  "    let freeBookings = 0;",
+                  "    let totalSpent = 0;",
+                  "    ",
+                  "    response.data.forEach((booking, index) => {",
+                  "        console.log(`\\n🎫 Booking ${index + 1}:`);",
+                  "        console.log('- Event:', booking.event.title);",
+                  "        console.log('- Ticket Type:', booking.ticketType);",
+                  "        console.log('- Quantity:', booking.quantity);",
+                  "        console.log('- Amount: ₦' + booking.finalAmount);",
+                  "        console.log('- Status:', booking.status);",
+                  "        console.log('- Payment Status:', booking.paymentStatus);",
+                  "        console.log('- Has QR Code:', !!booking.qrCode);",
+                  "        ",
+                  "        if (booking.finalAmount > 0) {",
+                  "            paidBookings++;",
+                  "            totalSpent += booking.finalAmount;",
+                  "        } else {",
+                  "            freeBookings++;",
+                  "        }",
+                  "    });",
+                  "    ",
+                  "    console.log(`\\n💰 Financial Summary:`);",
+                  "    console.log('- Paid Bookings:', paidBookings);",
+                  "    console.log('- Free Bookings:', freeBookings);",
+                  "    console.log('- Total Spent: ₦' + totalSpent);",
+                  "} else {",
+                  "    console.log('❌ Failed to retrieve user bookings');",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{authToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/bookings/my-tickets",
+              "host": ["{{baseUrl}}"],
+              "path": ["bookings", "my-tickets"]
+            }
+          }
+        },
+        {
+          "name": "Get Booking Details by ID",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{authToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/bookings/{{bookingId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["bookings", "{{bookingId}}"]
+            }
+          }
+        },
+        {
+          "name": "Cancel Booking (Before Event)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{authToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reason\": \"Change of plans - unable to attend the event\"\n}"
             },
             "url": {
               "raw": "{{baseUrl}}/bookings/{{bookingId}}/cancel",
@@ -839,10 +2269,34 @@
       ]
     },
     {
-      "name": "Payments",
+      "name": "Payment Processing",
       "item": [
         {
-          "name": "Initialize Payment",
+          "name": "Initialize Payment for Paid Event",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    pm.environment.set('paymentReference', response.data.reference);",
+                  "    pm.environment.set('authorizationUrl', response.data.authorization_url);",
+                  "    console.log('✅ Payment initialized successfully');",
+                  "    console.log('💳 Payment Details:');",
+                  "    console.log('- Reference:', response.data.reference);",
+                  "    console.log('- Amount: ₦' + (response.data.amount / 100));",
+                  "    console.log('- Authorization URL:', response.data.authorization_url);",
+                  "    console.log('- Access Code:', response.data.access_code);",
+                  "    console.log('\\n🔗 Next Step: Visit the authorization URL to complete payment');",
+                  "} else {",
+                  "    console.log('❌ Failed to initialize payment');",
+                  "    console.log('Response:', pm.response.text());",
+                  "}"
+                ]
+              }
+            }
+          ],
           "request": {
             "auth": {
               "type": "bearer",
@@ -863,7 +2317,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"bookingId\": \"{{bookingId}}\"\n}"
+              "raw": "{\n  \"bookingId\": \"{{paidBookingId}}\"\n}"
             },
             "url": {
               "raw": "{{baseUrl}}/payments/initialize",
@@ -874,6 +2328,36 @@
         },
         {
           "name": "Verify Payment",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    console.log('✅ Payment verified successfully');",
+                  "    console.log('💰 Payment Verification Details:');",
+                  "    console.log('- Status:', response.data.status);",
+                  "    console.log('- Reference:', response.data.reference);",
+                  "    console.log('- Amount: ₦' + (response.data.amount / 100));",
+                  "    console.log('- Gateway Response:', response.data.gateway_response);",
+                  "    console.log('- Paid At:', response.data.paid_at);",
+                  "    ",
+                  "    if (response.data.booking) {",
+                  "        console.log('\\n🎫 Booking Status Updated:');",
+                  "        console.log('- Booking ID:', response.data.booking._id);",
+                  "        console.log('- New Status:', response.data.booking.status);",
+                  "        console.log('- Payment Status:', response.data.booking.paymentStatus);",
+                  "        console.log('- QR Code Generated:', !!response.data.booking.qrCode);",
+                  "    }",
+                  "} else {",
+                  "    console.log('❌ Payment verification failed');",
+                  "    console.log('Response:', pm.response.text());",
+                  "}"
+                ]
+              }
+            }
+          ],
           "request": {
             "auth": {
               "type": "bearer",
@@ -894,7 +2378,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"reference\": \"PAYMENT_REFERENCE\"\n}"
+              "raw": "{\n  \"reference\": \"{{paymentReference}}\"\n}"
             },
             "url": {
               "raw": "{{baseUrl}}/payments/verify",
@@ -904,7 +2388,77 @@
           }
         },
         {
-          "name": "Paystack Webhook",
+          "name": "Confirm Booking Payment (Alternative Method)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    console.log('✅ Booking payment confirmed successfully');",
+                  "    console.log('🎫 Updated Booking Details:');",
+                  "    console.log('- Booking ID:', response.data._id);",
+                  "    console.log('- Status:', response.data.status);",
+                  "    console.log('- Payment Status:', response.data.paymentStatus);",
+                  "    console.log('- Paystack Reference:', response.data.paystackReference);",
+                  "    console.log('- QR Code Generated:', !!response.data.qrCode);",
+                  "    console.log('- Final Amount: ₦' + response.data.finalAmount);",
+                  "} else {",
+                  "    console.log('❌ Failed to confirm booking payment');",
+                  "    console.log('Response:', pm.response.text());",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{authToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"bookingId\": \"{{paidBookingId}}\",\n  \"paymentReference\": \"{{paymentReference}}\",\n  \"paystackReference\": \"{{paymentReference}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/bookings/confirm-payment",
+              "host": ["{{baseUrl}}"],
+              "path": ["bookings", "confirm-payment"]
+            }
+          }
+        },
+        {
+          "name": "Paystack Webhook (Test)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    console.log('✅ Webhook processed successfully');",
+                  "    console.log('🔔 Webhook notification received and processed');",
+                  "} else {",
+                  "    console.log('❌ Webhook processing failed');",
+                  "    console.log('Response:', pm.response.text());",
+                  "}"
+                ]
+              }
+            }
+          ],
           "request": {
             "method": "POST",
             "header": [
@@ -914,12 +2468,13 @@
               },
               {
                 "key": "x-paystack-signature",
-                "value": "WEBHOOK_SIGNATURE"
+                "value": "test_signature_12345",
+                "description": "Webhook signature from Paystack"
               }
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"event\": \"charge.success\",\n  \"data\": {\n    \"reference\": \"PAYMENT_REFERENCE\",\n    \"amount\": 1000000,\n    \"status\": \"success\"\n  }\n}"
+              "raw": "{\n  \"event\": \"charge.success\",\n  \"data\": {\n    \"reference\": \"{{paymentReference}}\",\n    \"amount\": 3500000,\n    \"status\": \"success\",\n    \"gateway_response\": \"Successful\",\n    \"paid_at\": \"2025-01-30T10:30:00.000Z\",\n    \"channel\": \"card\",\n    \"currency\": \"NGN\",\n    \"customer\": {\n      \"email\": \"user@showpass.com\"\n    }\n  }\n}"
             },
             "url": {
               "raw": "{{baseUrl}}/payments/webhook",
@@ -931,10 +2486,49 @@
       ]
     },
     {
-      "name": "Refunds",
+      "name": "Refund Management",
       "item": [
         {
-          "name": "Request Refund",
+          "name": "Request Refund for Paid Event",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200 || pm.response.code === 201) {",
+                  "    const response = pm.response.json();",
+                  "    console.log('✅ Refund request submitted successfully');",
+                  "    console.log('\\n💰 Refund Request Details:');",
+                  "    console.log('- Request ID:', response.data._id);",
+                  "    console.log('- Booking ID:', response.data.booking);",
+                  "    console.log('- Original Amount: ₦' + response.data.originalAmount);",
+                  "    console.log('- Processing Fee: ₦' + response.data.processingFee);",
+                  "    console.log('- Refund Amount: ₦' + response.data.refundAmount);",
+                  "    console.log('- Status:', response.data.status);",
+                  "    console.log('- Priority:', response.data.priority);",
+                  "    console.log('- Reason:', response.data.reason);",
+                  "    console.log('- Requested At:', new Date(response.data.createdAt).toLocaleString());",
+                  "    ",
+                  "    console.log('\\n⏱️ Processing Timeline:');",
+                  "    if (response.data.priority === 'high') {",
+                  "        console.log('- High Priority: 1-2 business days');",
+                  "    } else if (response.data.priority === 'medium') {",
+                  "        console.log('- Medium Priority: 3-5 business days');",
+                  "    } else {",
+                  "        console.log('- Normal Priority: 5-7 business days');",
+                  "    }",
+                  "    ",
+                  "    console.log('\\n📧 Notifications:');",
+                  "    console.log('- ✅ Refund request confirmation sent');",
+                  "    console.log('- ✅ Admin notified for processing');",
+                  "} else {",
+                  "    console.log('❌ Refund request failed');",
+                  "    console.log('Response:', pm.response.text());",
+                  "}"
+                ]
+              }
+            }
+          ],
           "request": {
             "auth": {
               "type": "bearer",
@@ -955,7 +2549,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"bookingId\": \"{{bookingId}}\",\n  \"reason\": \"Event cancelled by organizer\"\n}"
+              "raw": "{\n  \"bookingId\": \"{{paidBookingId}}\",\n  \"reason\": \"Unable to attend due to personal emergency. I have a medical situation that prevents me from traveling to the event location. Please process my refund at your earliest convenience.\"\n}"
             },
             "url": {
               "raw": "{{baseUrl}}/refunds",
@@ -965,7 +2559,68 @@
           }
         },
         {
-          "name": "Get User Refunds",
+          "name": "Get User Refund Requests",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    console.log('✅ User refund requests retrieved successfully');",
+                  "    console.log('\\n💰 Refund History Summary:');",
+                  "    console.log('- Total Refund Requests:', response.data.length);",
+                  "    ",
+                  "    let pending = 0, approved = 0, rejected = 0, processed = 0;",
+                  "    let totalRequested = 0, totalApproved = 0;",
+                  "    ",
+                  "    response.data.forEach((refund, index) => {",
+                  "        console.log(`\\n💸 Refund ${index + 1}:`);",
+                  "        console.log('- Request ID:', refund._id);",
+                  "        console.log('- Event:', refund.booking?.event?.title || 'Event details not available');",
+                  "        console.log('- Original Amount: ₦' + refund.originalAmount);",
+                  "        console.log('- Processing Fee: ₦' + refund.processingFee);",
+                  "        console.log('- Refund Amount: ₦' + refund.refundAmount);",
+                  "        console.log('- Status:', refund.status);",
+                  "        console.log('- Priority:', refund.priority);",
+                  "        console.log('- Requested:', new Date(refund.createdAt).toLocaleDateString());",
+                  "        ",
+                  "        if (refund.processedAt) {",
+                  "            console.log('- Processed:', new Date(refund.processedAt).toLocaleDateString());",
+                  "        }",
+                  "        ",
+                  "        if (refund.adminComments) {",
+                  "            console.log('- Admin Comments:', refund.adminComments);",
+                  "        }",
+                  "        ",
+                  "        // Count statistics",
+                  "        switch(refund.status) {",
+                  "            case 'pending': pending++; break;",
+                  "            case 'approved': approved++; break;",
+                  "            case 'rejected': rejected++; break;",
+                  "            case 'processed': processed++; break;",
+                  "        }",
+                  "        ",
+                  "        totalRequested += refund.refundAmount;",
+                  "        if (refund.status === 'approved' || refund.status === 'processed') {",
+                  "            totalApproved += refund.refundAmount;",
+                  "        }",
+                  "    });",
+                  "    ",
+                  "    console.log('\\n📊 Refund Statistics:');",
+                  "    console.log('- Pending:', pending);",
+                  "    console.log('- Approved:', approved);",
+                  "    console.log('- Processed:', processed);",
+                  "    console.log('- Rejected:', rejected);",
+                  "    console.log('- Total Requested: ₦' + totalRequested.toLocaleString());",
+                  "    console.log('- Total Approved: ₦' + totalApproved.toLocaleString());",
+                  "} else {",
+                  "    console.log('❌ Failed to retrieve refund requests');",
+                  "}"
+                ]
+              }
+            }
+          ],
           "request": {
             "auth": {
               "type": "bearer",
@@ -987,6 +2642,79 @@
         },
         {
           "name": "Get All Refunds (Admin)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    console.log('✅ All refund requests retrieved successfully');",
+                  "    console.log('\\n💰 Admin Refund Management Dashboard:');",
+                  "    console.log('- Total Refund Requests:', response.data.length);",
+                  "    console.log('- Page:', response.meta?.pagination?.page || 1);",
+                  "    console.log('- Total in System:', response.meta?.pagination?.total || 0);",
+                  "    ",
+                  "    let pending = 0, approved = 0, rejected = 0, processed = 0;",
+                  "    let highPriority = 0, mediumPriority = 0, lowPriority = 0;",
+                  "    let totalRefundAmount = 0;",
+                  "    ",
+                  "    response.data.forEach((refund, index) => {",
+                  "        console.log(`\\n💸 Refund Request ${index + 1}:`);",
+                  "        console.log('- Request ID:', refund._id);",
+                  "        console.log('- User:', refund.user?.firstName + ' ' + refund.user?.lastName);",
+                  "        console.log('- User Email:', refund.user?.email);",
+                  "        console.log('- Event:', refund.booking?.event?.title || 'N/A');",
+                  "        console.log('- Booking ID:', refund.booking?._id);",
+                  "        console.log('- Original Amount: ₦' + refund.originalAmount);",
+                  "        console.log('- Refund Amount: ₦' + refund.refundAmount);",
+                  "        console.log('- Status:', refund.status);",
+                  "        console.log('- Priority:', refund.priority);",
+                  "        console.log('- Reason:', refund.reason);",
+                  "        console.log('- Requested:', new Date(refund.createdAt).toLocaleDateString());",
+                  "        ",
+                  "        if (refund.processedBy) {",
+                  "            console.log('- Processed By:', refund.processedBy.firstName + ' ' + refund.processedBy.lastName);",
+                  "        }",
+                  "        ",
+                  "        // Count statistics",
+                  "        switch(refund.status) {",
+                  "            case 'pending': pending++; break;",
+                  "            case 'approved': approved++; break;",
+                  "            case 'rejected': rejected++; break;",
+                  "            case 'processed': processed++; break;",
+                  "        }",
+                  "        ",
+                  "        switch(refund.priority) {",
+                  "            case 'high': highPriority++; break;",
+                  "            case 'medium': mediumPriority++; break;",
+                  "            case 'low': lowPriority++; break;",
+                  "        }",
+                  "        ",
+                  "        totalRefundAmount += refund.refundAmount;",
+                  "    });",
+                  "    ",
+                  "    console.log('\\n📊 Admin Refund Statistics:');",
+                  "    console.log('- Pending Review:', pending);",
+                  "    console.log('- Approved:', approved);",
+                  "    console.log('- Processed:', processed);",
+                  "    console.log('- Rejected:', rejected);",
+                  "    ",
+                  "    console.log('\\n⚡ Priority Distribution:');",
+                  "    console.log('- High Priority:', highPriority);",
+                  "    console.log('- Medium Priority:', mediumPriority);",
+                  "    console.log('- Low Priority:', lowPriority);",
+                  "    ",
+                  "    console.log('\\n💰 Financial Impact:');",
+                  "    console.log('- Total Refund Amount: ₦' + totalRefundAmount.toLocaleString());",
+                  "} else {",
+                  "    console.log('❌ Failed to retrieve refund requests');",
+                  "    console.log('Make sure you are logged in as an admin');",
+                  "}"
+                ]
+              }
+            }
+          ],
           "request": {
             "auth": {
               "type": "bearer",
@@ -1000,14 +2728,66 @@
             },
             "method": "GET",
             "url": {
-              "raw": "{{baseUrl}}/admin/refunds",
+              "raw": "{{baseUrl}}/admin/refunds?page=1&limit=20",
               "host": ["{{baseUrl}}"],
-              "path": ["admin", "refunds"]
+              "path": ["admin", "refunds"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                },
+                {
+                  "key": "status",
+                  "value": "",
+                  "description": "Filter by status: pending, approved, rejected, processed",
+                  "disabled": true
+                },
+                {
+                  "key": "priority",
+                  "value": "",
+                  "description": "Filter by priority: high, medium, low",
+                  "disabled": true
+                }
+              ]
             }
           }
         },
         {
-          "name": "Process Refund (Admin)",
+          "name": "Approve Refund (Admin)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    console.log('✅ Refund approved successfully');",
+                  "    console.log('\\n💰 Refund Approval Details:');",
+                  "    console.log('- Refund ID:', response.data._id || 'N/A');",
+                  "    console.log('- User:', response.data.user?.firstName + ' ' + response.data.user?.lastName);",
+                  "    console.log('- Refund Amount: ₦' + response.data.refundAmount);",
+                  "    console.log('- New Status:', response.data.status);",
+                  "    console.log('- Approved By:', 'Current Admin');",
+                  "    console.log('- Approval Time:', new Date().toLocaleString());",
+                  "    console.log('- Admin Comments:', response.data.adminComments || 'Refund approved');",
+                  "    ",
+                  "    console.log('\\n📋 Next Steps:');",
+                  "    console.log('- ✅ User notified of approval');",
+                  "    console.log('- ⏳ Refund will be processed within 3-5 business days');",
+                  "    console.log('- 💳 Amount will be credited to original payment method');",
+                  "    console.log('- 📧 User will receive confirmation once processed');",
+                  "} else {",
+                  "    console.log('❌ Refund approval failed');",
+                  "    console.log('Response:', pm.response.text());",
+                  "}"
+                ]
+              }
+            }
+          ],
           "request": {
             "auth": {
               "type": "bearer",
@@ -1028,14 +2808,476 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"approved\": true,\n  \"comments\": \"Refund approved due to event cancellation\"\n}"
+              "raw": "{\n  \"approved\": true,\n  \"comments\": \"Refund approved due to legitimate personal emergency. Medical documentation provided supports the request. Refund will be processed within 3-5 business days to the original payment method.\"\n}"
             },
             "url": {
               "raw": "{{baseUrl}}/admin/refunds/REFUND_ID/process",
               "host": ["{{baseUrl}}"],
-              "path": ["admin", "refunds", "REFUND_ID", "process"]
+              "path": ["admin", "refunds", "REFUND_ID", "process"],
+              "variable": [
+                {
+                  "key": "REFUND_ID",
+                  "value": "{{refundId}}",
+                  "description": "Replace with actual refund ID from previous requests"
+                }
+              ]
             }
           }
+        },
+        {
+          "name": "Reject Refund (Admin)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    console.log('✅ Refund rejected successfully');",
+                  "    console.log('\\n❌ Refund Rejection Details:');",
+                  "    console.log('- Refund ID:', response.data._id || 'N/A');",
+                  "    console.log('- User:', response.data.user?.firstName + ' ' + response.data.user?.lastName);",
+                  "    console.log('- Requested Amount: ₦' + response.data.refundAmount);",
+                  "    console.log('- New Status:', response.data.status);",
+                  "    console.log('- Rejected By:', 'Current Admin');",
+                  "    console.log('- Rejection Time:', new Date().toLocaleString());",
+                  "    console.log('- Rejection Reason:', response.data.adminComments || 'See rejection details');",
+                  "    ",
+                  "    console.log('\\n📧 Notifications:');",
+                  "    console.log('- ✅ User notified of rejection with detailed reason');",
+                  "    console.log('- ✅ User can appeal decision if circumstances change');",
+                  "} else {",
+                  "    console.log('❌ Refund rejection failed');",
+                  "    console.log('Response:', pm.response.text());",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{authToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"approved\": false,\n  \"comments\": \"Refund request does not meet our refund policy criteria. The event is less than 24 hours away and our terms clearly state that refunds are not available within this timeframe unless due to event cancellation by the organizer. Please review our refund policy for future reference.\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/admin/refunds/REFUND_ID/process",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "refunds", "REFUND_ID", "process"],
+              "variable": [
+                {
+                  "key": "REFUND_ID",
+                  "value": "{{refundId}}",
+                  "description": "Replace with actual refund ID from previous requests"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Complete Workflow Examples",
+      "item": [
+        {
+          "name": "🔄 Free Event Complete Workflow",
+          "item": [
+            {
+              "name": "Step 1: Login as Organizer",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"email\": \"louisdiaz43@gmail.com\",\n  \"password\": \"Balikiss12\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/auth/login",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["auth", "login"]
+                }
+              }
+            },
+            {
+              "name": "Step 2: Create Free Event",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{authToken}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"title\": \"Free Community Workshop: Web Development Basics\",\n  \"description\": \"Join us for a hands-on workshop covering HTML, CSS, and JavaScript fundamentals. Perfect for beginners!\",\n  \"category\": \"Technology\",\n  \"venue\": {\n    \"name\": \"Tech Hub Lagos\",\n    \"address\": \"123 Tech Street, Victoria Island\",\n    \"city\": \"Lagos\",\n    \"state\": \"Lagos\"\n  },\n  \"startDate\": \"2025-03-10T14:00:00.000Z\",\n  \"endDate\": \"2025-03-10T17:00:00.000Z\",\n  \"startTime\": \"14:00\",\n  \"endTime\": \"17:00\",\n  \"ticketTypes\": [\n    {\n      \"name\": \"Free\",\n      \"price\": 0,\n      \"quantity\": 50,\n      \"description\": \"Free workshop attendance\",\n      \"isFree\": true\n    }\n  ],\n  \"maxAttendees\": 50,\n  \"tags\": [\"free\", \"workshop\", \"web development\", \"beginners\"]\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/events",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["events"]
+                }
+              }
+            },
+            {
+              "name": "Step 3: Login as Admin to Approve",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"email\": \"mustapha.muhammed@bowen.edu.ng\",\n  \"password\": \"Balikiss12\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/auth/login",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["auth", "login"]
+                }
+              }
+            },
+            {
+              "name": "Step 4: Approve Free Event",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{authToken}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"approved\": true,\n  \"comments\": \"Great free community event! Approved for publication.\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/admin/events/{{freeEventId}}/review",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["admin", "events", "{{freeEventId}}", "review"]
+                }
+              }
+            },
+            {
+              "name": "Step 5: Login as User to Register",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"email\": \"muhammedabiodun42@gmail.com\",\n  \"password\": \"Balikiss12\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/auth/login",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["auth", "login"]
+                }
+              }
+            },
+            {
+              "name": "Step 6: Register for Free Event",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{authToken}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"eventId\": \"{{freeEventId}}\",\n  \"ticketType\": \"Free\",\n  \"quantity\": 1\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/bookings/free-event",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["bookings", "free-event"]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "💰 Paid Event Complete Workflow",
+          "item": [
+            {
+              "name": "Step 1: Login as Organizer",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"email\": \"louisdiaz43@gmail.com\",\n  \"password\": \"Balikiss12\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/auth/login",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["auth", "login"]
+                }
+              }
+            },
+            {
+              "name": "Step 2: Create Paid Event",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{authToken}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"title\": \"Professional Business Conference 2025\",\n  \"description\": \"Premium business conference featuring industry leaders, networking opportunities, and professional development sessions.\",\n  \"category\": \"Business\",\n  \"venue\": {\n    \"name\": \"Lagos Business Center\",\n    \"address\": \"456 Business Avenue, Victoria Island\",\n    \"city\": \"Lagos\",\n    \"state\": \"Lagos\"\n  },\n  \"startDate\": \"2025-04-15T09:00:00.000Z\",\n  \"endDate\": \"2025-04-15T17:00:00.000Z\",\n  \"startTime\": \"09:00\",\n  \"endTime\": \"17:00\",\n  \"ticketTypes\": [\n    {\n      \"name\": \"Regular\",\n      \"price\": 50000,\n      \"quantity\": 100,\n      \"description\": \"Standard conference access\",\n      \"isFree\": false\n    },\n    {\n      \"name\": \"VIP\",\n      \"price\": 100000,\n      \"quantity\": 20,\n      \"description\": \"VIP access with networking dinner\",\n      \"isFree\": false\n    }\n  ],\n  \"maxAttendees\": 120,\n  \"tags\": [\"business\", \"networking\", \"professional\"]\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/events",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["events"]
+                }
+              }
+            },
+            {
+              "name": "Step 3: Login as Admin",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"email\": \"mustapha.muhammed@bowen.edu.ng\",\n  \"password\": \"Balikiss12\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/auth/login",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["auth", "login"]
+                }
+              }
+            },
+            {
+              "name": "Step 4: Approve Paid Event",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{authToken}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"approved\": true,\n  \"comments\": \"Excellent business conference with great speaker lineup. Approved!\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/admin/events/{{paidEventId}}/review",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["admin", "events", "{{paidEventId}}", "review"]
+                }
+              }
+            },
+            {
+              "name": "Step 5: Login as User",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"email\": \"muhammedabiodun42@gmail.com\",\n  \"password\": \"Balikiss12\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/auth/login",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["auth", "login"]
+                }
+              }
+            },
+            {
+              "name": "Step 6: Create Booking for Paid Event",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{authToken}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"eventId\": \"{{paidEventId}}\",\n  \"ticketType\": \"Regular\",\n  \"quantity\": 1,\n  \"attendeeInfo\": {\n    \"name\": \"John Business\",\n    \"email\": \"john.business@example.com\",\n    \"phone\": \"+2348123456789\"\n  }\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/bookings",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["bookings"]
+                }
+              }
+            },
+            {
+              "name": "Step 7: Initialize Payment",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{authToken}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"bookingId\": \"{{paidBookingId}}\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/payments/initialize",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["payments", "initialize"]
+                }
+              }
+            },
+            {
+              "name": "Step 8: Verify Payment",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{authToken}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"reference\": \"{{paymentReference}}\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/payments/verify",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["payments", "verify"]
+                }
+              }
+            }
+          ]
         }
       ]
     }

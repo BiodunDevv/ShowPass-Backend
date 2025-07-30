@@ -12,6 +12,7 @@ const {
   sendEventUpdateNotification,
   sendEventApprovalNotification,
   sendOrganizerApprovalNotification,
+  sendOrganizerWarningNotification,
 } = require("../utils/emailService");
 
 // Get dashboard statistics
@@ -83,7 +84,7 @@ const getDashboardStats = async (req, res) => {
     // Recent activities
     const recentBookings = await Booking.find()
       .populate("user", "firstName lastName")
-      .populate("event", "title")
+      .populate("event", "title startDate")
       .sort({ createdAt: -1 })
       .limit(10);
 
@@ -849,6 +850,259 @@ const sendSystemNotification = async (req, res) => {
   }
 };
 
+// Send warning to organizer for event that doesn't meet business standards
+const warnOrganizer = async (req, res) => {
+  try {
+    const { id } = req.params; // Event ID
+    const { reason, severity = "minor", autoDeleteAfterDays } = req.body;
+
+    if (!reason) {
+      return sendError(res, 400, "Warning reason is required");
+    }
+
+    const event = await Event.findById(id).populate(
+      "organizer",
+      "firstName lastName email"
+    );
+
+    if (!event) {
+      return sendError(res, 404, "Event not found");
+    }
+
+    // Create warning object
+    const warning = {
+      adminId: req.user._id,
+      reason,
+      issuedAt: new Date(),
+      severity,
+    };
+
+    // Add warning to event
+    event.warnings.push(warning);
+    event.warningCount = event.warnings.length;
+
+    // Flag for deletion if specified
+    if (autoDeleteAfterDays && autoDeleteAfterDays > 0) {
+      event.flaggedForDeletion = true;
+      event.flaggedBy = req.user._id;
+      event.deletionDeadline = new Date(
+        Date.now() + autoDeleteAfterDays * 24 * 60 * 60 * 1000
+      );
+    }
+
+    await event.save();
+
+    // Send warning notification to organizer
+    try {
+      await sendOrganizerWarningNotification(event.organizer, event, {
+        reason,
+        severity,
+        autoDeleteAfterDays,
+        warningCount: event.warningCount,
+        adminName: `${req.user.firstName} ${req.user.lastName}`,
+      });
+      console.log(
+        `📧 Warning notification sent to organizer: ${event.organizer.email}`
+      );
+    } catch (emailError) {
+      console.error("Failed to send warning notification:", emailError);
+    }
+
+    sendSuccess(
+      res,
+      `Warning sent to organizer successfully. ${
+        autoDeleteAfterDays
+          ? `Event will be auto-deleted in ${autoDeleteAfterDays} days if not corrected.`
+          : ""
+      }`,
+      {
+        eventId: event._id,
+        eventTitle: event.title,
+        organizer: {
+          name: `${event.organizer.firstName} ${event.organizer.lastName}`,
+          email: event.organizer.email,
+        },
+        warning: {
+          reason,
+          severity,
+          warningCount: event.warningCount,
+          flaggedForDeletion: event.flaggedForDeletion,
+          deletionDeadline: event.deletionDeadline,
+        },
+      }
+    );
+  } catch (error) {
+    console.error("Warn organizer error:", error);
+    sendError(res, 500, "Failed to send warning", error.message);
+  }
+};
+
+// Get events flagged for deletion
+const getFlaggedEvents = async (req, res) => {
+  try {
+    const { page, limit, skip } = getPagination(req);
+
+    const events = await Event.find({ flaggedForDeletion: true })
+      .populate("organizer", "firstName lastName email")
+      .populate("flaggedBy", "firstName lastName")
+      .sort({ deletionDeadline: 1 }) // Sort by deadline (closest first)
+      .skip(skip)
+      .limit(limit);
+
+    const total = await Event.countDocuments({ flaggedForDeletion: true });
+
+    // Calculate time remaining for each event
+    const eventsWithTimeRemaining = events.map((event) => {
+      const timeRemaining = event.deletionDeadline - new Date();
+      const daysRemaining = Math.max(
+        0,
+        Math.ceil(timeRemaining / (24 * 60 * 60 * 1000))
+      );
+
+      return {
+        ...event.toObject(),
+        daysRemaining,
+        overdue: timeRemaining <= 0,
+      };
+    });
+
+    sendSuccess(
+      res,
+      "Flagged events retrieved successfully",
+      eventsWithTimeRemaining,
+      {
+        pagination: {
+          page,
+          limit,
+          total,
+          pages: Math.ceil(total / limit),
+        },
+      }
+    );
+  } catch (error) {
+    console.error("Get flagged events error:", error);
+    sendError(res, 500, "Failed to retrieve flagged events", error.message);
+  }
+};
+
+// Auto-delete overdue flagged events
+const autoDeleteOverdueEvents = async (req, res) => {
+  try {
+    const overdueEvents = await Event.find({
+      flaggedForDeletion: true,
+      deletionDeadline: { $lte: new Date() },
+    }).populate("organizer", "firstName lastName email");
+
+    const deletedEvents = [];
+
+    for (const event of overdueEvents) {
+      try {
+        // Cancel associated bookings first
+        const bookings = await Booking.find({ event: event._id });
+        for (const booking of bookings) {
+          booking.status = "cancelled";
+          await booking.save();
+        }
+
+        // Store event info before deletion
+        deletedEvents.push({
+          id: event._id,
+          title: event.title,
+          organizer: event.organizer,
+          deletionDate: new Date(),
+        });
+
+        // Delete the event
+        await Event.findByIdAndDelete(event._id);
+
+        console.log(`🗑️ Auto-deleted overdue event: ${event.title}`);
+      } catch (deleteError) {
+        console.error(`Failed to delete event ${event.title}:`, deleteError);
+      }
+    }
+
+    sendSuccess(
+      res,
+      `${deletedEvents.length} overdue events have been automatically deleted`,
+      {
+        deletedEventsCount: deletedEvents.length,
+        deletedEvents: deletedEvents.map((e) => ({
+          title: e.title,
+          organizer: `${e.organizer.firstName} ${e.organizer.lastName}`,
+        })),
+      }
+    );
+  } catch (error) {
+    console.error("Auto delete overdue events error:", error);
+    sendError(res, 500, "Failed to auto-delete overdue events", error.message);
+  }
+};
+
+// Remove flag from event (unflag)
+const unflagEvent = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const event = await Event.findById(id);
+    if (!event) {
+      return sendError(res, 404, "Event not found");
+    }
+
+    event.flaggedForDeletion = false;
+    event.flaggedBy = null;
+    event.deletionDeadline = null;
+    await event.save();
+
+    sendSuccess(res, "Event unflagged successfully", {
+      eventId: event._id,
+      title: event.title,
+      flaggedForDeletion: event.flaggedForDeletion,
+    });
+  } catch (error) {
+    console.error("Unflag event error:", error);
+    sendError(res, 500, "Failed to unflag event", error.message);
+  }
+};
+
+// Get event warnings history
+const getEventWarnings = async (req, res) => {
+  try {
+    const { id } = req.params; // Event ID
+
+    const event = await Event.findById(id)
+      .populate("warnings.adminId", "firstName lastName")
+      .populate("organizer", "firstName lastName email");
+
+    if (!event) {
+      return sendError(res, 404, "Event not found");
+    }
+
+    sendSuccess(res, "Event warnings retrieved successfully", {
+      eventId: event._id,
+      eventTitle: event.title,
+      organizer: {
+        name: `${event.organizer.firstName} ${event.organizer.lastName}`,
+        email: event.organizer.email,
+      },
+      warningCount: event.warningCount,
+      flaggedForDeletion: event.flaggedForDeletion,
+      deletionDeadline: event.deletionDeadline,
+      warnings: event.warnings.map((warning) => ({
+        id: warning._id,
+        reason: warning.reason,
+        severity: warning.severity,
+        issuedAt: warning.issuedAt,
+        issuedBy: warning.adminId
+          ? `${warning.adminId.firstName} ${warning.adminId.lastName}`
+          : "Unknown Admin",
+      })),
+    });
+  } catch (error) {
+    console.error("Get event warnings error:", error);
+    sendError(res, 500, "Failed to retrieve event warnings", error.message);
+  }
+};
+
 module.exports = {
   getDashboardStats,
   getAllUsers,
@@ -861,4 +1115,9 @@ module.exports = {
   getAllBookings,
   getAnalytics,
   sendSystemNotification,
+  warnOrganizer,
+  getFlaggedEvents,
+  autoDeleteOverdueEvents,
+  unflagEvent,
+  getEventWarnings,
 };

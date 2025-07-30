@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>New Event Available - ShowPass</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        line-height: 1.6;
+        margin: 0;
+        padding: 0;
+        background-color: #f4f4f4;
+      }
+      .container {
+        max-width: 100%;
+        margin: 0 auto;
+        background-color: white;
+      }
+      .header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 20px;
+        text-align: center;
+        border-radius: 10px 10px 0 0;
+      }
+      .content {
+        padding: 10px;
+      }
+      .event-details {
+        background-color: #f8f9fa;
+        padding: 20px;
+        border-radius: 10px;
+        margin: 20px 0;
+      }
+      .cta-button {
+        text-align: center;
+        margin: 20px 0;
+      }
+      .btn {
+        display: inline-block;
+        padding: 12px 30px;
+        background-color: #28a745;
+        color: white;
+        text-decoration: none;
+        border-radius: 5px;
+        font-weight: bold;
+      }
+      .footer {
+        text-align: center;
+        padding: 20px;
+        color: #666;
+        font-size: 12px;
+      }
+      .logo {
+        font-size: 24px;
+        font-weight: bold;
+      }
+      .free-badge {
+        background-color: #28a745;
+        color: white;
+        padding: 3px 8px;
+        border-radius: 12px;
+        font-size: 11px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <div class="logo">🎟️ ShowPass</div>
+        <h2>New Event Available!</h2>
+      </div>
+      <div class="content">
+        <h3>Hello! 🎉</h3>
+        <p>
+          Exciting news! A new event has been approved and is now available
+          {{registrationType}}.
+        </p>
+
+        <div class="event-details">
+          <h4>📅 {{eventTitle}} {{freeBadge}}</h4>
+          <p><strong>Organized by:</strong> {{organizerName}}</p>
+          <p><strong>Category:</strong> {{category}}</p>
+          <p><strong>Date:</strong> {{eventDate}}</p>
+          <p><strong>Time:</strong> {{startTime}} - {{endTime}}</p>
+          <p><strong>Venue:</strong> {{venueName}}, {{venueCity}}</p>
+
+          <p><strong>Description:</strong></p>
+          <p>{{description}}</p>
+
+          {{ticketPricesSection}}
+        </div>
+
+        <div class="cta-button">
+          <a href="{{eventURL}}" class="btn"> {{ctaButtonText}} </a>
+        </div>
+
+        <p>Don't miss out on this amazing event!</p>
+      </div>
+      <div class="footer">
+        <p>© 2024 ShowPass. All rights reserved.</p>
+        <p>
+          Want to stop receiving these notifications?
+          <a href="{{notificationPreferencesURL}}">Update your preferences</a>
+        </p>
+      </div>
+    </div>
+  </body>
+</html>

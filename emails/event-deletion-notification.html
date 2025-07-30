@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Event Removal Notice - ShowPass</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        line-height: 1.6;
+        margin: 0;
+        padding: 0;
+        background-color: #f4f4f4;
+      }
+      .container {
+        max-width: 100%;
+        margin: 0 auto;
+        background-color: white;
+      }
+      .header {
+        background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+        color: white;
+        padding: 20px;
+        text-align: center;
+        border-radius: 10px 10px 0 0;
+      }
+      .content {
+        padding: 10px;
+      }
+      .deletion-notice {
+        background-color: #f8d7da;
+        border: 2px solid #dc3545;
+        padding: 20px;
+        border-radius: 10px;
+        margin: 20px 0;
+      }
+      .event-details {
+        background-color: #f8f9fa;
+        padding: 15px;
+        border-radius: 8px;
+        margin: 15px 0;
+      }
+      .footer {
+        text-align: center;
+        padding: 20px;
+        color: #666;
+        font-size: 12px;
+      }
+      .logo {
+        font-size: 24px;
+        font-weight: bold;
+      }
+      .support-info {
+        background-color: #d1ecf1;
+        border: 1px solid #bee5eb;
+        padding: 15px;
+        border-radius: 8px;
+        margin: 15px 0;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <div class="logo">🚫 ShowPass</div>
+        <h2>Event Removal Notice</h2>
+      </div>
+      <div class="content">
+        <h3>Hello {{firstName}},</h3>
+        <p>
+          We regret to inform you that your event has been removed from
+          ShowPass.
+        </p>
+
+        <div class="event-details">
+          <h4>📅 Removed Event</h4>
+          <p><strong>Event Title:</strong> {{eventTitle}}</p>
+          <p><strong>Event ID:</strong> {{eventId}}</p>
+          <p><strong>Removal Date:</strong> {{removalDate}}</p>
+        </div>
+
+        <div class="deletion-notice">
+          <h4>🚫 Removal Reason</h4>
+          <p>{{reason}}</p>
+        </div>
+
+        <div class="support-info">
+          <h4>📞 Need Help?</h4>
+          <p>
+            If you have questions about this removal or would like to appeal
+            this decision, please contact our support team.
+          </p>
+          <p><strong>Support Email:</strong> {{supportEmail}}</p>
+          <p>Include your event ID and organizer email in your inquiry.</p>
+        </div>
+
+        <p>
+          We appreciate your understanding and encourage you to review our event
+          guidelines for future submissions.
+        </p>
+      </div>
+      <div class="footer">
+        <p>© 2024 ShowPass. All rights reserved.</p>
+        <p>
+          This is an automated notification. Please contact support for
+          assistance.
+        </p>
+      </div>
+    </div>
+  </body>
+</html>

@@ -61,6 +61,26 @@ router.put(
 );
 
 // Event Management
+// @route   GET /api/admin/events/flagged
+// @desc    Get events flagged for deletion
+// @access  Private (Admin)
+router.get(
+  "/events/flagged",
+  requireAuth,
+  isAdmin,
+  adminController.getFlaggedEvents
+);
+
+// @route   POST /api/admin/events/auto-delete
+// @desc    Auto-delete overdue flagged events
+// @access  Private (Admin)
+router.post(
+  "/events/auto-delete",
+  requireAuth,
+  isAdmin,
+  adminController.autoDeleteOverdueEvents
+);
+
 // @route   GET /api/admin/events
 // @desc    Get all events (admin view)
 // @access  Private (Admin)
@@ -91,6 +111,50 @@ router.put(
   "/events/:id/toggle-featured",
   [validateObjectId(param("id")), requireAuth, isAdmin],
   adminController.toggleEventFeatured
+);
+
+// Event Warning System
+// @route   POST /api/admin/events/:id/warn
+// @desc    Send warning to organizer for event that doesn't meet standards
+// @access  Private (Admin)
+router.post(
+  "/events/:id/warn",
+  [
+    validateObjectId(param("id")),
+    requireAuth,
+    isAdmin,
+    body("reason")
+      .notEmpty()
+      .isLength({ min: 10, max: 1000 })
+      .withMessage("Warning reason is required and must be 10-1000 characters"),
+    body("severity")
+      .optional()
+      .isIn(["minor", "major", "critical"])
+      .withMessage("Invalid severity level"),
+    body("autoDeleteAfterDays")
+      .optional()
+      .isInt({ min: 1, max: 30 })
+      .withMessage("Auto-delete days must be between 1-30"),
+  ],
+  adminController.warnOrganizer
+);
+
+// @route   PUT /api/admin/events/:id/unflag
+// @desc    Remove deletion flag from event
+// @access  Private (Admin)
+router.put(
+  "/events/:id/unflag",
+  [validateObjectId(param("id")), requireAuth, isAdmin],
+  adminController.unflagEvent
+);
+
+// @route   GET /api/admin/events/:id/warnings
+// @desc    Get event warnings history
+// @access  Private (Admin)
+router.get(
+  "/events/:id/warnings",
+  [validateObjectId(param("id")), requireAuth, isAdmin],
+  adminController.getEventWarnings
 );
 
 // Booking Management

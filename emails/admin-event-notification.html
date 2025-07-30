@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>New Event Review - ShowPass Admin</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        line-height: 1.6;
+        margin: 0;
+        padding: 0;
+        background-color: #f4f4f4;
+      }
+      .container {
+        max-width: 100%;
+        margin: 0 auto;
+        background-color: white;
+      }
+      .header {
+        background: linear-gradient(135deg, #dc3545 0%, #bd2130 100%);
+        color: white;
+        padding: 20px;
+        text-align: center;
+        border-radius: 10px 10px 0 0;
+      }
+      .content {
+        padding: 10px;
+      }
+      .event-details {
+        background-color: #f8f9fa;
+        padding: 20px;
+        border-radius: 10px;
+        margin: 20px 0;
+      }
+      .action-buttons {
+        text-align: center;
+        margin: 20px 0;
+      }
+      .btn {
+        display: inline-block;
+        padding: 10px 20px;
+        margin: 0 10px;
+        border-radius: 5px;
+        text-decoration: none;
+        font-weight: bold;
+      }
+      .btn-approve {
+        background-color: #28a745;
+        color: white;
+      }
+      .btn-review {
+        background-color: #007bff;
+        color: white;
+      }
+      .footer {
+        text-align: center;
+        padding: 20px;
+        color: #666;
+        font-size: 12px;
+      }
+      .logo {
+        font-size: 24px;
+        font-weight: bold;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <div class="logo">👑 ShowPass Admin</div>
+        <h2>New Event Requires Review</h2>
+      </div>
+      <div class="content">
+        <h3>Hello Admin! 📋</h3>
+        <p>
+          A new event has been submitted and requires your review for approval.
+        </p>
+
+        <div class="event-details">
+          <h4>📅 Event Information</h4>
+          <p><strong>Event Title:</strong> {{eventTitle}}</p>
+          <p>
+            <strong>Organizer:</strong> {{organizerName}} ({{organizerEmail}})
+          </p>
+          <p><strong>Category:</strong> {{category}}</p>
+          <p><strong>Date:</strong> {{eventDate}}</p>
+          <p><strong>Time:</strong> {{startTime}} - {{endTime}}</p>
+          <p><strong>Venue:</strong> {{venueName}}, {{venueCity}}</p>
+          <p><strong>Event Type:</strong> {{eventType}}</p>
+
+          <h4>📝 Description</h4>
+          <p>{{description}}</p>
+
+          <h4>🎟️ Ticket Information</h4>
+          {{ticketInfo}}
+        </div>
+
+        <div class="action-buttons">
+          <a href="{{reviewURL}}" class="btn btn-review">Review Event</a>
+        </div>
+
+        <p>
+          Please review this event and take appropriate action from your admin
+          dashboard.
+        </p>
+      </div>
+      <div class="footer">
+        <p>© 2024 ShowPass Admin Panel. All rights reserved.</p>
+      </div>
+    </div>
+  </body>
+</html>
