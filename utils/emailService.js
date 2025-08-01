@@ -66,7 +66,7 @@ const sendEmail = async (to, subject, templateName, templateData = {}) => {
 
 // Send email verification
 const sendVerificationEmail = async (user, verificationToken) => {
-  const verificationURL = `${process.env.BASE_URL}/api/auth/verify-email?token=${verificationToken}`;
+  const verificationURL = `${process.env.BASE_URL}/auth/verify?token=${verificationToken}`;
 
   const template = loadTemplate("email-verification");
   const templateData = {
