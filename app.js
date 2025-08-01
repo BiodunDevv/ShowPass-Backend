@@ -10,6 +10,9 @@ const bookingRoutes = require("./routes/bookingRoutes");
 const paymentRoutes = require("./routes/paymentRoutes");
 const adminRoutes = require("./routes/adminRoutes");
 const refundRoutes = require("./routes/refundRoutes");
+const userDetailsRoutes = require("./routes/userDetailsRoutes");
+const articleRoutes = require("./routes/articleRoutes");
+const messagingRoutes = require("./routes/messagingRoutes");
 
 const app = express();
 
@@ -31,6 +34,9 @@ app.get("/", (req, res) => {
       payments: "/api/payment",
       admin: "/api/admin",
       refunds: "/api/refund",
+      userDetails: "/api/user-details",
+      articles: "/api/articles",
+      messaging: "/api/messaging",
     },
   });
 });
@@ -42,6 +48,9 @@ app.use("/api/booking", bookingRoutes);
 app.use("/api/payment", paymentRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/refund", refundRoutes);
+app.use("/api/user-details", userDetailsRoutes);
+app.use("/api/articles", articleRoutes);
+app.use("/api/messaging", messagingRoutes);
 
 // Global error handler
 app.use((err, req, res, next) => {

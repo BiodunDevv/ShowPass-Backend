@@ -190,6 +190,36 @@ const confirmBookingPayment = async (req, res) => {
 
     await booking.save();
 
+    // Update user spending tracking
+    try {
+      const userResult = await UserManager.findById(booking.user._id);
+      if (userResult) {
+        const { user } = userResult;
+
+        // Update total spent
+        user.totalSpent = (user.totalSpent || 0) + booking.finalAmount;
+
+        // Add to purchase history
+        user.purchaseHistory.push({
+          eventId: booking.event._id,
+          eventTitle: booking.event.title,
+          amount: booking.finalAmount,
+          ticketType: booking.ticketType,
+          quantity: booking.quantity,
+          date: new Date(),
+          status: "completed",
+        });
+
+        await user.save();
+        console.log(
+          `💰 Updated user spending: ${user.email} - Total: ₦${user.totalSpent}`
+        );
+      }
+    } catch (spendingError) {
+      console.error("Failed to update user spending:", spendingError);
+      // Don't fail the booking confirmation for spending tracking errors
+    }
+
     // Update user's attending events array
     await updateUserEventArrays(
       booking.user._id,

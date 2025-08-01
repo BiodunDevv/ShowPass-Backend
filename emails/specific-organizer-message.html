@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{{subject}} - ShowPass</title>
+    <style>
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        line-height: 1.6;
+        color: #333;
+        max-width: 600px;
+        margin: 0 auto;
+        padding: 10px;
+        background-color: #f4f4f4;
+      }
+      .container {
+        background: white;
+        padding: 10px;
+        border-radius: 10px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+      }
+      .header {
+        text-align: center;
+        margin-bottom: 30px;
+        padding-bottom: 20px;
+        border-bottom: 3px solid #8b5cf6;
+      }
+      .logo {
+        font-size: 28px;
+        font-weight: bold;
+        color: #8b5cf6;
+        margin-bottom: 10px;
+      }
+      .message-badge {
+        background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+        color: white;
+        padding: 8px 16px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        display: inline-block;
+        margin-bottom: 20px;
+      }
+      .personalized-badge {
+        background: linear-gradient(135deg, #ec4899 0%, #be185d 100%);
+        color: white;
+        padding: 6px 12px;
+        border-radius: 15px;
+        font-size: 11px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        display: inline-block;
+        margin-left: 10px;
+      }
+      .greeting {
+        font-size: 18px;
+        margin-bottom: 20px;
+        color: #555;
+      }
+      .subject-line {
+        font-size: 24px;
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 20px;
+        text-align: center;
+        padding: 15px;
+        background: #faf5ff;
+        border-left: 4px solid #8b5cf6;
+      }
+      .message-content {
+        background: #fefbff;
+        padding: 25px;
+        border-radius: 8px;
+        margin: 20px 0;
+        border: 1px solid #e9d5ff;
+        font-size: 16px;
+        line-height: 1.7;
+        white-space: pre-wrap;
+      }
+      .admin-signature {
+        margin-top: 30px;
+        padding: 20px;
+        background: #faf5ff;
+        border-radius: 8px;
+        border-left: 4px solid #8b5cf6;
+      }
+      .admin-info {
+        font-weight: 600;
+        color: #7c3aed;
+        margin-bottom: 5px;
+      }
+      .organizer-stats {
+        background: #faf5ff;
+        padding: 20px;
+        border-radius: 8px;
+        margin: 20px 0;
+        border: 1px solid #e9d5ff;
+      }
+      .stat-item {
+        display: inline-block;
+        margin: 5px 15px 5px 0;
+        padding: 8px 12px;
+        background: #a855f7;
+        color: white;
+        border-radius: 15px;
+        font-size: 14px;
+        font-weight: 600;
+      }
+      .personal-note {
+        background: linear-gradient(135deg, #fdf4ff 0%, #faf5ff 100%);
+        padding: 20px;
+        border-radius: 8px;
+        margin: 20px 0;
+        border: 2px solid #e9d5ff;
+        position: relative;
+      }
+      .personal-note:before {
+        content: "💌";
+        position: absolute;
+        top: -10px;
+        left: 20px;
+        background: white;
+        padding: 0 8px;
+        font-size: 20px;
+      }
+      .footer {
+        margin-top: 40px;
+        text-align: center;
+        padding-top: 20px;
+        border-top: 1px solid #eee;
+        color: #666;
+        font-size: 14px;
+      }
+      .cta-section {
+        text-align: center;
+        margin: 30px 0;
+      }
+      .cta-button {
+        display: inline-block;
+        background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+        color: white;
+        padding: 12px 30px;
+        text-decoration: none;
+        border-radius: 25px;
+        font-weight: 600;
+        transition: transform 0.3s ease;
+        margin: 5px;
+      }
+      .cta-button:hover {
+        transform: translateY(-2px);
+      }
+      .social-links {
+        margin: 20px 0;
+        text-align: center;
+      }
+      .social-link {
+        color: #8b5cf6;
+        text-decoration: none;
+        margin: 0 10px;
+        font-weight: 500;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <div class="logo">🎟️ ShowPass</div>
+        <div class="message-badge">
+          Personal Message {{#if isPersonalized}}
+          <span class="personalized-badge">Exclusively for You</span>
+          {{/if}}
+        </div>
+      </div>
+
+      <div class="greeting">Hello {{organizerName}},</div>
+
+      <div class="subject-line">{{subject}}</div>
+
+      {{#if isPersonalized}}
+      <div class="personal-note">
+        <h3 style="margin-top: 0; color: #7c3aed">
+          🎯 This message was sent specifically to you
+        </h3>
+        <p style="margin-bottom: 0; font-style: italic; color: #6b46c1">
+          Our admin team has taken the time to send you this personalized
+          message. We value your contribution to the ShowPass community!
+        </p>
+      </div>
+      {{/if}}
+
+      <div class="message-content">{{message}}</div>
+
+      <div class="organizer-stats">
+        <h3 style="margin-top: 0; color: #7c3aed">📊 Your Event Journey:</h3>
+        <div class="stat-item">📅 Events Created: {{totalEvents}}</div>
+        <div class="stat-item">🎯 Status: Active Organizer</div>
+        <div class="stat-item">⭐ Valued Member</div>
+      </div>
+
+      <div class="admin-signature">
+        <div class="admin-info">Personal message from: {{adminName}}</div>
+        <div>ShowPass Administration Team</div>
+        <div
+          style="
+            margin-top: 10px;
+            font-size: 14px;
+            color: #7c3aed;
+            font-style: italic;
+          "
+        >
+          "We appreciate your dedication to creating amazing events!"
+        </div>
+      </div>
+
+      <div class="cta-section">
+        <a
+          href="https://showpass.com/organizer/create-event"
+          class="cta-button"
+        >
+          ✨ Create New Event
+        </a>
+        <a href="https://showpass.com/organizer/dashboard" class="cta-button">
+          📊 My Dashboard
+        </a>
+        <a href="https://showpass.com/contact" class="cta-button">
+          💬 Reply to Admin
+        </a>
+      </div>
+
+      <div class="footer">
+        <div class="social-links">
+          <a href="#" class="social-link">Organizer Resources</a>
+          <a href="#" class="social-link">Help Center</a>
+          <a href="#" class="social-link">Contact Support</a>
+        </div>
+        <p>
+          © {{currentYear}} {{platformName}}. All rights reserved.<br />
+          Thank you for being a valued event organizer!
+        </p>
+        <p style="font-size: 12px; color: #999">
+          This is a personalized message from our administration team. For any
+          inquiries, please contact support.
+        </p>
+      </div>
+    </div>
+  </body>
+</html>

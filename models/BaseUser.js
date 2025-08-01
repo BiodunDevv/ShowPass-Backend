@@ -61,6 +61,34 @@ const baseUserSchema = new mongoose.Schema(
         default: true,
       },
     },
+    // Financial tracking
+    totalSpent: {
+      type: Number,
+      default: 0,
+      min: 0,
+    },
+    // Purchase history for detailed tracking
+    purchaseHistory: [
+      {
+        eventId: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "Event",
+        },
+        eventTitle: String,
+        amount: Number,
+        ticketType: String,
+        quantity: Number,
+        date: {
+          type: Date,
+          default: Date.now,
+        },
+        status: {
+          type: String,
+          enum: ["completed", "refunded", "cancelled"],
+          default: "completed",
+        },
+      },
+    ],
   },
   {
     timestamps: true,

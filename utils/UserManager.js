@@ -265,6 +265,66 @@ class UserManager {
       return false;
     }
   }
+
+  // Get all users across collections with filtering and pagination
+  static async getAllUsers(query = {}, options = {}) {
+    const {
+      skip = 0,
+      limit = 20,
+      sortBy = "createdAt",
+      sortOrder = "desc",
+    } = options;
+
+    const sort = {};
+    sort[sortBy] = sortOrder === "desc" ? -1 : 1;
+
+    try {
+      const [regularUsers, organizers, admins] = await Promise.all([
+        RegularUser.find(query).sort(sort).skip(skip).limit(limit).lean(),
+        Organizer.find(query).sort(sort).skip(skip).limit(limit).lean(),
+        Admin.find(query).sort(sort).skip(skip).limit(limit).lean(),
+      ]);
+
+      // Add role property to each user
+      const allUsers = [
+        ...regularUsers.map((user) => ({ ...user, role: "user" })),
+        ...organizers.map((user) => ({ ...user, role: "organizer" })),
+        ...admins.map((user) => ({ ...user, role: "admin" })),
+      ];
+
+      // Sort the combined results
+      allUsers.sort((a, b) => {
+        const aValue = a[sortBy];
+        const bValue = b[sortBy];
+        if (sortOrder === "desc") {
+          return bValue > aValue ? 1 : -1;
+        } else {
+          return aValue > bValue ? 1 : -1;
+        }
+      });
+
+      return allUsers.slice(0, limit);
+    } catch (error) {
+      console.error("Get all users error:", error);
+      throw error;
+    }
+  }
+
+  // Get total count of users across all collections
+  static async getTotalUsersCount(query = {}) {
+    try {
+      const [regularCount, organizerCount, adminCount] = await Promise.all([
+        RegularUser.countDocuments(query),
+        Organizer.countDocuments(query),
+        Admin.countDocuments(query),
+      ]);
+
+      return regularCount + organizerCount + adminCount;
+    } catch (error) {
+      console.error("Get total users count error:", error);
+      throw error;
+    }
+  }
 }
 
 module.exports = UserManager;

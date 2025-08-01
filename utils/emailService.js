@@ -34,6 +34,36 @@ const createTransporter = () => {
 
 const transporter = createTransporter();
 
+// Generic send email function for custom templates and messages
+const sendEmail = async (to, subject, templateName, templateData = {}) => {
+  try {
+    if (!transporter) {
+      throw new Error("Email transporter not available");
+    }
+
+    const template = loadTemplate(templateName);
+    const templateDataWithDefaults = {
+      platformName: "ShowPass",
+      currentYear: new Date().getFullYear(),
+      ...templateData,
+    };
+
+    const mailOptions = {
+      from: "ShowPass <noreply@showpass.com>",
+      to: to,
+      subject: subject,
+      html: compileTemplate(template, templateDataWithDefaults),
+    };
+
+    await transporter.sendMail(mailOptions);
+    console.log(`✅ Email sent successfully to ${to}`);
+    return { success: true };
+  } catch (error) {
+    console.error(`❌ Failed to send email to ${to}:`, error);
+    throw error;
+  }
+};
+
 // Send email verification
 const sendVerificationEmail = async (user, verificationToken) => {
   const verificationURL = `${process.env.BASE_URL}/api/auth/verify-email?token=${verificationToken}`;
@@ -666,6 +696,7 @@ const sendAdminEventDeletionNotification = async (
 };
 
 module.exports = {
+  sendEmail,
   sendVerificationEmail,
   sendTicketConfirmation,
   sendRefundConfirmation,

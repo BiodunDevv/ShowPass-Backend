@@ -1,7 +1,7 @@
 {
   "info": {
     "name": "ShowPass Backend API - Complete Event Management System",
-    "description": "# ShowPass Event Management API - Complete Documentation\n\nThis comprehensive Postman collection covers all aspects of the ShowPass event management system, with detailed examples for both **Free Events** and **Paid Events** workflows.\n\n## 🚀 Quick Start Guide\n\n### Prerequisites\n1. Start your ShowPass backend server on `http://localhost:3000`\n2. Ensure MongoDB is running and connected\n3. Configure your environment variables (email, Paystack, etc.)\n\n### Collection Structure\n\n#### 1. **Authentication** 🔐\n- User registration (Admin, Organizer, Regular User)\n- Login with different user roles\n- Email verification\n- Password reset workflows\n\n#### 2. **Event Discovery & Management** 🎪\n- Browse all public events with filtering\n- Search events by category, location, and keywords\n- Get free events specifically\n- Detailed event views with complete information\n- Event categories management\n\n#### 3. **Event Creation** ✨\n- **Create Free Events**: Complete examples with proper ticket configuration\n- **Create Paid Events**: Multi-tier pricing with VIP, Regular, Premium options\n- Event approval workflows\n- Event updates and management\n\n#### 4. **Bookings & Ticket Management** 🎫\n- **Free Event Registration**: Instant confirmation with QR codes\n- **Paid Event Booking**: Full payment integration workflow\n- Ticket management and viewing\n- Booking cancellation\n- QR code generation and verification\n\n#### 5. **Payment Processing** 💳\n- Paystack integration for paid events\n- Payment initialization and verification\n- Webhook handling\n- Fee calculation (platform fees, VAT)\n\n#### 6. **Organizer Workflows** 👨‍💼\n- Organizer dashboard with event statistics\n- Event attendee management\n- Check-in functionality with QR scanning\n- Event performance analytics\n\n#### 7. **Admin Management** 👑\n- Admin dashboard with system overview\n- User management (block/unblock users)\n- Event approval/rejection workflows\n- System-wide analytics and reporting\n\n#### 8. **Refund Management** 💰\n- Refund request submission\n- Admin refund processing\n- Refund status tracking\n- Financial impact management\n\n#### 9. **Complete Workflow Examples** 🔄\n- **Free Event Workflow**: End-to-end process from creation to attendance\n- **Paid Event Workflow**: Complete commercial event lifecycle\n\n## 🎯 Key Features Covered\n\n### Free Events\n- ✅ Zero-cost event creation\n- ✅ Instant registration without payment\n- ✅ QR code generation for entry\n- ✅ Attendee management\n- ✅ Email notifications\n\n### Paid Events\n- ✅ Multi-tier pricing (Regular, VIP, Premium)\n- ✅ Secure payment processing via Paystack\n- ✅ Automated fee calculation\n- ✅ Payment verification\n- ✅ Refund management\n- ✅ Revenue tracking\n\n### Admin Features\n- ✅ Event approval system\n- ✅ User management\n- ✅ System analytics\n- ✅ Refund processing\n- ✅ Platform oversight\n\n### Organizer Features\n- ✅ Event creation and management\n- ✅ Attendee check-in\n- ✅ Performance analytics\n- ✅ QR code verification\n\n## 🔧 Environment Variables\n\nThe collection uses these variables (automatically set by requests):\n\n- `baseUrl`: API base URL\n- `authToken`: JWT authentication token\n- `eventId`: General event ID\n- `freeEventId`: Free event specific ID\n- `paidEventId`: Paid event specific ID\n- `bookingId`: Booking reference\n- `paymentReference`: Paystack payment reference\n- `userId`: User identification\n\n## 📋 Testing Scenarios\n\n### Scenario 1: Free Community Event\n1. Organizer creates free tech meetup\n2. Admin approves the event\n3. Users register for free\n4. Organizer manages check-ins\n5. Post-event analytics\n\n### Scenario 2: Premium Business Conference\n1. Organizer creates paid conference with multiple ticket tiers\n2. Admin reviews and approves\n3. Users purchase tickets via Paystack\n4. Payment verification and confirmation\n5. Event day check-in management\n6. Refund processing if needed\n\n## 💡 Best Practices\n\n1. **Always authenticate first** - Use login endpoints before testing other features\n2. **Test with different user roles** - Admin, Organizer, and Regular User perspectives\n3. **Follow the workflow examples** - Use the complete workflow folders for end-to-end testing\n4. **Check response logs** - All requests include detailed console logging for debugging\n5. **Environment variables** - Let the collection manage IDs automatically\n\n## 🐛 Troubleshooting\n\n- **Authentication errors**: Ensure you're logged in with the correct role\n- **Event not found**: Check that event IDs are properly set in environment variables\n- **Payment issues**: Verify Paystack configuration in your backend\n- **Permission denied**: Make sure you're using the appropriate user role for each endpoint\n\n## 📞 Support\n\nThis collection provides comprehensive coverage of the ShowPass API. Each request includes detailed test scripts that log important information to help with debugging and understanding the system behavior.\n\n---\n\n**Version**: 2.0.0  \n**Last Updated**: January 2025  \n**Coverage**: Complete Free & Paid Event Workflows",
+    "description": "# ShowPass Event Management API - Complete Documentation\n\nThis comprehensive Postman collection covers all aspects of the ShowPass event management system, with detailed examples for both **Free Events** and **Paid Events** workflows.\n\n## 🚀 Quick Start Guide\n\n### Prerequisites\n1. Start your ShowPass backend server on `http://localhost:3000`\n2. Ensure MongoDB is running and connected\n3. Configure your environment variables (email, Paystack, etc.)\n\n### Collection Structure\n\n#### 1. **Authentication** 🔐\n- User registration (Admin, Organizer, Regular User)\n- Login with different user roles\n- Email verification\n- Password reset workflows\n\n#### 2. **Event Discovery & Management** 🎪\n- Browse all public events with filtering\n- Search events by category, location, and keywords\n- Get free events specifically\n- Detailed event views with complete information\n- Event categories management\n\n#### 3. **Event Creation** ✨\n- **Create Free Events**: Complete examples with proper ticket configuration\n- **Create Paid Events**: Multi-tier pricing with VIP, Regular, Premium options\n- Event approval workflows\n- Event updates and management\n\n#### 4. **Bookings & Ticket Management** 🎫\n- **Free Event Registration**: Instant confirmation with QR codes\n- **Paid Event Booking**: Full payment integration workflow\n- Ticket management and viewing\n- Booking cancellation\n- QR code generation and verification\n\n#### 5. **Payment Processing** 💳\n- Paystack integration for paid events\n- Payment initialization and verification\n- Webhook handling\n- Fee calculation (platform fees, VAT)\n\n#### 6. **Organizer Workflows** 👨‍💼\n- Organizer dashboard with event statistics\n- Event attendee management\n- Check-in functionality with QR scanning\n- Event performance analytics\n\n#### 7. **Admin Management** 👑\n- Admin dashboard with system overview\n- User management (block/unblock users)\n- Event approval/rejection workflows\n- System-wide analytics and reporting\n\n#### 8. **User Analytics & Management** 👥\n- Comprehensive user details with spending analytics\n- Financial tracking and purchase history\n- User statistics and metrics\n- Admin user management with advanced filtering\n\n#### 9. **Articles & Blog Management** 📝\n- Admin article creation and management\n- Blog post publishing with SEO optimization\n- Article categorization and tagging\n- Social features (likes, comments)\n- Content analytics and management\n\n#### 10. **User Profile Management** 👤\n- Comprehensive user profile retrieval\n- Profile completeness calculation\n- Role-specific statistics and metrics\n- Financial summary and spending analytics\n- Works for both regular users and organizers\n\n#### 11. **Admin Messaging System** 💬\n- Universal messaging to all platform users\n- Targeted messaging to specific user roles\n- Individual personalized messages\n- Professional email templates with branding\n- Delivery tracking and statistics\n\n#### 12. **Refund Management** 💰\n- Refund request submission\n- Admin refund processing\n- Refund status tracking\n- Financial impact management\n\n#### 13. **Complete Workflow Examples** 🔄\n- **Free Event Workflow**: End-to-end process from creation to attendance\n- **Paid Event Workflow**: Complete commercial event lifecycle\n\n## 🎯 Key Features Covered\n\n### Free Events\n- ✅ Zero-cost event creation\n- ✅ Instant registration without payment\n- ✅ QR code generation for entry\n- ✅ Attendee management\n- ✅ Email notifications\n\n### Paid Events\n- ✅ Multi-tier pricing (Regular, VIP, Premium)\n- ✅ Secure payment processing via Paystack\n- ✅ Automated fee calculation\n- ✅ Payment verification\n- ✅ Refund management\n- ✅ Revenue tracking\n\n### Admin Features\n- ✅ Event approval system\n- ✅ User management\n- ✅ System analytics\n- ✅ Refund processing\n- ✅ Platform oversight\n\n### Organizer Features\n- ✅ Event creation and management\n- ✅ Attendee check-in\n- ✅ Performance analytics\n- ✅ QR code verification\n\n## 🔧 Environment Variables\n\nThe collection uses these variables (automatically set by requests):\n\n- `baseUrl`: API base URL\n- `authToken`: JWT authentication token\n- `eventId`: General event ID\n- `freeEventId`: Free event specific ID\n- `paidEventId`: Paid event specific ID\n- `bookingId`: Booking reference\n- `paymentReference`: Paystack payment reference\n- `userId`: User identification\n\n## 📋 Testing Scenarios\n\n### Scenario 1: Free Community Event\n1. Organizer creates free tech meetup\n2. Admin approves the event\n3. Users register for free\n4. Organizer manages check-ins\n5. Post-event analytics\n\n### Scenario 2: Premium Business Conference\n1. Organizer creates paid conference with multiple ticket tiers\n2. Admin reviews and approves\n3. Users purchase tickets via Paystack\n4. Payment verification and confirmation\n5. Event day check-in management\n6. Refund processing if needed\n\n## 💡 Best Practices\n\n1. **Always authenticate first** - Use login endpoints before testing other features\n2. **Test with different user roles** - Admin, Organizer, and Regular User perspectives\n3. **Follow the workflow examples** - Use the complete workflow folders for end-to-end testing\n4. **Check response logs** - All requests include detailed console logging for debugging\n5. **Environment variables** - Let the collection manage IDs automatically\n\n## 🐛 Troubleshooting\n\n- **Authentication errors**: Ensure you're logged in with the correct role\n- **Event not found**: Check that event IDs are properly set in environment variables\n- **Payment issues**: Verify Paystack configuration in your backend\n- **Permission denied**: Make sure you're using the appropriate user role for each endpoint\n\n## 📞 Support\n\nThis collection provides comprehensive coverage of the ShowPass API. Each request includes detailed test scripts that log important information to help with debugging and understanding the system behavior.\n\n---\n\n**Version**: 2.0.0  \n**Last Updated**: January 2025  \n**Coverage**: Complete Free & Paid Event Workflows",
     "version": "2.0.0",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
@@ -92,6 +92,12 @@
       "value": "",
       "type": "string",
       "description": "Refund request ID"
+    },
+    {
+      "key": "articleId",
+      "value": "",
+      "type": "string",
+      "description": "Article ID for blog/article management - set by article creation requests"
     }
   ],
   "item": [
@@ -1970,6 +1976,1046 @@
               }
             }
           ]
+        }
+      ]
+    },
+    {
+      "name": "User Details Management",
+      "item": [
+        {
+          "name": "Get User Details by ID",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// Test successful response",
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Response has user details', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson.success).to.be.true;",
+                  "    pm.expect(responseJson.data).to.have.property('firstName');",
+                  "    pm.expect(responseJson.data).to.have.property('totalSpent');",
+                  "    pm.expect(responseJson.data).to.have.property('statistics');",
+                  "    pm.expect(responseJson.data).to.have.property('financialSummary');",
+                  "});",
+                  "",
+                  "pm.test('Statistics are properly formatted', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    const stats = responseJson.data.statistics;",
+                  "    pm.expect(stats).to.have.property('eventsCreated');",
+                  "    pm.expect(stats).to.have.property('eventsAttended');",
+                  "    pm.expect(stats).to.have.property('accountAge');",
+                  "});",
+                  "",
+                  "console.log('👤 User Details Response:', JSON.stringify(pm.response.json(), null, 2));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{authToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/user-details/{{userId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["user-details", "{{userId}}"]
+            },
+            "description": "Get comprehensive details of a specific user. Includes financial summary, purchase history, statistics, and role-specific metrics. Available to all authenticated users for their own data, admins can access any user's details."
+          }
+        },
+        {
+          "name": "Get All Users Details (Admin)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// Test successful response",
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Response contains users array with pagination', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson.success).to.be.true;",
+                  "    pm.expect(responseJson.data).to.have.property('users');",
+                  "    pm.expect(responseJson.data).to.have.property('pagination');",
+                  "    pm.expect(responseJson.data.users).to.be.an('array');",
+                  "});",
+                  "",
+                  "pm.test('Users have comprehensive details', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    if (responseJson.data.users.length > 0) {",
+                  "        const user = responseJson.data.users[0];",
+                  "        pm.expect(user).to.have.property('_id');",
+                  "        pm.expect(user).to.have.property('firstName');",
+                  "        pm.expect(user).to.have.property('role');",
+                  "        pm.expect(user).to.have.property('totalSpent');",
+                  "        pm.expect(user).to.have.property('statistics');",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test('Pagination info is correct', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    const pagination = responseJson.data.pagination;",
+                  "    pm.expect(pagination).to.have.property('currentPage');",
+                  "    pm.expect(pagination).to.have.property('totalPages');",
+                  "    pm.expect(pagination).to.have.property('totalUsers');",
+                  "    pm.expect(pagination).to.have.property('hasNext');",
+                  "    pm.expect(pagination).to.have.property('hasPrev');",
+                  "});",
+                  "",
+                  "console.log('👥 All Users Details Response:', JSON.stringify(pm.response.json(), null, 2));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{authToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/user-details?page=1&limit=10&role=organizer&sortBy=totalSpent&sortOrder=desc&search=&minSpent=0&maxSpent=50000",
+              "host": ["{{baseUrl}}"],
+              "path": ["user-details"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1",
+                  "description": "Page number for pagination"
+                },
+                {
+                  "key": "limit",
+                  "value": "10",
+                  "description": "Number of users per page"
+                },
+                {
+                  "key": "role",
+                  "value": "organizer",
+                  "description": "Filter by user role (admin, organizer, user)"
+                },
+                {
+                  "key": "sortBy",
+                  "value": "totalSpent",
+                  "description": "Sort field (firstName, lastName, email, createdAt, totalSpent)"
+                },
+                {
+                  "key": "sortOrder",
+                  "value": "desc",
+                  "description": "Sort order (asc, desc)"
+                },
+                {
+                  "key": "search",
+                  "value": "",
+                  "description": "Search in names and email"
+                },
+                {
+                  "key": "minSpent",
+                  "value": "0",
+                  "description": "Minimum spending filter"
+                },
+                {
+                  "key": "maxSpent",
+                  "value": "50000",
+                  "description": "Maximum spending filter"
+                }
+              ]
+            },
+            "description": "Get comprehensive details of all users with advanced filtering, sorting, and pagination. Admin-only endpoint that provides financial analytics, user statistics, and comprehensive user management data."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Articles & Blog Management",
+      "item": [
+        {
+          "name": "Create Article (Admin Only)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// Test successful response",
+                  "pm.test('Status code is 201', function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "pm.test('Article created successfully', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson.success).to.be.true;",
+                  "    pm.expect(responseJson.data).to.have.property('title');",
+                  "    pm.expect(responseJson.data).to.have.property('slug');",
+                  "    pm.expect(responseJson.data).to.have.property('_id');",
+                  "    ",
+                  "    // Set article ID for other requests",
+                  "    pm.environment.set('articleId', responseJson.data._id);",
+                  "});",
+                  "",
+                  "pm.test('Article has proper metadata', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    const article = responseJson.data;",
+                  "    pm.expect(article).to.have.property('author');",
+                  "    pm.expect(article).to.have.property('category');",
+                  "    pm.expect(article).to.have.property('readTime');",
+                  "    pm.expect(article).to.have.property('publishedAt');",
+                  "});",
+                  "",
+                  "console.log('📝 Article Created:', JSON.stringify(pm.response.json(), null, 2));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{authToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"The Ultimate Guide to Event Security in Nigeria\",\n  \"excerpt\": \"Comprehensive guide to ensuring the safety and security of your events in Nigeria. Learn about best practices, legal requirements, and technology solutions for event security.\",\n  \"content\": \"<h2>Introduction to Event Security</h2><p>Event security is a critical aspect of successful event planning in Nigeria. With the increasing number of events and the diverse security challenges across different regions, organizers must prioritize comprehensive security planning to ensure attendee safety and event success.</p><h2>Understanding Nigerian Security Context</h2><p>Nigeria's security landscape requires event organizers to be aware of:</p><ul><li>Regional security variations across states</li><li>Urban vs rural security considerations</li><li>Cultural and religious sensitivities</li><li>Government regulations and compliance requirements</li></ul><h2>Pre-Event Security Planning</h2><h3>Risk Assessment</h3><ul><li><strong>Venue Security Audit:</strong> Comprehensive evaluation of the event location</li><li><strong>Crowd Analysis:</strong> Understanding expected attendee demographics and behavior</li><li><strong>Threat Assessment:</strong> Identifying potential security risks specific to your event</li><li><strong>Emergency Planning:</strong> Developing comprehensive response protocols</li></ul><h3>Security Team Selection</h3><ul><li>Licensed security companies with proven track records</li><li>Personnel trained in crowd management</li><li>Local knowledge and language capabilities</li><li>Coordination with local law enforcement</li></ul><h2>Technology Solutions</h2><h3>Access Control Systems</h3><ul><li>Electronic ticketing with QR codes</li><li>RFID wristbands for multi-day events</li><li>Facial recognition systems for VIP areas</li><li>Mobile check-in applications</li></ul><h3>Surveillance and Monitoring</h3><ul><li>CCTV camera placement and monitoring</li><li>Drone surveillance for large outdoor events</li><li>Communication systems for security teams</li><li>Emergency alert systems</li></ul><h2>Crowd Management</h2><h3>Flow Design</h3><ul><li>Strategic entrance and exit placement</li><li>Clear signage and wayfinding</li><li>Capacity management and monitoring</li><li>Queue management systems</li></ul><h3>Emergency Procedures</h3><ul><li>Evacuation plans and routes</li><li>Medical emergency protocols</li><li>Fire safety measures</li><li>Communication during emergencies</li></ul><h2>Legal and Compliance Requirements</h2><h3>Permits and Licenses</h3><ul><li>Event permits from local authorities</li><li>Security service licenses</li><li>Fire safety certificates</li><li>Insurance requirements</li></ul><h3>Documentation</h3><ul><li>Security plans and protocols</li><li>Staff training records</li><li>Incident reporting procedures</li><li>Post-event security reports</li></ul><h2>Special Considerations</h2><h3>VIP Protection</h3><ul><li>Dedicated security details</li><li>Secure transportation arrangements</li><li>Protected areas and access routes</li><li>Background checks for close-contact staff</li></ul><h3>Cultural Events</h3><ul><li>Religious sensitivity and protocols</li><li>Traditional security customs</li><li>Community elder involvement</li><li>Cultural artifact protection</li></ul><h2>Budget Planning</h2><h3>Cost Factors</h3><ul><li><strong>Personnel Costs:</strong> Security guards, supervisors, specialists</li><li><strong>Technology Costs:</strong> Equipment rental, installation, monitoring</li><li><strong>Insurance Costs:</strong> Liability coverage, equipment protection</li><li><strong>Permit Costs:</strong> Government fees and compliance costs</li></ul><h3>Cost-Effective Solutions</h3><ul><li>Volunteer security training programs</li><li>Community partnership initiatives</li><li>Technology sharing with other events</li><li>Bulk contracting for multiple events</li></ul><h2>Post-Event Security Review</h2><h3>Incident Analysis</h3><ul><li>Detailed incident reports and analysis</li><li>Security footage review</li><li>Staff debriefing sessions</li><li>Attendee feedback collection</li></ul><h3>Continuous Improvement</h3><ul><li>Security protocol updates</li><li>Staff training improvements</li><li>Technology upgrades</li><li>Relationship building with authorities</li></ul><h2>Case Studies</h2><h3>Lagos Music Festival Success</h3><p>A major music festival in Lagos successfully managed 50,000 attendees over three days using a combination of advanced technology, well-trained personnel, and excellent coordination with local authorities.</p><h3>Abuja Corporate Conference</h3><p>A high-profile business conference in Abuja demonstrated effective VIP protection and general security management, ensuring the safety of government officials and business leaders.</p><h2>Emergency Contacts and Resources</h2><h3>National Emergency Numbers</h3><ul><li><strong>Police Emergency:</strong> 199</li><li><strong>Fire Service:</strong> 199</li><li><strong>Medical Emergency:</strong> 199</li><li><strong>NEMA:</strong> 0800-NEMA-911</li></ul><h3>Professional Organizations</h3><ul><li>Association of Private Security Companies of Nigeria (APSCN)</li><li>Event Management Association of Nigeria (EMAN)</li><li>Nigerian Security and Civil Defence Corps (NSCDC)</li></ul><h2>Conclusion</h2><p>Effective event security in Nigeria requires comprehensive planning, proper resource allocation, and strong partnerships with local authorities and security professionals. By implementing these best practices and staying current with security trends and regulations, event organizers can create safe, secure, and successful events that attendees can enjoy with confidence.</p><p>Remember that security is not just about preventing incidents—it's about creating an environment where attendees feel safe, comfortable, and able to fully engage with your event experience. Invest in proper security planning from the beginning, and view it as an essential component of event success rather than just a necessary expense.</p>\",\n  \"image\": \"https://images.unsplash.com/photo-1556075798-4825dfaaf498?w=800&h=400&fit=crop\",\n  \"author\": \"Security Expert\",\n  \"category\": \"Business\",\n  \"tags\": [\"security\", \"safety\", \"nigeria\", \"event planning\", \"crowd management\"],\n  \"featured\": true,\n  \"status\": \"published\",\n  \"seo\": {\n    \"metaTitle\": \"Complete Guide to Event Security in Nigeria - Safety Best Practices\",\n    \"metaDescription\": \"Learn essential event security strategies for Nigeria. Comprehensive guide covering planning, technology, and compliance.\",\n    \"keywords\": [\"event security nigeria\", \"crowd management\", \"event safety\", \"security planning\"]\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/articles",
+              "host": ["{{baseUrl}}"],
+              "path": ["articles"]
+            },
+            "description": "Create a new article/blog post. Only admins can create articles. The system automatically generates slugs, calculates read time, and handles SEO optimization."
+          }
+        },
+        {
+          "name": "Get All Articles",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// Test successful response",
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Response contains articles array', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson.success).to.be.true;",
+                  "    pm.expect(responseJson.data).to.be.an('array');",
+                  "});",
+                  "",
+                  "pm.test('Articles have required fields', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    if (responseJson.data.length > 0) {",
+                  "        const article = responseJson.data[0];",
+                  "        pm.expect(article).to.have.property('title');",
+                  "        pm.expect(article).to.have.property('excerpt');",
+                  "        pm.expect(article).to.have.property('author');",
+                  "        pm.expect(article).to.have.property('category');",
+                  "        pm.expect(article).to.have.property('readTime');",
+                  "        pm.expect(article).to.not.have.property('content'); // Content excluded in listing",
+                  "    }",
+                  "});",
+                  "",
+                  "console.log('📚 Articles Response:', JSON.stringify(pm.response.json(), null, 2));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/articles?page=1&limit=10&category=Technology&featured=true&search=&author=&sortBy=publishedAt&sortOrder=desc",
+              "host": ["{{baseUrl}}"],
+              "path": ["articles"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1",
+                  "description": "Page number"
+                },
+                {
+                  "key": "limit",
+                  "value": "10",
+                  "description": "Articles per page"
+                },
+                {
+                  "key": "category",
+                  "value": "Technology",
+                  "description": "Filter by category"
+                },
+                {
+                  "key": "featured",
+                  "value": "true",
+                  "description": "Filter featured articles"
+                },
+                {
+                  "key": "search",
+                  "value": "",
+                  "description": "Search in title and content"
+                },
+                {
+                  "key": "author",
+                  "value": "",
+                  "description": "Filter by author"
+                },
+                {
+                  "key": "sortBy",
+                  "value": "publishedAt",
+                  "description": "Sort field"
+                },
+                {
+                  "key": "sortOrder",
+                  "value": "desc",
+                  "description": "Sort order"
+                }
+              ]
+            },
+            "description": "Get all published articles with filtering and pagination. Public endpoint - no authentication required."
+          }
+        },
+        {
+          "name": "Get Featured Articles",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('All articles are featured', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    responseJson.data.forEach(article => {",
+                  "        pm.expect(article.featured).to.be.true;",
+                  "    });",
+                  "});",
+                  "",
+                  "console.log('⭐ Featured Articles:', JSON.stringify(pm.response.json(), null, 2));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/articles/featured?limit=6",
+              "host": ["{{baseUrl}}"],
+              "path": ["articles", "featured"],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "6",
+                  "description": "Number of featured articles to return"
+                }
+              ]
+            },
+            "description": "Get featured articles for homepage or promotional sections."
+          }
+        },
+        {
+          "name": "Get Article by ID",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Article has full content', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson.data).to.have.property('content');",
+                  "    pm.expect(responseJson.data).to.have.property('views');",
+                  "});",
+                  "",
+                  "pm.test('View count incremented', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson.data.views).to.be.above(0);",
+                  "});",
+                  "",
+                  "console.log('📖 Article Detail:', JSON.stringify(pm.response.json(), null, 2));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/articles/{{articleId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["articles", "{{articleId}}"]
+            },
+            "description": "Get a single article by ID or slug with full content. Automatically increments view count."
+          }
+        },
+        {
+          "name": "Get Article Categories",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Categories array returned', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson.data).to.be.an('array');",
+                  "    pm.expect(responseJson.data.length).to.be.above(0);",
+                  "});",
+                  "",
+                  "console.log('🏷️ Article Categories:', JSON.stringify(pm.response.json(), null, 2));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/articles/categories",
+              "host": ["{{baseUrl}}"],
+              "path": ["articles", "categories"]
+            },
+            "description": "Get all available article categories."
+          }
+        },
+        {
+          "name": "Get Articles by Category",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('All articles match category', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    const category = pm.request.url.path[pm.request.url.path.length - 1];",
+                  "    responseJson.data.forEach(article => {",
+                  "        pm.expect(article.category).to.equal(category);",
+                  "    });",
+                  "});",
+                  "",
+                  "console.log('📂 Category Articles:', JSON.stringify(pm.response.json(), null, 2));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/articles/category/Technology?page=1&limit=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["articles", "category", "Technology"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            },
+            "description": "Get articles filtered by specific category with pagination."
+          }
+        },
+        {
+          "name": "Update Article (Admin Only)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Article updated successfully', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson.success).to.be.true;",
+                  "    pm.expect(responseJson.message).to.include('updated');",
+                  "});",
+                  "",
+                  "console.log('✏️ Article Updated:', JSON.stringify(pm.response.json(), null, 2));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{authToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Updated: The Ultimate Guide to Event Security in Nigeria\",\n  \"excerpt\": \"Updated comprehensive guide to ensuring the safety and security of your events in Nigeria with 2025 best practices.\",\n  \"featured\": true,\n  \"tags\": [\"security\", \"safety\", \"nigeria\", \"event planning\", \"crowd management\", \"2025\"]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/articles/{{articleId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["articles", "{{articleId}}"]
+            },
+            "description": "Update an existing article. Only admins can update articles."
+          }
+        },
+        {
+          "name": "Like/Unlike Article",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Like status updated', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson.success).to.be.true;",
+                  "    pm.expect(responseJson.data).to.have.property('liked');",
+                  "    pm.expect(responseJson.data).to.have.property('totalLikes');",
+                  "});",
+                  "",
+                  "console.log('❤️ Article Like Response:', JSON.stringify(pm.response.json(), null, 2));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{authToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/articles/{{articleId}}/like",
+              "host": ["{{baseUrl}}"],
+              "path": ["articles", "{{articleId}}", "like"]
+            },
+            "description": "Like or unlike an article. Toggles like status for the authenticated user."
+          }
+        },
+        {
+          "name": "Add Comment to Article",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Comment added successfully', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson.success).to.be.true;",
+                  "    pm.expect(responseJson.data).to.have.property('comment');",
+                  "    pm.expect(responseJson.data).to.have.property('totalComments');",
+                  "});",
+                  "",
+                  "console.log('💬 Comment Added:', JSON.stringify(pm.response.json(), null, 2));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{authToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"content\": \"This is an excellent and comprehensive guide to event security in Nigeria. The practical tips and local context make it incredibly valuable for event organizers. Thank you for sharing this detailed information!\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/articles/{{articleId}}/comments",
+              "host": ["{{baseUrl}}"],
+              "path": ["articles", "{{articleId}}", "comments"]
+            },
+            "description": "Add a comment to an article. Requires authentication."
+          }
+        },
+        {
+          "name": "Delete Article (Admin Only)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Article deleted successfully', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson.success).to.be.true;",
+                  "    pm.expect(responseJson.message).to.include('deleted');",
+                  "});",
+                  "",
+                  "console.log('🗑️ Article Deleted:', JSON.stringify(pm.response.json(), null, 2));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{authToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/articles/{{articleId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["articles", "{{articleId}}"]
+            },
+            "description": "Delete an article permanently. Only admins can delete articles."
+          }
+        }
+      ]
+    },
+    {
+      "name": "👤 User Profile Management",
+      "item": [
+        {
+          "name": "Get User Profile (User/Organizer)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    console.log('✅ Profile fetched successfully');",
+                  "    console.log('\\n👤 Profile Information:');",
+                  "    console.log('- Name:', response.data.name);",
+                  "    console.log('- Email:', response.data.email);",
+                  "    console.log('- Role:', response.data.role);",
+                  "    console.log('- Profile Completeness:', response.data.profileCompleteness + '%');",
+                  "    ",
+                  "    if (response.data.statistics) {",
+                  "        console.log('\\n📊 User Statistics:');",
+                  "        Object.entries(response.data.statistics).forEach(([key, value]) => {",
+                  "            console.log(`- ${key}:`, value);",
+                  "        });",
+                  "    }",
+                  "    ",
+                  "    if (response.data.financialSummary) {",
+                  "        console.log('\\n💰 Financial Summary:');",
+                  "        Object.entries(response.data.financialSummary).forEach(([key, value]) => {",
+                  "            console.log(`- ${key}:`, value);",
+                  "        });",
+                  "    }",
+                  "} else {",
+                  "    console.log('❌ Failed to fetch profile');",
+                  "    console.log('Response:', pm.response.text());",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{authToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/user-details/profile",
+              "host": ["{{baseUrl}}"],
+              "path": ["user-details", "profile"]
+            },
+            "description": "Get comprehensive profile information for the authenticated user (works for both regular users and organizers). Returns profile completeness, statistics, and financial summary."
+          }
+        }
+      ]
+    },
+    {
+      "name": "💬 Admin Messaging System",
+      "item": [
+        {
+          "name": "Send Universal Message",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    console.log('✅ Universal message sent successfully');",
+                  "    console.log('\\n📊 Delivery Statistics:');",
+                  "    console.log('- Total Recipients:', response.data.totalRecipients);",
+                  "    console.log('- Successful Sends:', response.data.successfulSends);",
+                  "    console.log('- Failed Sends:', response.data.failedSends);",
+                  "    console.log('- Success Rate:', ((response.data.successfulSends / response.data.totalRecipients) * 100).toFixed(2) + '%');",
+                  "    ",
+                  "    if (response.data.deliveryBreakdown) {",
+                  "        console.log('\\n📋 Delivery Breakdown:');",
+                  "        Object.entries(response.data.deliveryBreakdown).forEach(([role, count]) => {",
+                  "            console.log(`- ${role}:`, count);",
+                  "        });",
+                  "    }",
+                  "} else {",
+                  "    console.log('❌ Failed to send universal message');",
+                  "    console.log('Response:', pm.response.text());",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{authToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\\n  \\\"subject\\\": \\\"🎉 ShowPass Platform Update - New Features Available!\\\",\\n  \\\"message\\\": \\\"Dear ShowPass Community,\\n\\nWe're excited to announce several new features that will enhance your experience on our platform:\\n\\n🎪 Enhanced Event Discovery - Better search and filtering options\\n📊 Improved Analytics - More detailed insights for organizers\\n💳 Streamlined Payments - Faster and more secure transactions\\n📱 Mobile Optimization - Better mobile app experience\\n\\nThese updates are now live and ready for you to explore. Thank you for being part of the ShowPass community!\\n\\nBest regards,\\nThe ShowPass Team\\\"\\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/messaging/universal",
+              "host": ["{{baseUrl}}"],
+              "path": ["messaging", "universal"]
+            },
+            "description": "Send a message to all users (organizers and regular users) on the platform. Only admins can send universal messages."
+          }
+        },
+        {
+          "name": "Send Message to All Users",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    console.log('✅ Message sent to all users successfully');",
+                  "    console.log('\\n📊 Delivery Statistics:');",
+                  "    console.log('- Total Recipients:', response.data.totalRecipients);",
+                  "    console.log('- Successful Sends:', response.data.successfulSends);",
+                  "    console.log('- Failed Sends:', response.data.failedSends);",
+                  "} else {",
+                  "    console.log('❌ Failed to send message to users');",
+                  "    console.log('Response:', pm.response.text());",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{authToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\\n  \\\"subject\\\": \\\"🎫 Discover Amazing Events This Weekend!\\\",\\n  \\\"message\\\": \\\"Hello there!\\n\\nThis weekend is packed with incredible events waiting for you to discover. From live concerts to tech meetups, cultural festivals to business conferences - there's something for everyone!\\n\\n🎵 Music & Entertainment\\n🎪 Cultural Events\\n💼 Professional Networking\\n🏃 Sports & Fitness\\n🎨 Arts & Creativity\\n\\nBrowse our latest events and find your next adventure. Don't miss out on the experiences that matter to you!\\n\\nHappy event hunting!\\nShowPass Team\\\"\\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/messaging/all-users",
+              "host": ["{{baseUrl}}"],
+              "path": ["messaging", "all-users"]
+            },
+            "description": "Send a message specifically to all regular users (excludes organizers). Only admins can send this type of message."
+          }
+        },
+        {
+          "name": "Send Message to All Organizers",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    console.log('✅ Message sent to all organizers successfully');",
+                  "    console.log('\\n📊 Delivery Statistics:');",
+                  "    console.log('- Total Recipients:', response.data.totalRecipients);",
+                  "    console.log('- Successful Sends:', response.data.successfulSends);",
+                  "    console.log('- Failed Sends:', response.data.failedSends);",
+                  "} else {",
+                  "    console.log('❌ Failed to send message to organizers');",
+                  "    console.log('Response:', pm.response.text());",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{authToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\\n  \\\"subject\\\": \\\"📈 Boost Your Event Success - New Organizer Tools!\\\",\\n  \\\"message\\\": \\\"Dear Event Organizers,\\n\\nWe've been working hard to provide you with better tools to make your events more successful. Here's what's new for you:\\n\\n🎯 Enhanced Analytics Dashboard\\n- Real-time attendee tracking\\n- Revenue insights and projections\\n- Audience demographic analysis\\n\\n📧 Improved Communication Tools\\n- Automated attendee notifications\\n- Custom email templates\\n- Post-event follow-up automation\\n\\n💰 Streamlined Payment Processing\\n- Faster settlements\\n- Lower transaction fees\\n- Multiple payment options\\n\\n🎪 Event Promotion Features\\n- SEO-optimized event pages\\n- Social media integration\\n- Featured event opportunities\\n\\nThese tools are designed to help you create memorable experiences and grow your audience. Start exploring them today!\\n\\nBest of luck with your events,\\nShowPass Team\\\"\\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/messaging/all-organizers",
+              "host": ["{{baseUrl}}"],
+              "path": ["messaging", "all-organizers"]
+            },
+            "description": "Send a message specifically to all organizers (excludes regular users). Only admins can send this type of message."
+          }
+        },
+        {
+          "name": "Send Message to Specific Organizer",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    console.log('✅ Message sent to specific organizer successfully');",
+                  "    console.log('\\n📧 Message Details:');",
+                  "    console.log('- Recipient:', response.data.organizerName);",
+                  "    console.log('- Email:', response.data.organizerEmail);",
+                  "    console.log('- Subject:', response.data.subject);",
+                  "    console.log('- Sent By:', response.data.sentBy);",
+                  "    console.log('- Sent At:', response.data.sentAt);",
+                  "} else {",
+                  "    console.log('❌ Failed to send message to organizer');",
+                  "    console.log('Response:', pm.response.text());",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{authToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\\n  \\\"organizerId\\\": \\\"{{userId}}\\\",\\n  \\\"subject\\\": \\\"🎯 Personal Event Strategy Consultation Available\\\",\\n  \\\"message\\\": \\\"Hello!\\n\\nI hope your events are going well. I've been reviewing your event performance and I'm impressed with the engagement you're generating.\\n\\nI'd like to offer you a personal consultation session where we can discuss:\\n\\n🎪 Event optimization strategies\\n📈 Growth opportunities for your audience\\n💡 Creative promotional ideas\\n🎯 Targeting and marketing best practices\\n\\nThis is a complimentary service we offer to our most active organizers. Would you be interested in scheduling a 30-minute call this week?\\n\\nLet me know your availability and I'll send over some meeting time options.\\n\\nBest regards,\\nShowPass Success Team\\\"\\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/messaging/organizer/{{userId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["messaging", "organizer", "{{userId}}"]
+            },
+            "description": "Send a personalized message to a specific organizer by their ID. Only admins can send individual messages."
+          }
+        },
+        {
+          "name": "Send Message to Specific User",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    console.log('✅ Message sent to specific user successfully');",
+                  "    console.log('\\n📧 Message Details:');",
+                  "    console.log('- Recipient:', response.data.userName);",
+                  "    console.log('- Email:', response.data.userEmail);",
+                  "    console.log('- Subject:', response.data.subject);",
+                  "    console.log('- Sent By:', response.data.sentBy);",
+                  "    console.log('- Sent At:', response.data.sentAt);",
+                  "} else {",
+                  "    console.log('❌ Failed to send message to user');",
+                  "    console.log('Response:', pm.response.text());",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{authToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\\n  \\\"userId\\\": \\\"{{userId}}\\\",\\n  \\\"subject\\\": \\\"🎁 Exclusive Event Recommendations Just for You!\\\",\\n  \\\"message\\\": \\\"Hi there!\\n\\nI noticed you've been actively attending events on ShowPass, and I wanted to personally reach out with some exclusive recommendations that I think you'll love.\\n\\nBased on your event history, here are some upcoming events that match your interests:\\n\\n🎵 Music & Live Performances\\n🎪 Cultural and Art Events\\n💼 Professional Development Workshops\\n🏃 Fitness and Wellness Activities\\n\\nAs one of our valued community members, you'll also get early access to:\\n\\n⚡ Flash ticket sales\\n🎯 VIP upgrade opportunities\\n🎁 Exclusive member-only events\\n💰 Special discount codes\\n\\nKeep exploring and discovering amazing experiences!\\n\\nBest wishes,\\nShowPass Community Team\\\"\\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/messaging/user/{{userId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["messaging", "user", "{{userId}}"]
+            },
+            "description": "Send a personalized message to a specific user by their ID. Only admins can send individual messages."
+          }
         }
       ]
     },
