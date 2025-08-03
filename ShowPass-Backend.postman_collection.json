@@ -3217,12 +3217,7 @@
             "url": {
               "raw": "{{baseUrl}}/articles/{{articleId}}/comments/{{commentId}}",
               "host": ["{{baseUrl}}"],
-              "path": [
-                "articles",
-                "{{articleId}}",
-                "comments",
-                "{{commentId}}"
-              ]
+              "path": ["articles", "{{articleId}}", "comments", "{{commentId}}"]
             },
             "description": "Delete a comment from an article. Users can only delete their own comments, admins can delete any comment. Requires authentication."
           }
