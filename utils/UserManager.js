@@ -35,21 +35,21 @@ class UserManager {
   // Find user by verification code across all collections
   static async findByVerificationCode(code) {
     // Try to find in each collection
-    let user = await RegularUser.findOne({ 
+    let user = await RegularUser.findOne({
       verificationCode: code,
-      verificationCodeExpires: { $gt: new Date() }
+      verificationCodeExpires: { $gt: new Date() },
     });
     if (user) return { user, model: RegularUser, role: "user" };
 
-    user = await Organizer.findOne({ 
+    user = await Organizer.findOne({
       verificationCode: code,
-      verificationCodeExpires: { $gt: new Date() }
+      verificationCodeExpires: { $gt: new Date() },
     });
     if (user) return { user, model: Organizer, role: "organizer" };
 
-    user = await Admin.findOne({ 
+    user = await Admin.findOne({
       verificationCode: code,
-      verificationCodeExpires: { $gt: new Date() }
+      verificationCodeExpires: { $gt: new Date() },
     });
     if (user) return { user, model: Admin, role: "admin" };
 
@@ -336,11 +336,13 @@ class UserManager {
 
   // Get total count of users across all collections
   static async getTotalUsersCount(query = {}) {
-    const [regularUsersCount, organizersCount, adminsCount] = await Promise.all([
-      RegularUser.countDocuments(query),
-      Organizer.countDocuments(query),
-      Admin.countDocuments(query),
-    ]);
+    const [regularUsersCount, organizersCount, adminsCount] = await Promise.all(
+      [
+        RegularUser.countDocuments(query),
+        Organizer.countDocuments(query),
+        Admin.countDocuments(query),
+      ]
+    );
 
     return regularUsersCount + organizersCount + adminsCount;
   }

@@ -44,7 +44,10 @@ router.post(
 // @route   POST /api/auth/resend-verification-email
 // @desc    Resend verification email by email address (public)
 // @access  Public
-router.post("/resend-verification-email", authController.resendVerificationByEmail);
+router.post(
+  "/resend-verification-email",
+  authController.resendVerificationByEmail
+);
 
 // @route   POST /api/auth/forgot-password
 // @desc    Request password reset

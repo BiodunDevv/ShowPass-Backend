@@ -25,7 +25,9 @@ const register = async (req, res) => {
     }
 
     // Generate 6-digit verification code
-    const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
+    const verificationCode = Math.floor(
+      100000 + Math.random() * 900000
+    ).toString();
     const verificationCodeExpires = new Date(Date.now() + 15 * 60 * 1000); // 15 minutes
 
     // Create user in appropriate collection
@@ -187,8 +189,15 @@ const verifyEmail = async (req, res) => {
     const { user } = userResult;
 
     // Check if code has expired (15 minutes)
-    if (user.verificationCodeExpires && user.verificationCodeExpires < new Date()) {
-      return sendError(res, 400, "Verification code has expired. Please request a new one.");
+    if (
+      user.verificationCodeExpires &&
+      user.verificationCodeExpires < new Date()
+    ) {
+      return sendError(
+        res,
+        400,
+        "Verification code has expired. Please request a new one."
+      );
     }
 
     // Update user
@@ -231,18 +240,25 @@ const resendVerification = async (req, res) => {
     }
 
     // Generate new 6-digit verification code
-    const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
+    const verificationCode = Math.floor(
+      100000 + Math.random() * 900000
+    ).toString();
     const verificationCodeExpires = new Date(Date.now() + 15 * 60 * 1000); // 15 minutes
-    
+
     user.verificationCode = verificationCode;
     user.verificationCodeExpires = verificationCodeExpires;
     await user.save();
 
     // Send verification email
     await sendVerificationEmail(user, verificationCode);
-    console.log(`🔐 New verification code for ${user.email}: ${verificationCode}`);
+    console.log(
+      `🔐 New verification code for ${user.email}: ${verificationCode}`
+    );
 
-    sendSuccess(res, "Verification code sent successfully. Please check your email.");
+    sendSuccess(
+      res,
+      "Verification code sent successfully. Please check your email."
+    );
   } catch (error) {
     console.error("Resend verification error:", error);
     sendError(res, 500, "Failed to resend verification code", error.message);
@@ -270,9 +286,11 @@ const resendVerificationByEmail = async (req, res) => {
     }
 
     // Generate new 6-digit verification code
-    const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
+    const verificationCode = Math.floor(
+      100000 + Math.random() * 900000
+    ).toString();
     const verificationCodeExpires = new Date(Date.now() + 15 * 60 * 1000); // 15 minutes
-    
+
     user.verificationCode = verificationCode;
     user.verificationCodeExpires = verificationCodeExpires;
     await user.save();
@@ -281,7 +299,10 @@ const resendVerificationByEmail = async (req, res) => {
     await sendVerificationEmail(user, verificationCode);
     console.log(`🔐 New verification code for ${email}: ${verificationCode}`);
 
-    sendSuccess(res, "Verification code sent successfully. Please check your email.");
+    sendSuccess(
+      res,
+      "Verification code sent successfully. Please check your email."
+    );
   } catch (error) {
     console.error("Resend verification by email error:", error);
     sendError(res, 500, "Failed to resend verification code", error.message);

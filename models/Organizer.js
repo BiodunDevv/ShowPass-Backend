@@ -105,7 +105,7 @@ const organizerSchema = new mongoose.Schema(
     },
     verified: {
       type: Boolean,
-      default: false,
+      default: true,
     },
     verificationDocuments: [String], // File paths
     rating: {

@@ -85,7 +85,7 @@ const regularUserSchema = new mongoose.Schema(
   },
   {
     timestamps: true,
-    collection: 'regularusers' // Explicit collection name
+    collection: "regularusers", // Explicit collection name
   }
 );
 
