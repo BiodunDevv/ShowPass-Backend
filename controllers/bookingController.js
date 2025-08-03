@@ -11,10 +11,11 @@ const {
 const { generateTicketQR } = require("../utils/qrGenerator");
 const { sendTicketConfirmation } = require("../utils/emailService");
 
-// Create booking (initiate ticket purchase)
+// Create booking (direct booking after frontend payment)
 const createBooking = async (req, res) => {
   try {
-    const { eventId, ticketType, quantity, attendeeInfo } = req.body;
+    const { eventId, ticketType, quantity, attendeeInfo, frontendPaymentId } =
+      req.body;
 
     // Get event
     const event = await Event.findById(eventId);
@@ -54,8 +55,8 @@ const createBooking = async (req, res) => {
     const subtotal = ticketPrice * quantity;
     const fees = calculateFees(subtotal);
 
-    // Create booking
-    const booking = new Booking({
+    // Generate QR code immediately since payment is already processed
+    const bookingData = {
       user: req.user._id,
       event: eventId,
       ticketType,
@@ -64,10 +65,21 @@ const createBooking = async (req, res) => {
       platformFee: fees.platformFee,
       vat: fees.vat,
       finalAmount: fees.finalAmount,
+      frontendPaymentId, // Store frontend payment ID
+    };
+
+    const { qrCode, qrCodeImage } = await generateTicketQR(bookingData);
+
+    // Create confirmed booking
+    const booking = new Booking({
+      ...bookingData,
+      qrCode,
+      qrCodeImage,
       attendeeInfo: {
-        name: attendeeInfo.name || `${req.user.firstName} ${req.user.lastName}`,
-        email: attendeeInfo.email || req.user.email,
-        phone: attendeeInfo.phone || req.user.phone,
+        name:
+          attendeeInfo?.name || `${req.user.firstName} ${req.user.lastName}`,
+        email: attendeeInfo?.email || req.user.email,
+        phone: attendeeInfo?.phone || req.user.phone,
       },
     });
 
@@ -77,9 +89,68 @@ const createBooking = async (req, res) => {
       { path: "event", select: "title startDate endDate venue organizer" },
     ]);
 
+    // Update user spending tracking
+    try {
+      const userResult = await UserManager.findById(booking.user._id);
+      if (userResult && userResult.user) {
+        const { user } = userResult;
+
+        // Initialize purchaseHistory if it doesn't exist
+        if (!user.purchaseHistory) {
+          user.purchaseHistory = [];
+        }
+
+        // Update total spent
+        user.totalSpent = (user.totalSpent || 0) + booking.finalAmount;
+
+        // Add to purchase history
+        user.purchaseHistory.push({
+          eventId: booking.event._id,
+          eventTitle: booking.event.title,
+          amount: booking.finalAmount,
+          ticketType: booking.ticketType,
+          quantity: booking.quantity,
+          date: new Date(),
+          status: "completed",
+        });
+
+        await user.save();
+        console.log(
+          `💰 Updated user spending: ${user.email} - Total: ₦${user.totalSpent}`
+        );
+      }
+    } catch (spendingError) {
+      console.error("Failed to update user spending:", spendingError);
+      // Don't fail the booking confirmation for spending tracking errors
+    }
+
+    // Update user's attending events array
+    await updateUserEventArrays(
+      booking.user._id,
+      booking.event._id,
+      "attending"
+    );
+
+    // Update event ticket sales
+    const ticketType_obj = event.ticketTypes.find(
+      (tt) => tt.name === booking.ticketType
+    );
+    if (ticketType_obj) {
+      ticketType_obj.sold += booking.quantity;
+      event.currentAttendees += booking.quantity;
+      await event.save();
+    }
+
+    // Send confirmation email
+    try {
+      await sendTicketConfirmation(booking.user, booking, event, qrCodeImage);
+    } catch (emailError) {
+      console.error("Ticket email failed:", emailError);
+    }
+
     sendSuccess(
       res,
-      "Booking created successfully. Proceed to payment.",
+      "Booking completed successfully! Check your email for ticket details.",
       booking
     );
   } catch (error) {
@@ -158,102 +229,6 @@ const getBookingById = async (req, res) => {
   } catch (error) {
     console.error("Get booking error:", error);
     sendError(res, 500, "Failed to retrieve booking", error.message);
-  }
-};
-
-// Confirm booking payment (called after successful payment)
-const confirmBookingPayment = async (req, res) => {
-  try {
-    const { bookingId, paymentReference, paystackReference } = req.body;
-
-    const booking = await Booking.findById(bookingId)
-      .populate("user")
-      .populate("event");
-
-    if (!booking) {
-      return sendError(res, 404, "Booking not found");
-    }
-
-    if (booking.status === "confirmed") {
-      return sendError(res, 400, "Booking already confirmed");
-    }
-
-    // Update booking status
-    booking.status = "confirmed";
-    booking.paymentStatus = "paid";
-    booking.paystackReference = paystackReference;
-
-    // Generate QR code
-    const { qrCode, qrCodeImage } = await generateTicketQR(booking);
-    booking.qrCode = qrCode;
-    booking.qrCodeImage = qrCodeImage;
-
-    await booking.save();
-
-    // Update user spending tracking
-    try {
-      const userResult = await UserManager.findById(booking.user._id);
-      if (userResult) {
-        const { user } = userResult;
-
-        // Update total spent
-        user.totalSpent = (user.totalSpent || 0) + booking.finalAmount;
-
-        // Add to purchase history
-        user.purchaseHistory.push({
-          eventId: booking.event._id,
-          eventTitle: booking.event.title,
-          amount: booking.finalAmount,
-          ticketType: booking.ticketType,
-          quantity: booking.quantity,
-          date: new Date(),
-          status: "completed",
-        });
-
-        await user.save();
-        console.log(
-          `💰 Updated user spending: ${user.email} - Total: ₦${user.totalSpent}`
-        );
-      }
-    } catch (spendingError) {
-      console.error("Failed to update user spending:", spendingError);
-      // Don't fail the booking confirmation for spending tracking errors
-    }
-
-    // Update user's attending events array
-    await updateUserEventArrays(
-      booking.user._id,
-      booking.event._id,
-      "attending",
-      User
-    );
-
-    // Update event ticket sales
-    const event = await Event.findById(booking.event._id);
-    const ticketType = event.ticketTypes.find(
-      (tt) => tt.name === booking.ticketType
-    );
-    if (ticketType) {
-      ticketType.sold += booking.quantity;
-      event.currentAttendees += booking.quantity;
-      await event.save();
-    }
-
-    // Send confirmation email
-    try {
-      await sendTicketConfirmation(booking.user, booking, event, qrCodeImage);
-    } catch (emailError) {
-      console.error("Ticket email failed:", emailError);
-    }
-
-    sendSuccess(
-      res,
-      "Booking confirmed successfully! Check your email for ticket details.",
-      booking
-    );
-  } catch (error) {
-    console.error("Confirm booking error:", error);
-    sendError(res, 500, "Failed to confirm booking", error.message);
   }
 };
 
@@ -522,7 +497,7 @@ const registerForFreeEvent = async (req, res) => {
     await booking.save();
 
     // Update user's attending events array
-    await updateUserEventArrays(req.user._id, eventId, "attending", User);
+    await updateUserEventArrays(req.user._id, eventId, "attending");
 
     // Update event ticket sales
     ticketTypeData.sold += quantity;
@@ -534,7 +509,7 @@ const registerForFreeEvent = async (req, res) => {
 
     // Send confirmation email
     try {
-      await sendTicketConfirmation(req.user, booking);
+      await sendTicketConfirmation(req.user, booking, event, qrCodeImage);
       console.log(
         `📧 Free event registration confirmation sent to: ${req.user.email}`
       );
@@ -560,7 +535,6 @@ module.exports = {
   createBooking,
   getUserBookings,
   getBookingById,
-  confirmBookingPayment,
   cancelBooking,
   checkInBooking,
   verifyQRCode,

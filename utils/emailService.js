@@ -99,15 +99,26 @@ const sendTicketConfirmation = async (user, booking, event, qrCodeImage) => {
     quantity: booking.quantity,
     finalAmount: formatCurrency(booking.finalAmount),
     paymentReference: booking.paymentReference,
-    qrCodeImage: qrCodeImage,
+    qrCodeImage: "cid:qrcode", // Reference the attached image
     supportEmail: process.env.EMAIL_FROM,
   };
+
+  // Convert data URL to buffer for attachment
+  const base64Data = qrCodeImage.replace(/^data:image\/png;base64,/, "");
+  const qrCodeBuffer = Buffer.from(base64Data, "base64");
 
   const mailOptions = {
     from: "ShowPass <noreply@showpass.com>",
     to: user.email,
     subject: `🎟️ Your Ticket for ${event.title} - ShowPass`,
     html: compileTemplate(template, templateData),
+    attachments: [
+      {
+        filename: "qr-code.png",
+        content: qrCodeBuffer,
+        cid: "qrcode", // Same as referenced in template
+      },
+    ],
   };
 
   await transporter.sendMail(mailOptions);

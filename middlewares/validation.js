@@ -155,12 +155,19 @@ const validateBooking = [
     .isInt({ min: 1, max: 10 })
     .withMessage("Quantity must be between 1 and 10"),
 
-  body("attendeeInfo.name")
+  body("frontendPaymentId")
     .trim()
     .notEmpty()
-    .withMessage("Attendee name is required"),
+    .withMessage("Frontend payment ID is required"),
+
+  body("attendeeInfo.name")
+    .optional()
+    .trim()
+    .notEmpty()
+    .withMessage("Attendee name cannot be empty if provided"),
 
   body("attendeeInfo.email")
+    .optional()
     .isEmail()
     .withMessage("Please provide a valid attendee email")
     .normalizeEmail(),

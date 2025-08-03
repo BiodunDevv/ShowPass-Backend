@@ -7,7 +7,6 @@ const bodyParser = require("body-parser");
 const authRoutes = require("./routes/authRoutes");
 const eventRoutes = require("./routes/eventRoutes");
 const bookingRoutes = require("./routes/bookingRoutes");
-const paymentRoutes = require("./routes/paymentRoutes");
 const adminRoutes = require("./routes/adminRoutes");
 const refundRoutes = require("./routes/refundRoutes");
 const userDetailsRoutes = require("./routes/userDetailsRoutes");
@@ -45,7 +44,6 @@ app.get("/", (req, res) => {
 app.use("/api/auth", authRoutes);
 app.use("/api/events", eventRoutes);
 app.use("/api/booking", bookingRoutes);
-app.use("/api/payment", paymentRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/refund", refundRoutes);
 app.use("/api/user-details", userDetailsRoutes);

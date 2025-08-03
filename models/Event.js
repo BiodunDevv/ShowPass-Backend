@@ -217,26 +217,33 @@ const eventSchema = new mongoose.Schema(
 
 // Virtual for total tickets
 eventSchema.virtual("totalTickets").get(function () {
-  return this.ticketTypes.reduce((total, ticket) => total + ticket.quantity, 0);
+  return (
+    this.ticketTypes?.reduce((total, ticket) => total + ticket.quantity, 0) || 0
+  );
 });
 
 // Virtual for tickets sold
 eventSchema.virtual("ticketsSold").get(function () {
-  return this.ticketTypes.reduce((total, ticket) => total + ticket.sold, 0);
+  return (
+    this.ticketTypes?.reduce((total, ticket) => total + ticket.sold, 0) || 0
+  );
 });
 
 // Virtual for revenue
 eventSchema.virtual("totalRevenue").get(function () {
-  return this.ticketTypes.reduce(
-    (total, ticket) => total + ticket.sold * ticket.price,
-    0
+  return (
+    this.ticketTypes?.reduce(
+      (total, ticket) => total + ticket.sold * ticket.price,
+      0
+    ) || 0
   );
 });
 
 // Check if event is free
 eventSchema.virtual("isFree").get(function () {
-  return this.ticketTypes.every(
-    (ticket) => ticket.price === 0 || ticket.isFree
+  return (
+    this.ticketTypes?.every((ticket) => ticket.price === 0 || ticket.isFree) ||
+    false
   );
 });
 

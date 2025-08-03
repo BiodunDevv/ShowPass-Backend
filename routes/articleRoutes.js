@@ -10,6 +10,8 @@ const {
   deleteArticle,
   toggleArticleLike,
   addComment,
+  getArticleComments,
+  addCommentReply,
   getArticleCategories,
   getArticlesByCategory,
 } = require("../controllers/articleController");
@@ -20,6 +22,7 @@ router.get("/featured", getFeaturedArticles);
 router.get("/categories", getArticleCategories);
 router.get("/category/:category", getArticlesByCategory);
 router.get("/:id", getArticleById);
+router.get("/:id/comments", getArticleComments);
 
 // Protected routes
 router.use(requireAuth);
@@ -33,10 +36,13 @@ router.put("/:id", updateArticle);
 // Delete article (Admin only)
 router.delete("/:id", deleteArticle);
 
-// Like/unlike article
+// Like/unlike article (Users and Organizers)
 router.post("/:id/like", toggleArticleLike);
 
-// Add comment to article
+// Add comment to article (Users and Organizers)
 router.post("/:id/comments", addComment);
+
+// Add reply to comment (Users and Organizers)
+router.post("/:id/comments/:commentId/replies", addCommentReply);
 
 module.exports = router;

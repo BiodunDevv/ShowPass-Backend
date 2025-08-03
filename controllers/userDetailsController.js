@@ -14,7 +14,7 @@ const getUserDetails = async (req, res) => {
     const { userId } = req.params;
     const requestingUser = req.user;
 
-    // Check permissions: admin can view all, users can view own profile, organizers can view attendees
+    // NEW: All users can view organizer details
     if (
       requestingUser.role !== "admin" &&
       requestingUser._id.toString() !== userId
@@ -31,6 +31,15 @@ const getUserDetails = async (req, res) => {
             403,
             "You can only view details of your event attendees"
           );
+        }
+      } else if (requestingUser.role === "user") {
+        // Users can view organizer profiles but not other user profiles
+        const targetUserResult = await UserManager.findById(userId);
+        if (!targetUserResult) {
+          return sendError(res, 404, "User not found");
+        }
+        if (targetUserResult.user.role !== "organizer") {
+          return sendError(res, 403, "You can only view organizer profiles");
         }
       } else {
         return sendError(res, 403, "Access denied");
@@ -520,8 +529,142 @@ const calculateProfileCompleteness = (user) => {
   return Math.round((completeness / totalFields) * 100);
 };
 
+// Get organizer public profile with all their events (accessible to all users)
+const getOrganizerProfile = async (req, res) => {
+  try {
+    const { organizerId } = req.params;
+
+    // Find the organizer
+    const organizerResult = await UserManager.findById(organizerId);
+    if (!organizerResult) {
+      return sendError(res, 404, "Organizer not found");
+    }
+
+    const { user: organizer } = organizerResult;
+
+    if (organizer.role !== "organizer") {
+      return sendError(res, 400, "User is not an organizer");
+    }
+
+    // Get all organizer's events with detailed information
+    const events = await Event.find({ organizer: organizerId })
+      .select(
+        "title description category startDate endTime venue status approved price ticketTypes images createdAt"
+      )
+      .sort({ startDate: -1 });
+
+    // Get organizer statistics
+    const [totalAttendees, totalRevenue, approvedEvents] = await Promise.all([
+      Booking.countDocuments({
+        event: { $in: events.map((e) => e._id) },
+        status: "confirmed",
+      }),
+      Booking.aggregate([
+        {
+          $match: {
+            event: { $in: events.map((e) => e._id) },
+            status: "confirmed",
+          },
+        },
+        {
+          $group: {
+            _id: null,
+            total: { $sum: "$totalAmount" },
+          },
+        },
+      ]),
+      Event.countDocuments({ organizer: organizerId, approved: true }),
+    ]);
+
+    // Calculate ratings based on events (simplified - you might want to add a proper rating system)
+    const avgRating = 4.2; // Placeholder - implement actual rating calculation
+
+    // Categorize events
+    const upcomingEvents = events.filter(
+      (event) => new Date(event.startDate) > new Date() && event.approved
+    );
+    const pastEvents = events.filter(
+      (event) => new Date(event.startDate) <= new Date() && event.approved
+    );
+    const pendingEvents = events.filter((event) => !event.approved);
+
+    // Public organizer profile
+    const organizerProfile = {
+      _id: organizer._id,
+      firstName: organizer.firstName,
+      lastName: organizer.lastName,
+      email: organizer.email, // Consider if this should be public
+      role: organizer.role,
+      verified: organizer.verified,
+      isVerified: organizer.isVerified,
+      createdAt: organizer.createdAt,
+      bio: organizer.bio || null,
+      website: organizer.website || null,
+      socialLinks: organizer.socialLinks || {},
+
+      statistics: {
+        totalEvents: events.length,
+        approvedEvents: approvedEvents,
+        pendingEvents: pendingEvents.length,
+        totalAttendees: totalAttendees,
+        totalRevenue: totalRevenue[0]?.total || 0,
+        avgRating: avgRating,
+        accountAge: calculateAccountAge(organizer.createdAt),
+        verificationStatus: organizer.verified ? "verified" : "unverified",
+      },
+
+      events: {
+        upcoming: upcomingEvents.map((event) => ({
+          _id: event._id,
+          title: event.title,
+          description: event.description,
+          category: event.category,
+          startDate: event.startDate,
+          endTime: event.endTime,
+          venue: event.venue,
+          price: event.price,
+          ticketTypes: event.ticketTypes,
+          images: event.images,
+          createdAt: event.createdAt,
+        })),
+        past: pastEvents.slice(0, 10).map((event) => ({
+          _id: event._id,
+          title: event.title,
+          category: event.category,
+          startDate: event.startDate,
+          venue: event.venue,
+          price: event.price,
+        })),
+        pending:
+          req.user && req.user._id.toString() === organizerId
+            ? pendingEvents.map((event) => ({
+                _id: event._id,
+                title: event.title,
+                status: event.status,
+                createdAt: event.createdAt,
+              }))
+            : [], // Only show pending events to the organizer themselves
+      },
+
+      categories: [...new Set(events.map((event) => event.category))],
+      joinDate: organizer.createdAt,
+      isOwnProfile: req.user && req.user._id.toString() === organizerId,
+    };
+
+    sendSuccess(
+      res,
+      "Organizer profile retrieved successfully",
+      organizerProfile
+    );
+  } catch (error) {
+    console.error("Get organizer profile error:", error);
+    sendError(res, 500, "Failed to retrieve organizer profile", error.message);
+  }
+};
+
 module.exports = {
   getUserDetails,
   getAllUsersDetails,
   getUserProfile,
+  getOrganizerProfile,
 };

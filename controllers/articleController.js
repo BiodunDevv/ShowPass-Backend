@@ -234,7 +234,22 @@ const toggleArticleLike = async (req, res) => {
   try {
     const { id } = req.params;
     const userId = req.user._id;
-    const userType = req.user.userType;
+
+    // Determine user type based on role
+    let userType;
+    switch (req.user.role) {
+      case "admin":
+        userType = "Admin";
+        break;
+      case "organizer":
+        userType = "Organizer";
+        break;
+      case "user":
+        userType = "RegularUser";
+        break;
+      default:
+        userType = "RegularUser";
+    }
 
     const article = await Article.findById(id);
     if (!article) {
@@ -258,9 +273,17 @@ const toggleArticleLike = async (req, res) => {
 
     await article.save();
 
+    // Get user details for response
+    const userResult = await UserManager.findById(userId);
+    const userName = userResult
+      ? `${userResult.user.firstName} ${userResult.user.lastName}`
+      : "Unknown User";
+
     sendSuccess(res, "Article like status updated", {
       liked: existingLikeIndex === -1,
       totalLikes: article.likes.length,
+      likedBy: existingLikeIndex === -1 ? userName : null,
+      action: existingLikeIndex === -1 ? "liked" : "unliked",
     });
   } catch (error) {
     console.error("Toggle article like error:", error);
@@ -274,11 +297,31 @@ const addComment = async (req, res) => {
     const { id } = req.params;
     const { content } = req.body;
     const userId = req.user._id;
-    const userType = req.user.userType;
+
+    // Determine user type based on role
+    let userType;
+    switch (req.user.role) {
+      case "admin":
+        userType = "Admin";
+        break;
+      case "organizer":
+        userType = "Organizer";
+        break;
+      case "user":
+        userType = "RegularUser";
+        break;
+      default:
+        userType = "RegularUser";
+    }
+
     const userName = `${req.user.firstName} ${req.user.lastName}`;
 
     if (!content || content.trim().length === 0) {
       return sendError(res, 400, "Comment content is required");
+    }
+
+    if (content.trim().length > 1000) {
+      return sendError(res, 400, "Comment cannot exceed 1000 characters");
     }
 
     const article = await Article.findById(id);
@@ -296,9 +339,23 @@ const addComment = async (req, res) => {
     article.comments.push(comment);
     await article.save();
 
+    // Get the newly added comment with all details
+    const newComment = article.comments[article.comments.length - 1];
+
     sendSuccess(res, "Comment added successfully", {
-      comment: article.comments[article.comments.length - 1],
+      comment: {
+        _id: newComment._id,
+        user: newComment.user,
+        userType: newComment.userType,
+        userName: newComment.userName,
+        content: newComment.content,
+        createdAt: newComment.createdAt,
+      },
       totalComments: article.comments.length,
+      article: {
+        _id: article._id,
+        title: article.title,
+      },
     });
   } catch (error) {
     console.error("Add comment error:", error);
@@ -306,7 +363,123 @@ const addComment = async (req, res) => {
   }
 };
 
-// Get article categories
+// Get comments for an article
+const getArticleComments = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { page = 1, limit = 10 } = req.query;
+
+    const article = await Article.findById(id)
+      .select("comments title")
+      .populate({
+        path: "comments.user",
+        select: "firstName lastName",
+      });
+
+    if (!article) {
+      return sendError(res, 404, "Article not found");
+    }
+
+    // Sort comments by newest first
+    const sortedComments = article.comments.sort(
+      (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+    );
+
+    // Pagination
+    const startIndex = (page - 1) * limit;
+    const endIndex = startIndex + parseInt(limit);
+    const paginatedComments = sortedComments.slice(startIndex, endIndex);
+
+    sendSuccess(res, "Comments retrieved successfully", {
+      comments: paginatedComments,
+      totalComments: article.comments.length,
+      page: parseInt(page),
+      limit: parseInt(limit),
+      totalPages: Math.ceil(article.comments.length / limit),
+      article: {
+        _id: article._id,
+        title: article.title,
+      },
+    });
+  } catch (error) {
+    console.error("Get article comments error:", error);
+    sendError(res, 500, "Failed to retrieve comments", error.message);
+  }
+};
+
+// Add reply to a comment
+const addCommentReply = async (req, res) => {
+  try {
+    const { id, commentId } = req.params;
+    const { content } = req.body;
+    const userId = req.user._id;
+
+    // Determine user type based on role
+    let userType;
+    switch (req.user.role) {
+      case "admin":
+        userType = "Admin";
+        break;
+      case "organizer":
+        userType = "Organizer";
+        break;
+      case "user":
+        userType = "RegularUser";
+        break;
+      default:
+        userType = "RegularUser";
+    }
+
+    const userName = `${req.user.firstName} ${req.user.lastName}`;
+
+    if (!content || content.trim().length === 0) {
+      return sendError(res, 400, "Reply content is required");
+    }
+
+    if (content.trim().length > 500) {
+      return sendError(res, 400, "Reply cannot exceed 500 characters");
+    }
+
+    const article = await Article.findById(id);
+    if (!article) {
+      return sendError(res, 404, "Article not found");
+    }
+
+    const comment = article.comments.id(commentId);
+    if (!comment) {
+      return sendError(res, 404, "Comment not found");
+    }
+
+    const reply = {
+      user: userId,
+      userType: userType,
+      userName: userName,
+      content: content.trim(),
+    };
+
+    comment.replies.push(reply);
+    await article.save();
+
+    // Get the newly added reply
+    const newReply = comment.replies[comment.replies.length - 1];
+
+    sendSuccess(res, "Reply added successfully", {
+      reply: {
+        _id: newReply._id,
+        user: newReply.user,
+        userType: newReply.userType,
+        userName: newReply.userName,
+        content: newReply.content,
+        createdAt: newReply.createdAt,
+      },
+      commentId: commentId,
+      totalReplies: comment.replies.length,
+    });
+  } catch (error) {
+    console.error("Add comment reply error:", error);
+    sendError(res, 500, "Failed to add reply", error.message);
+  }
+};
 const getArticleCategories = async (req, res) => {
   try {
     const categories = [
@@ -388,6 +561,8 @@ module.exports = {
   deleteArticle,
   toggleArticleLike,
   addComment,
+  getArticleComments,
+  addCommentReply,
   getArticleCategories,
   getArticlesByCategory,
 };

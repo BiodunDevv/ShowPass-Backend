@@ -9,13 +9,26 @@ const {
 const { param, body } = require("express-validator");
 
 // @route   POST /api/booking
-// @desc    Create new booking
+// @desc    Create new booking (direct booking after frontend payment)
 // @access  Private (User)
 router.post(
   "/",
-  requireAuth,
-  isUser,
-  validateBooking,
+  [
+    requireAuth,
+    isUser,
+    body("eventId").isMongoId().withMessage("Valid event ID is required"),
+    body("ticketType").notEmpty().withMessage("Ticket type is required"),
+    body("quantity")
+      .isInt({ min: 1, max: 10 })
+      .withMessage("Quantity must be between 1 and 10"),
+    body("frontendPaymentId")
+      .notEmpty()
+      .withMessage("Frontend payment ID is required"),
+    body("attendeeInfo")
+      .optional()
+      .isObject()
+      .withMessage("Attendee info must be an object"),
+  ],
   bookingController.createBooking
 );
 
@@ -52,24 +65,6 @@ router.get(
   validateObjectId(param("id")),
   requireAuth,
   bookingController.getBookingById
-);
-
-// @route   POST /api/booking/confirm-payment
-// @desc    Confirm booking payment
-// @access  Private
-router.post(
-  "/confirm-payment",
-  [
-    requireAuth,
-    body("bookingId").isMongoId().withMessage("Valid booking ID is required"),
-    body("paymentReference")
-      .notEmpty()
-      .withMessage("Payment reference is required"),
-    body("paystackReference")
-      .notEmpty()
-      .withMessage("Paystack reference is required"),
-  ],
-  bookingController.confirmBookingPayment
 );
 
 // @route   PUT /api/booking/:id/cancel

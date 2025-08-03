@@ -40,18 +40,18 @@ const bookingSchema = new mongoose.Schema(
     status: {
       type: String,
       enum: ["pending", "confirmed", "cancelled", "refunded", "used"],
-      default: "pending",
+      default: "confirmed", // Default to confirmed since payment is handled on frontend
     },
     paymentStatus: {
       type: String,
       enum: ["pending", "paid", "failed", "refunded"],
-      default: "pending",
+      default: "paid", // Default to paid since payment is handled on frontend
     },
     paymentReference: {
       type: String,
       unique: true,
     },
-    paystackReference: String,
+    frontendPaymentId: String, // Store frontend payment transaction ID
     qrCode: String,
     qrCodeImage: String,
     attendeeInfo: {
