@@ -39,6 +39,8 @@ const organizerSchema = new mongoose.Schema(
       default: false,
     },
     verificationToken: String,
+    verificationCode: String,
+    verificationCodeExpires: Date,
     resetPasswordToken: String,
     resetPasswordExpire: Date,
     profileImage: String,

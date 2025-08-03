@@ -32,7 +32,31 @@ class UserManager {
     return null;
   }
 
-  // Find user by verification token across all collections
+  // Find user by verification code across all collections
+  static async findByVerificationCode(code) {
+    // Try to find in each collection
+    let user = await RegularUser.findOne({ 
+      verificationCode: code,
+      verificationCodeExpires: { $gt: new Date() }
+    });
+    if (user) return { user, model: RegularUser, role: "user" };
+
+    user = await Organizer.findOne({ 
+      verificationCode: code,
+      verificationCodeExpires: { $gt: new Date() }
+    });
+    if (user) return { user, model: Organizer, role: "organizer" };
+
+    user = await Admin.findOne({ 
+      verificationCode: code,
+      verificationCodeExpires: { $gt: new Date() }
+    });
+    if (user) return { user, model: Admin, role: "admin" };
+
+    return null;
+  }
+
+  // Find user by verification token across all collections (legacy support)
   static async findByVerificationToken(token) {
     // Try to find in each collection
     let user = await RegularUser.findOne({ verificationToken: token });
@@ -312,18 +336,13 @@ class UserManager {
 
   // Get total count of users across all collections
   static async getTotalUsersCount(query = {}) {
-    try {
-      const [regularCount, organizerCount, adminCount] = await Promise.all([
-        RegularUser.countDocuments(query),
-        Organizer.countDocuments(query),
-        Admin.countDocuments(query),
-      ]);
+    const [regularUsersCount, organizersCount, adminsCount] = await Promise.all([
+      RegularUser.countDocuments(query),
+      Organizer.countDocuments(query),
+      Admin.countDocuments(query),
+    ]);
 
-      return regularCount + organizerCount + adminCount;
-    } catch (error) {
-      console.error("Get total users count error:", error);
-      throw error;
-    }
+    return regularUsersCount + organizersCount + adminsCount;
   }
 }
 

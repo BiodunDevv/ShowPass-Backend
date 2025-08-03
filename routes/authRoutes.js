@@ -27,19 +27,24 @@ router.get("/me", requireAuth, authController.getMe);
 // @access  Private
 router.put("/profile", requireAuth, authController.updateProfile);
 
-// @route   GET /api/auth/verify-email
-// @desc    Verify email address
+// @route   POST /api/auth/verify-email
+// @desc    Verify email address with 6-digit code
 // @access  Public
-router.get("/verify-email", authController.verifyEmail);
+router.post("/verify-email", authController.verifyEmail);
 
 // @route   POST /api/auth/resend-verification
-// @desc    Resend verification email
+// @desc    Resend verification email (authenticated)
 // @access  Private
 router.post(
   "/resend-verification",
   requireAuth,
   authController.resendVerification
 );
+
+// @route   POST /api/auth/resend-verification-email
+// @desc    Resend verification email by email address (public)
+// @access  Public
+router.post("/resend-verification-email", authController.resendVerificationByEmail);
 
 // @route   POST /api/auth/forgot-password
 // @desc    Request password reset

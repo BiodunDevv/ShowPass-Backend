@@ -154,6 +154,36 @@
         },
         {
           "name": "Register Regular User",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200 || pm.response.code === 201) {",
+                  "    const response = pm.response.json();",
+                  "    pm.environment.set('authToken', response.data.token);",
+                  "    pm.environment.set('userId', response.data.user._id);",
+                  "    console.log('✅ User registration successful');",
+                  "    console.log('👤 User Details:');",
+                  "    console.log('- ID:', response.data.user._id);",
+                  "    console.log('- Name:', response.data.user.firstName + ' ' + response.data.user.lastName);",
+                  "    console.log('- Email:', response.data.user.email);",
+                  "    console.log('- Role:', response.data.user.role);",
+                  "    console.log('- Verified:', response.data.user.isVerified);",
+                  "    console.log('- Token saved to environment');",
+                  "    console.log('');",
+                  "    console.log('📧 Next Step: Check email for verification link');",
+                  "    if (!response.data.user.isVerified) {",
+                  "        console.log('💡 You can also use the \"Resend Verification Email\" endpoint');",
+                  "    }",
+                  "} else {",
+                  "    console.log('❌ Registration failed');",
+                  "    console.log('Response:', pm.response.text());",
+                  "}"
+                ]
+              }
+            }
+          ],
           "request": {
             "method": "POST",
             "header": [
@@ -170,7 +200,67 @@
               "raw": "{{baseUrl}}/auth/register",
               "host": ["{{baseUrl}}"],
               "path": ["auth", "register"]
+            },
+            "description": "Register a new regular user account. This will create a user with 'user' role who can browse events, make bookings, and manage their profile."
+          }
+        },
+        {
+          "name": "Register Test User (Mustapha)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200 || pm.response.code === 201) {",
+                  "    const response = pm.response.json();",
+                  "    pm.environment.set('authToken', response.data.token);",
+                  "    pm.environment.set('userId', response.data.user._id);",
+                  "    console.log('✅ Test user registration successful');",
+                  "    console.log('👤 User Details:');",
+                  "    console.log('- ID:', response.data.user._id);",
+                  "    console.log('- Name:', response.data.user.firstName + ' ' + response.data.user.lastName);",
+                  "    console.log('- Email:', response.data.user.email);",
+                  "    console.log('- Role:', response.data.user.role);",
+                  "    console.log('- Verified:', response.data.user.isVerified);",
+                  "    console.log('- Token saved to environment');",
+                  "    console.log('');",
+                  "    console.log('🧪 This is a test user for verification workflows');",
+                  "    if (!response.data.user.isVerified) {",
+                  "        console.log('📧 Next: Use \"Resend Verification Email\" to test email verification');",
+                  "    }",
+                  "} else if (pm.response.code === 400) {",
+                  "    const response = pm.response.json();",
+                  "    if (response.message.includes('already exists')) {",
+                  "        console.log('ℹ️ User already exists - try logging in instead');",
+                  "    } else {",
+                  "        console.log('❌ Registration failed:', response.message);",
+                  "    }",
+                  "} else {",
+                  "    console.log('❌ Registration failed');",
+                  "    console.log('Response:', pm.response.text());",
+                  "}"
+                ]
+              }
             }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstName\": \"Mustapha\",\n  \"lastName\": \"Hajarat\",\n  \"email\": \"mustapha.hajarat@bowen.edu.ng\",\n  \"password\": \"Baikiss12\",\n  \"role\": \"user\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/register",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "register"]
+            },
+            "description": "Register the test user with Bowen University email. This user can be used to test the email verification workflow and other user features."
           }
         },
         {
@@ -254,6 +344,37 @@
                   "    const response = pm.response.json();",
                   "    pm.environment.set('authToken', response.data.token);",
                   "    pm.environment.set('userId', response.data.user._id);",
+                  "    console.log('✅ Seeded user login successful');",
+                  "    console.log('👤 User Details:');",
+                  "    console.log('- ID:', response.data.user._id);",
+                  "    console.log('- Name:', response.data.user.firstName + ' ' + response.data.user.lastName);",
+                  "    console.log('- Email:', response.data.user.email);",
+                  "    console.log('- Role:', response.data.user.role);",
+                  "    console.log('- Verified:', response.data.user.isVerified);",
+                  "    console.log('- Token saved to environment');",
+                  "    console.log('');",
+                  "    console.log('🌱 This is a seeded user from database initialization');",
+                  "    console.log('✅ Account verified - all features available');",
+                  "} else if (pm.response.code === 401) {",
+                  "    console.log('❌ Login failed - Invalid credentials');",
+                  "    console.log('💡 Make sure you have run the seed data script first');",
+                  "} else if (pm.response.code === 403) {",
+                  "    const response = pm.response.json();",
+                  "    if (response.message && response.message.includes('verify your email')) {",
+                  "        console.log('🚫 Email verification required');",
+                  "        console.log('📧 Please verify your email address before logging in');",
+                  "        console.log('');",
+                  "        console.log('💡 This seeded user needs email verification:');",
+                  "        console.log('1. Use \"Resend Verification Email\" endpoint');",
+                  "        console.log('2. Check your email for verification link');",
+                  "        console.log('3. Click verification link');",
+                  "        console.log('4. Then try logging in again');",
+                  "    } else {",
+                  "        console.log('❌ Access forbidden:', response.message);",
+                  "    }",
+                  "} else {",
+                  "    console.log('❌ Login failed');",
+                  "    console.log('Response:', pm.response.text());",
                   "}"
                 ]
               }
@@ -275,28 +396,59 @@
               "raw": "{{baseUrl}}/auth/login",
               "host": ["{{baseUrl}}"],
               "path": ["auth", "login"]
-            }
+            },
+            "description": "Login with the seeded user account. This user is created when the database is initialized with seed data.\n\n⚠️ **Email Verification Required**: Users must verify their email address before they can log in. If the account is not verified, you'll receive a 403 error with instructions to verify.\n\n**Expected Responses:**\n- 200: Login successful (verified user)\n- 401: Invalid credentials\n- 403: Email verification required"
           }
         },
         {
-          "name": "Verify Email",
-          "request": {
-            "method": "GET",
-            "url": {
-              "raw": "{{baseUrl}}/auth/verify-email?token=YOUR_VERIFICATION_TOKEN",
-              "host": ["{{baseUrl}}"],
-              "path": ["auth", "verify-email"],
-              "query": [
-                {
-                  "key": "token",
-                  "value": "YOUR_VERIFICATION_TOKEN"
-                }
-              ]
+          "name": "Login Test User (Mustapha)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    pm.environment.set('authToken', response.data.token);",
+                  "    pm.environment.set('userId', response.data.user._id);",
+                  "    console.log('✅ Test user login successful');",
+                  "    console.log('👤 User Details:');",
+                  "    console.log('- ID:', response.data.user._id);",
+                  "    console.log('- Name:', response.data.user.firstName + ' ' + response.data.user.lastName);",
+                  "    console.log('- Email:', response.data.user.email);",
+                  "    console.log('- Role:', response.data.user.role);",
+                  "    console.log('- Verified:', response.data.user.isVerified);",
+                  "    console.log('- Token saved to environment');",
+                  "    console.log('');",
+                  "    console.log('🧪 Using test user for verification workflows');",
+                  "    console.log('✅ Account verified - ready for testing');",
+                  "} else if (pm.response.code === 401) {",
+                  "    console.log('❌ Login failed - Check credentials');",
+                  "    console.log('💡 Try registering the user first if account doesn\\'t exist');",
+                  "} else if (pm.response.code === 403) {",
+                  "    const response = pm.response.json();",
+                  "    if (response.message && response.message.includes('verify your email')) {",
+                  "        console.log('� Email verification required');",
+                  "        console.log('📧 Please verify your email address before logging in');",
+                  "        console.log('');",
+                  "        console.log('💡 Perfect for testing email verification workflow:');",
+                  "        console.log('1. Use \"Resend Verification Email\" endpoint');",
+                  "        console.log('2. Check email for verification link');",
+                  "        console.log('3. Use \"Verify Email\" endpoint with token');",
+                  "        console.log('4. Then try logging in again');",
+                  "        console.log('');",
+                  "        console.log('🧪 This demonstrates the security feature working correctly');",
+                  "    } else {",
+                  "        console.log('❌ Access forbidden:', response.message);",
+                  "    }",
+                  "} else {",
+                  "    console.log('❌ Login failed');",
+                  "    console.log('Response:', pm.response.text());",
+                  "}"
+                ]
+              }
             }
-          }
-        },
-        {
-          "name": "Forgot Password",
+          ],
           "request": {
             "method": "POST",
             "header": [
@@ -307,17 +459,280 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"email\": \"user@showpass.com\"\n}"
+              "raw": "{\n  \"email\": \"mustapha.hajarat@bowen.edu.ng\",\n  \"password\": \"Baikiss12\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "login"]
+            },
+            "description": "Login with the test user credentials. This user can be used to test various features including email verification workflows.\n\n⚠️ **Email Verification Required**: Users must verify their email address before they can log in. This endpoint is perfect for testing the email verification workflow:\n\n1. Try logging in with unverified user → Get 403 error\n2. Use \"Resend Verification Email\" endpoint\n3. Use \"Verify Email\" endpoint with token\n4. Try logging in again → Success\n\n**Expected Responses:**\n- 200: Login successful (verified user)\n- 401: Invalid credentials\n- 403: Email verification required"
+          }
+        },
+        {
+          "name": "Verify Email",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    console.log('✅ Email verification successful');",
+                  "    console.log('🎉 Welcome to ShowPass! Account is now verified');",
+                  "    console.log('📧 Welcome email sent to your inbox');",
+                  "    console.log('');",
+                  "    console.log('💡 You can now:');",
+                  "    console.log('- Login to access all features');",
+                  "    console.log('- Browse and book events');",
+                  "    console.log('- Create events (if organizer)');",
+                  "    console.log('- Receive digital tickets with QR codes');",
+                  "    console.log('');",
+                  "    console.log('🔗 Next: Use the Login endpoint to get your authentication token');",
+                  "} else if (pm.response.code === 400) {",
+                  "    const response = pm.response.json();",
+                  "    if (response.message.includes('Invalid') || response.message.includes('expired')) {",
+                  "        console.log('❌ Invalid or expired verification code');",
+                  "        console.log('💡 The 6-digit code may have expired (15 min limit)');",
+                  "        console.log('🔄 Try using \"Resend Verification Email\" to get a new code');",
+                  "    } else if (response.message.includes('6 digits')) {",
+                  "        console.log('❌ Invalid code format - must be exactly 6 digits');",
+                  "        console.log('💡 Example: 123456');",
+                  "    } else if (response.message.includes('already verified')) {",
+                  "        console.log('ℹ️ Email already verified');",
+                  "        console.log('✅ Account is ready to use');",
+                  "    } else {",
+                  "        console.log('❌ Verification failed:', response.message);",
+                  "    }",
+                  "} else {",
+                  "    console.log('❌ Verification failed');",
+                  "    console.log('Response:', pm.response.text());",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"code\": \"123456\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/verify-email",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "verify-email"]
+            },
+            "description": "Verify user email using the 6-digit code sent via email. Replace '123456' with the actual verification code from your email.\n\n⚠️ **Important**: \n- Code expires in 15 minutes\n- Must be exactly 6 digits\n- Check your email (including spam folder)\n\n**Expected Responses:**\n- 200: Email verified successfully, welcome email sent\n- 400: Invalid code format, expired code, or already verified\n- 500: Server error"
+          }
+        },
+        {
+          "name": "Resend Verification Email",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    console.log('✅ Verification code resent successfully');",
+                  "    console.log('📧 Please check your email for the new 6-digit code');",
+                  "    console.log('');",
+                  "    console.log('💡 Next Steps:');",
+                  "    console.log('1. Check your email inbox (including spam folder)');",
+                  "    console.log('2. Copy the 6-digit verification code');",
+                  "    console.log('3. Use \"Verify Email\" endpoint with the code');",
+                  "    console.log('4. Code expires in 15 minutes');",
+                  "} else if (pm.response.code === 400) {",
+                  "    const response = pm.response.json();",
+                  "    if (response.message.includes('already verified')) {",
+                  "        console.log('ℹ️ Email is already verified - no action needed');",
+                  "    } else {",
+                  "        console.log('❌ Resend verification failed:', response.message);",
+                  "    }",
+                  "} else {",
+                  "    console.log('❌ Failed to resend verification email');",
+                  "    console.log('Response:', pm.response.text());",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{authToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/auth/resend-verification",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "resend-verification"]
+            },
+            "description": "Resend verification code to the authenticated user. Requires authentication token from login. Can only be used if the email is not already verified.\n\n🔐 **Authentication Required**: Must be logged in\n📧 **New Code**: Generates fresh 6-digit verification code\n⏰ **Expires**: Code valid for 15 minutes"
+          }
+        },
+        {
+          "name": "Resend Verification Email (Public)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    console.log('✅ Verification code sent successfully');",
+                  "    console.log('📧 Please check your email for the new 6-digit code');",
+                  "    console.log('');",
+                  "    console.log('💡 Next Steps:');",
+                  "    console.log('1. Check your email inbox (including spam folder)');",
+                  "    console.log('2. Copy the 6-digit verification code');",
+                  "    console.log('3. Use \"Verify Email\" endpoint with the code');",
+                  "    console.log('4. Code expires in 15 minutes');",
+                  "    console.log('');",
+                  "    console.log('🧪 This endpoint doesn\\'t require authentication');",
+                  "} else if (pm.response.code === 400) {",
+                  "    const response = pm.response.json();",
+                  "    if (response.message.includes('already verified')) {",
+                  "        console.log('ℹ️ Email is already verified - login directly');",
+                  "        console.log('✅ No verification needed');",
+                  "    } else {",
+                  "        console.log('❌ Resend verification failed:', response.message);",
+                  "    }",
+                  "} else if (pm.response.code === 404) {",
+                  "    console.log('❌ No user found with this email address');",
+                  "    console.log('💡 Check the email spelling or register first');",
+                  "} else {",
+                  "    console.log('❌ Failed to resend verification email');",
+                  "    console.log('Response:', pm.response.text());",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"mustapha.hajarat@bowen.edu.ng\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/resend-verification-email",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "resend-verification-email"]
+            },
+            "description": "Resend verification code to any email address without requiring authentication. Perfect for users who haven't verified their email yet and can't login.\n\n🔑 **Key Features:**\n- No authentication required\n- Generates new 6-digit code\n- Code expires in 15 minutes\n- Works for unverified accounts\n\n**Expected Responses:**\n- 200: Verification code sent successfully\n- 400: Email already verified or invalid request\n- 404: No user found with email address\n- 500: Server error"
+          }
+        },
+        {
+          "name": "Forgot Password",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    console.log('✅ Password reset email sent successfully');",
+                  "    console.log('📧 Please check your email for the reset link');",
+                  "    console.log('');",
+                  "    console.log('💡 Next Steps:');",
+                  "    console.log('1. Check your email inbox (including spam folder)');",
+                  "    console.log('2. Click the reset link in the email');",
+                  "    console.log('3. Or copy the reset token and use \"Reset Password\" endpoint');",
+                  "    console.log('');",
+                  "    console.log('⏰ Note: Reset tokens typically expire after 1 hour');",
+                  "} else if (pm.response.code === 404) {",
+                  "    console.log('❌ Email not found');",
+                  "    console.log('💡 Make sure the email address is correct and registered');",
+                  "} else {",
+                  "    console.log('❌ Password reset request failed');",
+                  "    console.log('Response:', pm.response.text());",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"mustapha.hajarat@bowen.edu.ng\"\n}"
             },
             "url": {
               "raw": "{{baseUrl}}/auth/forgot-password",
               "host": ["{{baseUrl}}"],
               "path": ["auth", "forgot-password"]
-            }
+            },
+            "description": "Request a password reset email. The user will receive an email with a reset token that can be used to set a new password."
           }
         },
         {
           "name": "Reset Password",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    console.log('✅ Password reset successful');",
+                  "    console.log('🔐 Your password has been updated');",
+                  "    console.log('');",
+                  "    console.log('💡 Next Steps:');",
+                  "    console.log('1. Use your new password to login');",
+                  "    console.log('2. Consider updating your password in any saved credentials');",
+                  "    console.log('');",
+                  "    console.log('🔗 You can now use the login endpoints with your new password');",
+                  "} else if (pm.response.code === 400) {",
+                  "    const response = pm.response.json();",
+                  "    if (response.message.includes('Invalid') || response.message.includes('expired')) {",
+                  "        console.log('❌ Invalid or expired reset token');",
+                  "        console.log('💡 Request a new password reset from \"Forgot Password\"');",
+                  "    } else if (response.message.includes('Password')) {",
+                  "        console.log('❌ Password validation failed');",
+                  "        console.log('💡 Password must meet security requirements:');",
+                  "        console.log('- At least 8 characters long');",
+                  "        console.log('- Include uppercase and lowercase letters');",
+                  "        console.log('- Include at least one number');",
+                  "        console.log('- Include at least one special character');",
+                  "    } else {",
+                  "        console.log('❌ Password reset failed:', response.message);",
+                  "    }",
+                  "} else {",
+                  "    console.log('❌ Password reset failed');",
+                  "    console.log('Response:', pm.response.text());",
+                  "}"
+                ]
+              }
+            }
+          ],
           "request": {
             "method": "POST",
             "header": [
@@ -328,13 +743,14 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"token\": \"RESET_TOKEN\",\n  \"newPassword\": \"NewPassword123!\"\n}"
+              "raw": "{\n  \"token\": \"RESET_TOKEN_FROM_EMAIL\",\n  \"newPassword\": \"NewPassword123!\"\n}"
             },
             "url": {
               "raw": "{{baseUrl}}/auth/reset-password",
               "host": ["{{baseUrl}}"],
               "path": ["auth", "reset-password"]
-            }
+            },
+            "description": "Reset password using the token received via email. Replace RESET_TOKEN_FROM_EMAIL with the actual token from the password reset email."
           }
         }
       ]

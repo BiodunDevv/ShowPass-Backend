@@ -6,80 +6,322 @@
     <title>Email Verification - ShowPass</title>
     <style>
       body {
-        font-family: Arial, sans-serif;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
         line-height: 1.6;
         margin: 0;
         padding: 0;
-        background-color: #f4f4f4;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
       }
-      .container {
+      .email-wrapper {
         max-width: 100%;
-        margin: 0 auto;
+        margin: 10px;
         background-color: white;
+        border-radius: 16px;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
       }
       .header {
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         color: white;
-        padding: 20px;
+        padding: 40px 30px;
         text-align: center;
-        border-radius: 10px 10px 0 0;
+        position: relative;
+      }
+      .header::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="50" cy="50" r="1" fill="rgba(255,255,255,0.1)"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+        opacity: 0.1;
+      }
+      .logo {
+        font-size: 32px;
+        font-weight: 800;
+        margin-bottom: 8px;
+        position: relative;
+        z-index: 1;
+      }
+      .header-subtitle {
+        font-size: 16px;
+        opacity: 0.9;
+        margin: 0;
+        position: relative;
+        z-index: 1;
       }
       .content {
         padding: 10px;
       }
-      .button {
-        display: inline-block;
-        padding: 12px 30px;
-        background-color: #667eea;
-        color: white;
-        text-decoration: none;
-        border-radius: 5px;
+      .greeting {
+        font-size: 24px;
+        font-weight: 600;
+        color: #2d3748;
+        margin-bottom: 20px;
+      }
+      .main-text {
+        font-size: 16px;
+        color: #4a5568;
+        margin-bottom: 30px;
+        line-height: 1.6;
+      }
+      .code-container {
+        background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
+        border: 2px dashed #cbd5e0;
+        border-radius: 12px;
+        padding: 30px;
+        text-align: center;
+        margin: 30px 0;
+        position: relative;
+        overflow: hidden;
+      }
+      .code-container::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: repeating-linear-gradient(
+          45deg,
+          transparent,
+          transparent 10px,
+          rgba(190, 227, 248, 0.1) 10px,
+          rgba(190, 227, 248, 0.1) 20px
+        );
+        animation: shimmer 3s ease-in-out infinite;
+      }
+      @keyframes shimmer {
+        0%, 100% { transform: translateX(-100px) translateY(-100px); }
+        50% { transform: translateX(100px) translateY(100px); }
+      }
+      .code-label {
+        font-size: 14px;
+        font-weight: 600;
+        color: #667eea;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin-bottom: 15px;
+        position: relative;
+        z-index: 1;
+      }
+      .verification-code {
+        font-size: 42px;
+        font-weight: 800;
+        color: #2d3748;
+        letter-spacing: 8px;
+        margin: 15px 0;
+        font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+        position: relative;
+        z-index: 1;
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+      .code-note {
+        font-size: 14px;
+        color: #718096;
+        margin-top: 15px;
+        position: relative;
+        z-index: 1;
+      }
+      .instructions {
+        background: linear-gradient(135deg, #fef5e7 0%, #fed7aa 100%);
+        border-left: 4px solid #f6ad55;
+        padding: 20px;
+        margin: 30px 0;
+        border-radius: 8px;
+      }
+      .instructions-title {
+        font-size: 16px;
+        font-weight: 600;
+        color: #c05621;
+        margin-bottom: 10px;
+        display: flex;
+        align-items: center;
+      }
+      .instructions-title::before {
+        content: '💡';
+        margin-right: 8px;
+      }
+      .instructions-text {
+        font-size: 14px;
+        color: #9c4221;
+        margin: 0;
+        line-height: 1.5;
+      }
+      .expiry-warning {
+        background: linear-gradient(135deg, #fed7d7 0%, #feb2b2 100%);
+        border: 1px solid #fc8181;
+        border-radius: 8px;
+        padding: 15px;
         margin: 20px 0;
+        text-align: center;
+      }
+      .expiry-warning .icon {
+        font-size: 20px;
+        margin-bottom: 5px;
+      }
+      .expiry-text {
+        font-size: 14px;
+        font-weight: 600;
+        color: #c53030;
+        margin: 0;
+      }
+      .security-note {
+        background: #f8f9fa;
+        border: 1px solid #e9ecef;
+        border-radius: 8px;
+        padding: 20px;
+        margin: 30px 0;
+      }
+      .security-title {
+        font-size: 14px;
+        font-weight: 600;
+        color: #495057;
+        margin-bottom: 10px;
+        display: flex;
+        align-items: center;
+      }
+      .security-title::before {
+        content: '🔒';
+        margin-right: 8px;
+      }
+      .security-text {
+        font-size: 14px;
+        color: #6c757d;
+        margin: 0;
+        line-height: 1.5;
       }
       .footer {
+        background: #f8f9fa;
         text-align: center;
-        padding: 20px;
-        color: #666;
-        font-size: 12px;
+        padding: 10px;
+        border-top: 1px solid #e9ecef;
       }
-      .logo {
-        font-size: 24px;
-        font-weight: bold;
+      .footer-logo {
+        font-size: 18px;
+        font-weight: 700;
+        color: #667eea;
+        margin-bottom: 10px;
+      }
+      .footer-text {
+        font-size: 12px;
+        color: #6c757d;
+        margin: 5px 0;
+      }
+      .social-links {
+        margin: 15px 0;
+      }
+      .social-link {
+        display: inline-block;
+        width: 36px;
+        height: 36px;
+        background: #667eea;
+        color: white;
+        text-decoration: none;
+        border-radius: 50%;
+        line-height: 36px;
+        margin: 0 5px;
+        font-size: 16px;
+        transition: all 0.3s ease;
+      }
+      .social-link:hover {
+        background: #764ba2;
+        transform: translateY(-2px);
+      }
+      @media (max-width: 600px) {
+        .email-wrapper {
+          margin: 20px;
+          border-radius: 12px;
+        }
+        .content {
+          padding: 30px 20px;
+        }
+        .header {
+          padding: 30px 20px;
+        }
+        .verification-code {
+          font-size: 36px;
+          letter-spacing: 6px;
+        }
+        .greeting {
+          font-size: 22px;
+        }
       }
     </style>
   </head>
   <body>
-    <div class="container">
+    <div class="email-wrapper">
       <div class="header">
         <div class="logo">🎟️ ShowPass</div>
-        <h2>Welcome to ShowPass!</h2>
+        <p class="header-subtitle">Your Premier Event Ticketing Platform</p>
       </div>
+      
       <div class="content">
-        <h3>Hello {{firstName}}!</h3>
-        <p>
-          Thank you for joining ShowPass, your premier event ticketing platform!
+        <h1 class="greeting">Hello {{firstName}}! 👋</h1>
+        
+        <p class="main-text">
+          Welcome to ShowPass! We're excited to have you join our community of event enthusiasts. 
+          To complete your registration and start discovering amazing events, please verify your email address using the code below.
         </p>
-        <p>
-          To complete your registration and start exploring amazing events,
-          please verify your email address by clicking the button below:
-        </p>
-        <div style="text-align: center">
-          <a href="{{verificationURL}}" class="button">Verify Email Address</a>
+
+        <div class="code-container">
+          <div class="code-label">Your Verification Code</div>
+          <div class="verification-code">{{verificationCode}}</div>
+          <div class="code-note">Enter this code in the verification form</div>
         </div>
-        <p>
-          If you can't click the button, copy and paste this link into your
-          browser:
+
+        <div class="instructions">
+          <div class="instructions-title">How to verify:</div>
+          <p class="instructions-text">
+            1. Return to the ShowPass app or website<br>
+            2. Go to the email verification page<br>
+            3. Enter the 6-digit code above<br>
+            4. Click "Verify Email" to complete the process
+          </p>
+        </div>
+
+        <div class="expiry-warning">
+          <div class="icon">⏰</div>
+          <p class="expiry-text">This code expires in 15 minutes</p>
+        </div>
+
+        <div class="security-note">
+          <div class="security-title">Security Notice</div>
+          <p class="security-text">
+            This verification code is unique to your account. Never share it with anyone. 
+            If you didn't create a ShowPass account, please ignore this email and no action is required.
+          </p>
+        </div>
+
+        <p class="main-text">
+          Once verified, you'll be able to:
         </p>
-        <p style="word-break: break-all; color: #667eea">{{verificationURL}}</p>
-        <p><strong>This link will expire in 24 hours.</strong></p>
-        <p>
-          If you didn't create an account with ShowPass, please ignore this
-          email.
-        </p>
+        <ul style="color: #4a5568; padding-left: 20px;">
+          <li>🎫 Browse and book tickets for exciting events</li>
+          <li>❤️ Save your favorite events and organizers</li>
+          <li>📱 Receive digital tickets with QR codes</li>
+          <li>🔔 Get notified about new events in your area</li>
+          <li>💰 Secure payment processing</li>
+        </ul>
       </div>
+      
       <div class="footer">
-        <p>© 2024 ShowPass. All rights reserved.</p>
-        <p>This is an automated email, please do not reply.</p>
+        <div class="footer-logo">ShowPass</div>
+        <p class="footer-text">© 2025 ShowPass. All rights reserved.</p>
+        <p class="footer-text">This is an automated email, please do not reply.</p>
+        
+        <div class="social-links">
+          <a href="#" class="social-link">📧</a>
+          <a href="#" class="social-link">🐦</a>
+          <a href="#" class="social-link">📘</a>
+          <a href="#" class="social-link">📷</a>
+        </div>
+        
+        <p class="footer-text" style="margin-top: 15px;">
+          Need help? Contact us at support@showpass.com
+        </p>
       </div>
     </div>
   </body>

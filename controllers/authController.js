@@ -9,6 +9,7 @@ const {
 const {
   sendVerificationEmail,
   sendPasswordResetEmail,
+  sendWelcomeEmail,
 } = require("../utils/emailService");
 const { randomBytes, createHash } = require("crypto");
 
@@ -23,8 +24,9 @@ const register = async (req, res) => {
       return sendError(res, 400, "User with this email already exists");
     }
 
-    // Generate verification token
-    const verificationToken = generateVerificationToken();
+    // Generate 6-digit verification code
+    const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
+    const verificationCodeExpires = new Date(Date.now() + 15 * 60 * 1000); // 15 minutes
 
     // Create user in appropriate collection
     const { user } = await UserManager.createUser({
@@ -33,12 +35,14 @@ const register = async (req, res) => {
       email,
       password,
       role,
-      verificationToken,
+      verificationCode,
+      verificationCodeExpires,
     });
 
     // Send verification email
     try {
-      await sendVerificationEmail(user, verificationToken);
+      await sendVerificationEmail(user, verificationCode);
+      console.log(`🔐 Verification code for ${email}: ${verificationCode}`);
     } catch (emailError) {
       console.error("Email sending failed:", emailError);
       // Don't fail registration if email fails
@@ -80,6 +84,15 @@ const login = async (req, res) => {
         res,
         403,
         "Your account has been blocked. Please contact support."
+      );
+    }
+
+    // Check if user is verified
+    if (!user.isVerified) {
+      return sendError(
+        res,
+        403,
+        "Please verify your email address before logging in. Check your email for verification instructions."
       );
     }
 
@@ -152,30 +165,50 @@ const updateProfile = async (req, res) => {
   }
 };
 
-// Verify email
+// Verify email with 6-digit code
 const verifyEmail = async (req, res) => {
   try {
-    const { token } = req.query;
+    const { code } = req.body;
 
-    if (!token) {
-      return sendError(res, 400, "Verification token is required");
+    if (!code) {
+      return sendError(res, 400, "Verification code is required");
     }
 
-    const userResult = await UserManager.findByVerificationToken(token);
+    // Validate code format (6 digits)
+    if (!/^\d{6}$/.test(code)) {
+      return sendError(res, 400, "Verification code must be 6 digits");
+    }
+
+    const userResult = await UserManager.findByVerificationCode(code);
     if (!userResult) {
-      return sendError(res, 400, "Invalid or expired verification token");
+      return sendError(res, 400, "Invalid or expired verification code");
     }
 
     const { user } = userResult;
 
+    // Check if code has expired (15 minutes)
+    if (user.verificationCodeExpires && user.verificationCodeExpires < new Date()) {
+      return sendError(res, 400, "Verification code has expired. Please request a new one.");
+    }
+
     // Update user
     user.isVerified = true;
-    user.verificationToken = undefined;
+    user.verificationCode = undefined;
+    user.verificationCodeExpires = undefined;
     await user.save();
+
+    // Send welcome email after successful verification
+    try {
+      await sendWelcomeEmail(user);
+      console.log(`🎉 Welcome email sent to ${user.email}`);
+    } catch (emailError) {
+      console.error("Welcome email failed:", emailError);
+      // Don't fail verification if welcome email fails
+    }
 
     sendSuccess(
       res,
-      "Email verified successfully! You can now access all features."
+      "Email verified successfully! Welcome to ShowPass! 🎉 You can now access all features."
     );
   } catch (error) {
     console.error("Email verification error:", error);
@@ -197,18 +230,61 @@ const resendVerification = async (req, res) => {
       return sendError(res, 400, "Email is already verified");
     }
 
-    // Generate new verification token
-    const verificationToken = generateVerificationToken();
-    user.verificationToken = verificationToken;
+    // Generate new 6-digit verification code
+    const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
+    const verificationCodeExpires = new Date(Date.now() + 15 * 60 * 1000); // 15 minutes
+    
+    user.verificationCode = verificationCode;
+    user.verificationCodeExpires = verificationCodeExpires;
     await user.save();
 
     // Send verification email
-    await sendVerificationEmail(user, verificationToken);
+    await sendVerificationEmail(user, verificationCode);
+    console.log(`🔐 New verification code for ${user.email}: ${verificationCode}`);
 
-    sendSuccess(res, "Verification email sent successfully");
+    sendSuccess(res, "Verification code sent successfully. Please check your email.");
   } catch (error) {
     console.error("Resend verification error:", error);
-    sendError(res, 500, "Failed to resend verification email", error.message);
+    sendError(res, 500, "Failed to resend verification code", error.message);
+  }
+};
+
+// Resend verification code by email (public endpoint)
+const resendVerificationByEmail = async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    if (!email) {
+      return sendError(res, 400, "Email address is required");
+    }
+
+    const userResult = await UserManager.findByEmail(email);
+    if (!userResult) {
+      return sendError(res, 404, "No user found with this email address");
+    }
+
+    const { user } = userResult;
+
+    if (user.isVerified) {
+      return sendError(res, 400, "Email is already verified");
+    }
+
+    // Generate new 6-digit verification code
+    const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
+    const verificationCodeExpires = new Date(Date.now() + 15 * 60 * 1000); // 15 minutes
+    
+    user.verificationCode = verificationCode;
+    user.verificationCodeExpires = verificationCodeExpires;
+    await user.save();
+
+    // Send verification email
+    await sendVerificationEmail(user, verificationCode);
+    console.log(`🔐 New verification code for ${email}: ${verificationCode}`);
+
+    sendSuccess(res, "Verification code sent successfully. Please check your email.");
+  } catch (error) {
+    console.error("Resend verification by email error:", error);
+    sendError(res, 500, "Failed to resend verification code", error.message);
   }
 };
 
@@ -266,7 +342,7 @@ const resetPassword = async (req, res) => {
     }
 
     // Hash token to compare with database
-    const hashedToken = crypto.createHash("sha256").update(token).digest("hex");
+    const hashedToken = createHash("sha256").update(token).digest("hex");
 
     const userResult = await UserManager.findByResetToken(hashedToken);
     if (!userResult) {
@@ -343,6 +419,7 @@ module.exports = {
   updateProfile,
   verifyEmail,
   resendVerification,
+  resendVerificationByEmail,
   forgotPassword,
   resetPassword,
   changePassword,
