@@ -480,6 +480,46 @@ const addCommentReply = async (req, res) => {
     sendError(res, 500, "Failed to add reply", error.message);
   }
 };
+
+// Delete comment (only comment author or admin)
+const deleteComment = async (req, res) => {
+  try {
+    const { id, commentId } = req.params;
+    const userId = req.user._id;
+
+    const article = await Article.findById(id);
+    if (!article) {
+      return sendError(res, 404, "Article not found");
+    }
+
+    const comment = article.comments.id(commentId);
+    if (!comment) {
+      return sendError(res, 404, "Comment not found");
+    }
+
+    // Check if user is the comment author or admin
+    if (comment.user.toString() !== userId.toString() && req.user.role !== "admin") {
+      return sendError(res, 403, "You can only delete your own comments");
+    }
+
+    // Remove the comment
+    article.comments.pull(commentId);
+    await article.save();
+
+    sendSuccess(res, "Comment deleted successfully", {
+      commentId: commentId,
+      totalComments: article.comments.length,
+      article: {
+        _id: article._id,
+        title: article.title,
+      },
+    });
+  } catch (error) {
+    console.error("Delete comment error:", error);
+    sendError(res, 500, "Failed to delete comment", error.message);
+  }
+};
+
 const getArticleCategories = async (req, res) => {
   try {
     const categories = [
@@ -563,6 +603,7 @@ module.exports = {
   addComment,
   getArticleComments,
   addCommentReply,
+  deleteComment,
   getArticleCategories,
   getArticlesByCategory,
 };

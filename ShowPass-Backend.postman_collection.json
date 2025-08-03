@@ -3173,6 +3173,61 @@
           }
         },
         {
+          "name": "Delete Comment",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Comment deleted successfully', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson.success).to.be.true;",
+                  "    pm.expect(responseJson.message).to.include('deleted');",
+                  "    pm.expect(responseJson.data).to.have.property('commentId');",
+                  "    pm.expect(responseJson.data).to.have.property('totalComments');",
+                  "});",
+                  "",
+                  "console.log('🗑️ Comment Deleted:', JSON.stringify(pm.response.json(), null, 2));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{authToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/articles/{{articleId}}/comments/{{commentId}}",
+              "host": ["{{baseUrl}}"],
+              "path": [
+                "articles",
+                "{{articleId}}",
+                "comments",
+                "{{commentId}}"
+              ]
+            },
+            "description": "Delete a comment from an article. Users can only delete their own comments, admins can delete any comment. Requires authentication."
+          }
+        },
+        {
           "name": "Delete Article (Admin Only)",
           "event": [
             {

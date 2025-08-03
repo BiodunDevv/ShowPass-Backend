@@ -12,6 +12,7 @@ const {
   addComment,
   getArticleComments,
   addCommentReply,
+  deleteComment,
   getArticleCategories,
   getArticlesByCategory,
 } = require("../controllers/articleController");
@@ -42,7 +43,10 @@ router.post("/:id/like", toggleArticleLike);
 // Add comment to article (Users and Organizers)
 router.post("/:id/comments", addComment);
 
-// Add reply to comment (Users and Organizers)
-router.post("/:id/comments/:commentId/replies", addCommentReply);
+// Add reply to comment (Users and Organizers) - Fixed route path
+router.post("/:id/comments/:commentId/reply", addCommentReply);
+
+// Delete comment (Comment author or Admin)
+router.delete("/:id/comments/:commentId", deleteComment);
 
 module.exports = router;
