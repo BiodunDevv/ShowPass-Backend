@@ -1540,7 +1540,7 @@
             },
             "method": "PUT",
             "url": {
-              "raw": "{{baseUrl}}/bookings/{{bookingId}}/checkin",
+              "raw": "{{baseUrl}}/booking/{{bookingId}}/checkin",
               "host": ["{{baseUrl}}"],
               "path": ["bookings", "{{bookingId}}", "checkin"]
             }
@@ -1598,7 +1598,7 @@
               "description": "QR code data in JSON string format"
             },
             "url": {
-              "raw": "{{baseUrl}}/bookings/verify-qr",
+              "raw": "{{baseUrl}}/booking/verify-qr",
               "host": ["{{baseUrl}}"],
               "path": ["bookings", "verify-qr"]
             }
@@ -3717,7 +3717,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"eventId\": \"{{paidEventId}}\",\n  \"ticketType\": \"Regular\",\n  \"quantity\": 2,\n  \"frontendPaymentId\": \"frontend_pay_{{$randomUUID}}\",\n  \"attendeeInfo\": {\n    \"name\": \"John Doe\",\n    \"email\": \"john.doe@example.com\",\n    \"phone\": \"+2348123456789\"\n  }\n}"
+              "raw": "{\n  \"eventId\": \"{{paidEventId}}\",\n  \"ticketType\": \"Regular\",\n  \"quantity\": 2,\n  \"frontendPaymentId\": \"frontend_pay_{{$randomUUID}}\",\n  \"attendeeInfo\": [\n    {\n      \"name\": \"John Doe\",\n      \"email\": \"john.doe@example.com\",\n      \"phone\": \"+2348123456789\"\n    },\n    {\n      \"name\": \"Jane Smith\",\n      \"email\": \"jane.smith@example.com\",\n      \"phone\": \"+2348087654321\"\n    }\n  ]\n}"
             },
             "url": {
               "raw": "{{baseUrl}}/booking",
@@ -3779,9 +3779,9 @@
               "raw": "{\n  \"eventId\": \"{{freeEventId}}\",\n  \"ticketType\": \"Free\",\n  \"quantity\": 1,\n  \"attendeeInfo\": [\n    {\n      \"name\": \"Jane Smith\",\n      \"email\": \"jane.smith@example.com\",\n      \"phone\": \"+2348087654321\"\n    }\n  ]\n}"
             },
             "url": {
-              "raw": "{{baseUrl}}/bookings/free-event",
+              "raw": "{{baseUrl}}/booking/free-event",
               "host": ["{{baseUrl}}"],
-              "path": ["bookings", "free-event"]
+              "path": ["booking", "free-event"]
             }
           }
         },
@@ -3834,9 +3834,9 @@
               "raw": "{\n  \"eventId\": \"{{paidEventId}}\",\n  \"ticketType\": \"VIP\",\n  \"quantity\": 1,\n  \"attendeeInfo\": {\n    \"name\": \"Premium Customer\",\n    \"email\": \"premium@example.com\",\n    \"phone\": \"+2348111222333\"\n  }\n}"
             },
             "url": {
-              "raw": "{{baseUrl}}/bookings",
+              "raw": "{{baseUrl}}/booking",
               "host": ["{{baseUrl}}"],
-              "path": ["bookings"]
+              "path": ["booking"]
             }
           }
         },
@@ -3899,7 +3899,7 @@
             },
             "method": "GET",
             "url": {
-              "raw": "{{baseUrl}}/bookings/my-tickets",
+              "raw": "{{baseUrl}}/booking/my-tickets",
               "host": ["{{baseUrl}}"],
               "path": ["bookings", "my-tickets"]
             }
@@ -3920,7 +3920,7 @@
             },
             "method": "GET",
             "url": {
-              "raw": "{{baseUrl}}/bookings/{{bookingId}}",
+              "raw": "{{baseUrl}}/booking/{{bookingId}}",
               "host": ["{{baseUrl}}"],
               "path": ["bookings", "{{bookingId}}"]
             }
@@ -3951,7 +3951,7 @@
               "raw": "{\n  \"reason\": \"Change of plans - unable to attend the event\"\n}"
             },
             "url": {
-              "raw": "{{baseUrl}}/bookings/{{bookingId}}/cancel",
+              "raw": "{{baseUrl}}/booking/{{bookingId}}/cancel",
               "host": ["{{baseUrl}}"],
               "path": ["bookings", "{{bookingId}}", "cancel"]
             }
@@ -4669,9 +4669,9 @@
                   "raw": "{\n  \"eventId\": \"{{freeEventId}}\",\n  \"ticketType\": \"Free\",\n  \"quantity\": 1\n}"
                 },
                 "url": {
-                  "raw": "{{baseUrl}}/bookings/free-event",
+                  "raw": "{{baseUrl}}/booking/free-event",
                   "host": ["{{baseUrl}}"],
-                  "path": ["bookings", "free-event"]
+                  "path": ["booking", "free-event"]
                 }
               }
             }
@@ -4830,9 +4830,9 @@
                   "raw": "{\n  \"eventId\": \"{{paidEventId}}\",\n  \"ticketType\": \"Regular\",\n  \"quantity\": 1,\n  \"attendeeInfo\": {\n    \"name\": \"John Business\",\n    \"email\": \"john.business@example.com\",\n    \"phone\": \"+2348123456789\"\n  }\n}"
                 },
                 "url": {
-                  "raw": "{{baseUrl}}/bookings",
+                  "raw": "{{baseUrl}}/booking",
                   "host": ["{{baseUrl}}"],
-                  "path": ["bookings"]
+                  "path": ["booking"]
                 }
               }
             },
@@ -4933,7 +4933,7 @@
                 ],
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"eventId\": \"{{paidEventId}}\",\n  \"ticketType\": \"Regular\",\n  \"quantity\": 1,\n  \"frontendPaymentId\": \"{{frontendPaymentId}}\",\n  \"attendeeInfo\": {\n    \"name\": \"John Doe\",\n    \"email\": \"john.doe@example.com\",\n    \"phone\": \"+2348123456789\"\n  }\n}"
+                  "raw": "{\n  \"eventId\": \"{{paidEventId}}\",\n  \"ticketType\": \"Regular\",\n  \"quantity\": 1,\n  \"frontendPaymentId\": \"{{frontendPaymentId}}\",\n  \"attendeeInfo\": [\n    {\n      \"name\": \"John Doe\",\n      \"email\": \"john.doe@example.com\",\n      \"phone\": \"+2348123456789\"\n    }\n  ]\n}"
                 },
                 "url": {
                   "raw": "{{baseUrl}}/booking",

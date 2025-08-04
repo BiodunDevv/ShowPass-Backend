@@ -136,78 +136,175 @@ const sendTicketConfirmationToAttendees = async (
   const base64Data = qrCodeImage.replace(/^data:image\/png;base64,/, "");
   const qrCodeBuffer = Buffer.from(base64Data, "base64");
 
-  // Send to booking user
-  const bookingUserData = {
-    firstName: bookingUser.firstName,
-    eventTitle: event.title,
-    eventDate: new Date(event.startDate).toLocaleDateString(),
-    startTime: event.startTime,
-    endTime: event.endTime,
-    venueName: event.venue.name,
-    venueAddress: event.venue.address,
-    ticketType: booking.ticketType,
-    quantity: booking.quantity,
-    finalAmount: formatCurrency(booking.finalAmount),
-    paymentReference: booking.paymentReference,
-    qrCodeImage: "cid:qrcode",
-    supportEmail: process.env.EMAIL_FROM,
-  };
+  // Get unique emails from attendees
+  const uniqueAttendeeEmails = [
+    ...new Set(attendeeList.map((a) => a.email).filter((email) => email)),
+  ];
 
-  const bookingUserMail = {
-    from: "ShowPass <noreply@showpass.com>",
-    to: bookingUser.email,
-    subject: `🎟️ Your Ticket for ${event.title} - ShowPass`,
-    html: compileTemplate(template, bookingUserData),
-    attachments: [
-      {
-        filename: "qr-code.png",
-        content: qrCodeBuffer,
-        cid: "qrcode",
-      },
-    ],
-  };
+  // Check if booking user's email is in attendee list
+  const bookingUserInAttendees = uniqueAttendeeEmails.includes(
+    bookingUser.email
+  );
 
-  await transporter.sendMail(bookingUserMail);
-  console.log(`📧 Ticket sent to booking user: ${bookingUser.email}`);
+  // If booking user is in attendee list, send just the ticket receipt
+  if (bookingUserInAttendees) {
+    console.log(
+      `📧 Booking user ${bookingUser.email} is an attendee - sending single ticket email`
+    );
 
-  // Send to each attendee (if different from booking user)
-  for (const attendee of attendeeList) {
-    if (attendee.email && attendee.email !== bookingUser.email) {
-      const attendeeData = {
-        firstName: attendee.name.split(" ")[0], // Get first name
-        eventTitle: event.title,
-        eventDate: new Date(event.startDate).toLocaleDateString(),
-        startTime: event.startTime,
-        endTime: event.endTime,
-        venueName: event.venue.name,
-        venueAddress: event.venue.address,
-        ticketType: booking.ticketType,
-        quantity: 1, // Each attendee gets individual ticket
-        finalAmount: formatCurrency(booking.finalAmount / booking.quantity), // Split amount per attendee
-        paymentReference: booking.paymentReference,
-        qrCodeImage: "cid:qrcode",
-        supportEmail: process.env.EMAIL_FROM,
-      };
+    const bookingUserData = {
+      firstName: bookingUser.firstName,
+      eventTitle: event.title,
+      eventDate: new Date(event.startDate).toLocaleDateString(),
+      startTime: event.startTime,
+      endTime: event.endTime,
+      venueName: event.venue.name,
+      venueAddress: event.venue.address,
+      ticketType: booking.ticketType,
+      quantity: booking.quantity,
+      finalAmount: formatCurrency(booking.finalAmount),
+      paymentReference: booking.paymentReference,
+      qrCodeImage: "cid:qrcode",
+      supportEmail: process.env.EMAIL_FROM,
+    };
 
-      const attendeeMail = {
-        from: "ShowPass <noreply@showpass.com>",
-        to: attendee.email,
-        subject: `🎟️ Your Ticket for ${event.title} - ShowPass`,
-        html: compileTemplate(template, attendeeData),
-        attachments: [
-          {
-            filename: "qr-code.png",
-            content: qrCodeBuffer,
-            cid: "qrcode",
-          },
-        ],
-      };
+    const bookingUserMail = {
+      from: "ShowPass <noreply@showpass.com>",
+      to: bookingUser.email,
+      subject: `🎟️ Your Ticket for ${event.title} - ShowPass`,
+      html: compileTemplate(template, bookingUserData),
+      attachments: [
+        {
+          filename: "qr-code.png",
+          content: qrCodeBuffer,
+          cid: "qrcode",
+        },
+      ],
+    };
 
-      try {
-        await transporter.sendMail(attendeeMail);
-        console.log(`📧 Ticket sent to attendee: ${attendee.email}`);
-      } catch (error) {
-        console.error(`Failed to send ticket to ${attendee.email}:`, error);
+    await transporter.sendMail(bookingUserMail);
+    console.log(`📧 Ticket receipt sent to: ${bookingUser.email}`);
+
+    // Send tickets to other attendees (excluding booking user)
+    for (const attendee of attendeeList) {
+      if (attendee.email && attendee.email !== bookingUser.email) {
+        const attendeeData = {
+          firstName: attendee.name.split(" ")[0], // Get first name
+          eventTitle: event.title,
+          eventDate: new Date(event.startDate).toLocaleDateString(),
+          startTime: event.startTime,
+          endTime: event.endTime,
+          venueName: event.venue.name,
+          venueAddress: event.venue.address,
+          ticketType: booking.ticketType,
+          quantity: 1, // Each attendee gets individual ticket
+          finalAmount: formatCurrency(booking.finalAmount / booking.quantity), // Split amount per attendee
+          paymentReference: booking.paymentReference,
+          qrCodeImage: "cid:qrcode",
+          supportEmail: process.env.EMAIL_FROM,
+        };
+
+        const attendeeMail = {
+          from: "ShowPass <noreply@showpass.com>",
+          to: attendee.email,
+          subject: `🎟️ Your Ticket for ${event.title} - ShowPass`,
+          html: compileTemplate(template, attendeeData),
+          attachments: [
+            {
+              filename: "qr-code.png",
+              content: qrCodeBuffer,
+              cid: "qrcode",
+            },
+          ],
+        };
+
+        try {
+          await transporter.sendMail(attendeeMail);
+          console.log(`📧 Ticket sent to attendee: ${attendee.email}`);
+        } catch (error) {
+          console.error(`Failed to send ticket to ${attendee.email}:`, error);
+        }
+      }
+    }
+  } else {
+    // Booking user is NOT an attendee - send confirmation to booking user + tickets to attendees
+    console.log(
+      `📧 Booking user ${bookingUser.email} is not an attendee - sending confirmation + individual tickets`
+    );
+
+    // Send confirmation to booking user
+    const confirmationData = {
+      firstName: bookingUser.firstName,
+      eventTitle: event.title,
+      eventDate: new Date(event.startDate).toLocaleDateString(),
+      startTime: event.startTime,
+      endTime: event.endTime,
+      venueName: event.venue.name,
+      venueAddress: event.venue.address,
+      ticketType: booking.ticketType,
+      quantity: booking.quantity,
+      finalAmount: formatCurrency(booking.finalAmount),
+      paymentReference: booking.paymentReference,
+      qrCodeImage: "cid:qrcode",
+      supportEmail: process.env.EMAIL_FROM,
+    };
+
+    const confirmationMail = {
+      from: "ShowPass <noreply@showpass.com>",
+      to: bookingUser.email,
+      subject: `✅ Booking Confirmation: ${event.title} - ShowPass`,
+      html: compileTemplate(template, confirmationData),
+      attachments: [
+        {
+          filename: "qr-code.png",
+          content: qrCodeBuffer,
+          cid: "qrcode",
+        },
+      ],
+    };
+
+    await transporter.sendMail(confirmationMail);
+    console.log(`📧 Booking confirmation sent to: ${bookingUser.email}`);
+
+    // Send tickets to all attendees
+    for (const attendee of attendeeList) {
+      if (attendee.email) {
+        const attendeeData = {
+          firstName: attendee.name.split(" ")[0], // Get first name
+          eventTitle: event.title,
+          eventDate: new Date(event.startDate).toLocaleDateString(),
+          startTime: event.startTime,
+          endTime: event.endTime,
+          venueName: event.venue.name,
+          venueAddress: event.venue.address,
+          ticketType: booking.ticketType,
+          quantity: 1, // Each attendee gets individual ticket
+          finalAmount: formatCurrency(booking.finalAmount / booking.quantity), // Split amount per attendee
+          paymentReference: booking.paymentReference,
+          qrCodeImage: "cid:qrcode",
+          supportEmail: process.env.EMAIL_FROM,
+        };
+
+        const attendeeMail = {
+          from: "ShowPass <noreply@showpass.com>",
+          to: attendee.email,
+          subject: `🎟️ Your Ticket for ${event.title} - ShowPass`,
+          html: compileTemplate(template, attendeeData),
+          attachments: [
+            {
+              filename: "qr-code.png",
+              content: qrCodeBuffer,
+              cid: "qrcode",
+            },
+          ],
+        };
+
+        try {
+          await transporter.sendMail(attendeeMail);
+          console.log(`📧 Ticket sent to attendee: ${attendee.email}`);
+        } catch (error) {
+          console.error(`Failed to send ticket to ${attendee.email}:`, error);
+        }
       }
     }
   }

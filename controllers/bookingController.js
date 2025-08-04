@@ -117,7 +117,7 @@ const createBooking = async (req, res) => {
 
     // Update user spending tracking
     try {
-      const userResult = await UserManager.findById(booking.user._id);
+      const userResult = await UserManager.findById(req.user._id);
       if (userResult && userResult.user) {
         const { user } = userResult;
 
@@ -151,11 +151,7 @@ const createBooking = async (req, res) => {
     }
 
     // Update user's attending events array
-    await updateUserEventArrays(
-      booking.user._id,
-      booking.event._id,
-      "attending"
-    );
+    await updateUserEventArrays(req.user._id, booking.event._id, "attending");
 
     // Update event ticket sales
     const ticketType_obj = event.ticketTypes.find(
