@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Your Event Ticket - ShowPass</title>
+    <style>
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          "Helvetica Neue", Arial, sans-serif;
+        line-height: 1.6;
+        color: #333;
+        max-width: 600px;
+        margin: 0 auto;
+        padding: 20px;
+        background-color: #f8f9fa;
+      }
+      .container {
+        background-color: #ffffff;
+        border-radius: 12px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+      }
+      .header {
+        background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+        color: white;
+        padding: 30px;
+        text-align: center;
+      }
+      .header h1 {
+        margin: 0;
+        font-size: 28px;
+        font-weight: 700;
+      }
+      .header .emoji {
+        font-size: 48px;
+        margin-bottom: 15px;
+        display: block;
+      }
+      .ticket-number {
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 20px;
+        padding: 8px 16px;
+        font-size: 14px;
+        font-weight: 600;
+        margin-top: 10px;
+        display: inline-block;
+      }
+      .content {
+        padding: 30px;
+      }
+      .ticket-info {
+        background: linear-gradient(135deg, #e8f5e8 0%, #d4edda 100%);
+        border-radius: 12px;
+        padding: 25px;
+        margin: 20px 0;
+        border: 2px solid #28a745;
+        text-align: center;
+      }
+      .attendee-name {
+        font-size: 24px;
+        font-weight: 700;
+        color: #28a745;
+        margin-bottom: 10px;
+      }
+      .ticket-type {
+        font-size: 18px;
+        color: #495057;
+        margin-bottom: 15px;
+      }
+      .qr-section {
+        background: #ffffff;
+        border-radius: 12px;
+        padding: 30px;
+        text-align: center;
+        margin: 25px 0;
+        border: 3px dashed #28a745;
+      }
+      .qr-code {
+        margin: 20px 0;
+      }
+      .qr-code img {
+        max-width: 200px;
+        height: auto;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      }
+      .qr-instructions {
+        color: #495057;
+        font-size: 14px;
+        margin-top: 15px;
+        line-height: 1.5;
+      }
+      .event-details {
+        background: #f8f9fa;
+        border-radius: 8px;
+        padding: 20px;
+        margin: 20px 0;
+        border-left: 4px solid #28a745;
+      }
+      .detail-row {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 10px;
+        padding: 8px 0;
+        border-bottom: 1px solid #e9ecef;
+      }
+      .detail-row:last-child {
+        border-bottom: none;
+      }
+      .detail-label {
+        font-weight: 600;
+        color: #495057;
+      }
+      .detail-value {
+        color: #212529;
+        text-align: right;
+      }
+      .important-notice {
+        background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
+        border-radius: 8px;
+        padding: 20px;
+        margin: 20px 0;
+        border: 2px solid #ffc107;
+      }
+      .important-notice h3 {
+        margin: 0 0 10px 0;
+        color: #856404;
+        font-size: 18px;
+      }
+      .important-notice ul {
+        margin: 10px 0;
+        padding-left: 20px;
+      }
+      .important-notice li {
+        margin-bottom: 5px;
+        color: #856404;
+      }
+      .footer {
+        background-color: #f8f9fa;
+        padding: 20px 30px;
+        text-align: center;
+        color: #6c757d;
+        font-size: 14px;
+        border-top: 1px solid #e9ecef;
+      }
+      .footer a {
+        color: #28a745;
+        text-decoration: none;
+      }
+      .ticket-reference {
+        background: #e9ecef;
+        border-radius: 6px;
+        padding: 10px;
+        font-family: "Courier New", monospace;
+        font-size: 14px;
+        margin: 10px 0;
+        text-align: center;
+        letter-spacing: 1px;
+      }
+      @media (max-width: 600px) {
+        body {
+          padding: 10px;
+        }
+        .header h1 {
+          font-size: 24px;
+        }
+        .content {
+          padding: 20px;
+        }
+        .detail-row {
+          flex-direction: column;
+          text-align: left;
+        }
+        .detail-value {
+          text-align: left;
+          margin-top: 5px;
+          font-weight: 600;
+        }
+        .attendee-name {
+          font-size: 20px;
+        }
+        .qr-code img {
+          max-width: 150px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <span class="emoji">🎫</span>
+        <h1>Your Event Ticket</h1>
+        <div class="ticket-number">
+          Ticket #{{ticketNumber}} of {{totalTickets}}
+        </div>
+      </div>
+
+      <div class="content">
+        <div class="ticket-info">
+          <div class="attendee-name">{{attendeeName}}</div>
+          <div class="ticket-type">{{ticketType}} Ticket</div>
+          <div class="ticket-reference">{{ticketReference}}</div>
+        </div>
+
+        <p>Hello {{firstName}},</p>
+
+        <p>
+          Here's your individual ticket for <strong>{{eventTitle}}</strong>.
+          Please save this email and present the QR code below for entry.
+        </p>
+
+        <div class="qr-section">
+          <h3>🔍 Your Entry QR Code</h3>
+          <div class="qr-code">
+            <img src="{{qrCodeImage}}" alt="Event Ticket QR Code" />
+          </div>
+          <div class="qr-instructions">
+            <strong>Present this QR code at the event entrance</strong><br />
+            Screenshot or save this image for offline access
+          </div>
+        </div>
+
+        <div class="event-details">
+          <h3>📅 Event Information</h3>
+          <div class="detail-row">
+            <span class="detail-label">Event:</span>
+            <span class="detail-value">{{eventTitle}}</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Date:</span>
+            <span class="detail-value">{{eventDate}}</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Time:</span>
+            <span class="detail-value">{{startTime}} - {{endTime}}</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Venue:</span>
+            <span class="detail-value">{{venueName}}</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Address:</span>
+            <span class="detail-value">{{venueAddress}}</span>
+          </div>
+        </div>
+
+        <div class="important-notice">
+          <h3>⚠️ Important Instructions</h3>
+          <ul>
+            <li>
+              This QR code is unique to you and cannot be shared or duplicated
+            </li>
+            <li>Arrive 15-30 minutes before the event start time</li>
+            <li>Have your QR code ready on your phone or printed copy</li>
+            <li>Bring a valid ID that matches the name on this ticket</li>
+            <li>Screenshot this QR code in case of poor internet connection</li>
+          </ul>
+        </div>
+
+        <p>
+          We're excited to see you at the event! If you have any questions,
+          please contact our support team.
+        </p>
+
+        <p>Best regards,<br />The ShowPass Team</p>
+      </div>
+
+      <div class="footer">
+        <p>
+          This ticket was issued by ShowPass.<br />
+          Need help? Contact us at
+          <a href="mailto:{{supportEmail}}">{{supportEmail}}</a>
+        </p>
+        <p style="margin-top: 10px; font-size: 12px">
+          Ticket Reference: {{ticketReference}} | Issued: {{issuedDate}}
+        </p>
+      </div>
+    </div>
+  </body>
+</html>

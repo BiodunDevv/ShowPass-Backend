@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Booking Confirmation - ShowPass</title>
+    <style>
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          "Helvetica Neue", Arial, sans-serif;
+        line-height: 1.6;
+        color: #333;
+        max-width: 600px;
+        margin: 0 auto;
+        padding: 20px;
+        background-color: #f8f9fa;
+      }
+      .container {
+        background-color: #ffffff;
+        border-radius: 12px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+      }
+      .header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 30px;
+        text-align: center;
+      }
+      .header h1 {
+        margin: 0;
+        font-size: 28px;
+        font-weight: 700;
+      }
+      .header .emoji {
+        font-size: 48px;
+        margin-bottom: 15px;
+        display: block;
+      }
+      .content {
+        padding: 30px;
+      }
+      .event-details {
+        background: #f8f9fa;
+        border-radius: 8px;
+        padding: 20px;
+        margin: 20px 0;
+        border-left: 4px solid #667eea;
+      }
+      .detail-row {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 10px;
+        padding: 8px 0;
+        border-bottom: 1px solid #e9ecef;
+      }
+      .detail-row:last-child {
+        border-bottom: none;
+        font-weight: 600;
+        font-size: 18px;
+        margin-top: 15px;
+        padding-top: 15px;
+        border-top: 2px solid #667eea;
+        color: #667eea;
+      }
+      .detail-label {
+        font-weight: 600;
+        color: #495057;
+      }
+      .detail-value {
+        color: #212529;
+        text-align: right;
+      }
+      .highlight-box {
+        background: linear-gradient(135deg, #e3f2fd 0%, #f3e5f5 100%);
+        border-radius: 8px;
+        padding: 20px;
+        margin: 20px 0;
+        text-align: center;
+        border: 2px solid #667eea;
+      }
+      .highlight-box h3 {
+        margin: 0 0 10px 0;
+        color: #667eea;
+        font-size: 20px;
+      }
+      .highlight-box p {
+        margin: 0;
+        font-size: 16px;
+        color: #495057;
+      }
+      .footer {
+        background-color: #f8f9fa;
+        padding: 20px 30px;
+        text-align: center;
+        color: #6c757d;
+        font-size: 14px;
+        border-top: 1px solid #e9ecef;
+      }
+      .footer a {
+        color: #667eea;
+        text-decoration: none;
+      }
+      .btn {
+        display: inline-block;
+        padding: 12px 24px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        text-decoration: none;
+        border-radius: 6px;
+        font-weight: 600;
+        margin: 15px 0;
+      }
+      .attendee-list {
+        background: #f8f9fa;
+        border-radius: 8px;
+        padding: 15px;
+        margin: 15px 0;
+      }
+      .attendee-item {
+        display: flex;
+        align-items: center;
+        padding: 8px 0;
+        border-bottom: 1px solid #e9ecef;
+      }
+      .attendee-item:last-child {
+        border-bottom: none;
+      }
+      .attendee-number {
+        background: #667eea;
+        color: white;
+        border-radius: 50%;
+        width: 24px;
+        height: 24px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 12px;
+        font-weight: 600;
+        margin-right: 12px;
+      }
+      @media (max-width: 600px) {
+        body {
+          padding: 10px;
+        }
+        .header h1 {
+          font-size: 24px;
+        }
+        .content {
+          padding: 20px;
+        }
+        .detail-row {
+          flex-direction: column;
+          text-align: left;
+        }
+        .detail-value {
+          text-align: left;
+          margin-top: 5px;
+          font-weight: 600;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <span class="emoji">✅</span>
+        <h1>Booking Confirmed!</h1>
+        <p>Your event booking has been successfully processed</p>
+      </div>
+
+      <div class="content">
+        <p>Dear {{firstName}},</p>
+
+        <p>
+          Great news! Your booking for <strong>{{eventTitle}}</strong> has been
+          confirmed. Individual tickets with QR codes have been sent to each
+          attendee's email address.
+        </p>
+
+        <div class="highlight-box">
+          <h3>🎫 Tickets Distributed</h3>
+          <p>
+            Each attendee will receive their individual ticket with a unique QR
+            code for entry. This ensures smooth check-in and prevents any
+            verification issues.
+          </p>
+        </div>
+
+        <div class="event-details">
+          <h3>📅 Event Details</h3>
+          <div class="detail-row">
+            <span class="detail-label">Event:</span>
+            <span class="detail-value">{{eventTitle}}</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Date:</span>
+            <span class="detail-value">{{eventDate}}</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Time:</span>
+            <span class="detail-value">{{startTime}} - {{endTime}}</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Venue:</span>
+            <span class="detail-value">{{venueName}}</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Address:</span>
+            <span class="detail-value">{{venueAddress}}</span>
+          </div>
+        </div>
+
+        <div class="event-details">
+          <h3>🎟️ Booking Summary</h3>
+          <div class="detail-row">
+            <span class="detail-label">Ticket Type:</span>
+            <span class="detail-value">{{ticketType}}</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Quantity:</span>
+            <span class="detail-value">{{quantity}} ticket(s)</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Payment Reference:</span>
+            <span class="detail-value">{{paymentReference}}</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Total Amount:</span>
+            <span class="detail-value">{{finalAmount}}</span>
+          </div>
+        </div>
+
+        <div class="attendee-list">
+          <h3>👥 Attendees</h3>
+          <p style="margin-bottom: 15px; color: #6c757d; font-size: 14px">
+            Individual tickets have been sent to:
+          </p>
+          {{#each attendees}}
+          <div class="attendee-item">
+            <div class="attendee-number">{{@index}}</div>
+            <div>
+              <strong>{{this.name}}</strong><br />
+              <span style="color: #6c757d; font-size: 14px"
+                >{{this.email}}</span
+              >
+            </div>
+          </div>
+          {{/each}}
+        </div>
+
+        <div class="highlight-box">
+          <h3>📱 Important Notes</h3>
+          <p>
+            • Each attendee must present their individual QR code for entry<br />
+            • QR codes are unique and cannot be duplicated<br />
+            • Please arrive 15-30 minutes before the event starts<br />
+            • Keep your tickets safe and accessible on your mobile device
+          </p>
+        </div>
+
+        <p>
+          If you have any questions or need assistance, please don't hesitate to
+          contact our support team.
+        </p>
+
+        <p>Thank you for choosing ShowPass!</p>
+      </div>
+
+      <div class="footer">
+        <p>
+          This is an automated message from ShowPass.<br />
+          Need help? Contact us at
+          <a href="mailto:{{supportEmail}}">{{supportEmail}}</a>
+        </p>
+      </div>
+    </div>
+  </body>
+</html>

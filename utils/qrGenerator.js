@@ -101,9 +101,81 @@ const generateEventQR = async (eventId) => {
   }
 };
 
+// Generate individual QR codes for each ticket/attendee
+const generateIndividualTicketQRs = async (bookingData, attendeeList) => {
+  try {
+    const individualQRs = [];
+
+    for (let i = 0; i < attendeeList.length; i++) {
+      const attendee = attendeeList[i];
+      const ticketNumber = i + 1;
+
+      // Create unique reference for each ticket
+      const ticketReference = `${
+        bookingData.paymentReference || "REF" + Date.now()
+      }_T${ticketNumber}`;
+
+      const qrData = {
+        bookingId: bookingData._id,
+        ticketId: `${bookingData._id}_${ticketNumber}`,
+        eventId: bookingData.event,
+        userId: bookingData.user,
+        ticketType: bookingData.ticketType,
+        ticketNumber: ticketNumber,
+        totalTickets: attendeeList.length,
+        attendeeName: attendee.name,
+        attendeeEmail: attendee.email,
+        reference: ticketReference,
+        issuedAt: new Date().toISOString(),
+        // Add a hash for verification
+        hash: generateIndividualQRHash(bookingData, ticketNumber, attendee),
+      };
+
+      const qrCodeString = JSON.stringify(qrData);
+
+      // Generate QR code as data URL (base64 image)
+      const qrCodeImage = await QRCode.toDataURL(qrCodeString, {
+        errorCorrectionLevel: "M",
+        type: "image/png",
+        quality: 0.92,
+        margin: 1,
+        color: {
+          dark: "#000000",
+          light: "#FFFFFF",
+        },
+        width: 256,
+      });
+
+      individualQRs.push({
+        ticketNumber,
+        attendee,
+        qrCode: qrCodeString,
+        qrCodeImage: qrCodeImage,
+        reference: ticketReference,
+      });
+    }
+
+    return individualQRs;
+  } catch (error) {
+    console.error("Individual QR Code generation error:", error);
+    throw new Error("Failed to generate individual QR codes");
+  }
+};
+
+// Generate hash for individual QR verification
+const generateIndividualQRHash = (bookingData, ticketNumber, attendee) => {
+  const data = `${bookingData._id}${bookingData.event}${bookingData.user}${ticketNumber}${attendee.email}`;
+  return crypto
+    .createHash("sha256")
+    .update(data + process.env.JWT_SECRET)
+    .digest("hex");
+};
+
 module.exports = {
   generateTicketQR,
+  generateIndividualTicketQRs,
   verifyTicketQR,
   generateEventQR,
   generateQRHash,
+  generateIndividualQRHash,
 };

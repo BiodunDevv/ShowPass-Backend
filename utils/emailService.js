@@ -892,11 +892,134 @@ const sendAdminEventDeletionNotification = async (
   }
 };
 
+// Send individual tickets to attendees and booking confirmation to user
+const sendIndividualTicketsAndConfirmation = async (
+  bookingUser,
+  booking,
+  event,
+  individualQRs
+) => {
+  const ticketTemplate = loadTemplate("individual-ticket");
+  const confirmationTemplate = loadTemplate("booking-confirmation");
+
+  // Get unique emails from attendees
+  const uniqueAttendeeEmails = [
+    ...new Set(
+      individualQRs.map((qr) => qr.attendee.email).filter((email) => email)
+    ),
+  ];
+
+  // Check if booking user's email is in attendee list
+  const bookingUserInAttendees = uniqueAttendeeEmails.includes(
+    bookingUser.email
+  );
+
+  try {
+    // Send individual tickets to each attendee
+    for (const qrData of individualQRs) {
+      const attendee = qrData.attendee;
+
+      if (attendee.email) {
+        // Convert QR code data URL to buffer for attachment
+        const base64Data = qrData.qrCodeImage.replace(
+          /^data:image\/png;base64,/,
+          ""
+        );
+        const qrCodeBuffer = Buffer.from(base64Data, "base64");
+
+        const ticketData = {
+          firstName: attendee.name.split(" ")[0], // Get first name
+          attendeeName: attendee.name,
+          eventTitle: event.title,
+          eventDate: new Date(event.startDate).toLocaleDateString(),
+          startTime: event.startTime,
+          endTime: event.endTime,
+          venueName: event.venue.name,
+          venueAddress: event.venue.address,
+          ticketType: booking.ticketType,
+          ticketNumber: qrData.ticketNumber,
+          totalTickets: individualQRs.length,
+          ticketReference: qrData.reference,
+          finalAmount: formatCurrency(booking.finalAmount / booking.quantity), // Amount per ticket
+          qrCodeImage: "cid:qrcode",
+          supportEmail: process.env.EMAIL_FROM,
+          issuedDate: new Date().toLocaleDateString(),
+        };
+
+        const ticketMail = {
+          from: "ShowPass <noreply@showpass.com>",
+          to: attendee.email,
+          subject: `🎫 Your Ticket for ${event.title} - ShowPass`,
+          html: compileTemplate(ticketTemplate, ticketData),
+          attachments: [
+            {
+              filename: `ticket-${qrData.ticketNumber}.png`,
+              content: qrCodeBuffer,
+              cid: "qrcode",
+            },
+          ],
+        };
+
+        await transporter.sendMail(ticketMail);
+        console.log(
+          `📧 Individual ticket #${qrData.ticketNumber} sent to: ${attendee.email}`
+        );
+      }
+    }
+
+    // Send booking confirmation to the booking user (if they're not getting a ticket)
+    if (!bookingUserInAttendees) {
+      const confirmationData = {
+        firstName: bookingUser.firstName,
+        eventTitle: event.title,
+        eventDate: new Date(event.startDate).toLocaleDateString(),
+        startTime: event.startTime,
+        endTime: event.endTime,
+        venueName: event.venue.name,
+        venueAddress: event.venue.address,
+        ticketType: booking.ticketType,
+        quantity: booking.quantity,
+        finalAmount: formatCurrency(booking.finalAmount),
+        paymentReference: booking.paymentReference,
+        supportEmail: process.env.EMAIL_FROM,
+        bookingDate: new Date().toLocaleDateString(),
+        attendees: individualQRs.map((qr, index) => ({
+          name: qr.attendee.name,
+          email: qr.attendee.email || "N/A",
+          index: index + 1,
+        })),
+      };
+
+      const confirmationMail = {
+        from: "ShowPass <noreply@showpass.com>",
+        to: bookingUser.email,
+        subject: `✅ Booking Confirmed: ${event.title} - ShowPass`,
+        html: compileTemplate(confirmationTemplate, confirmationData),
+      };
+
+      await transporter.sendMail(confirmationMail);
+      console.log(`📧 Booking confirmation sent to: ${bookingUser.email}`);
+    } else {
+      console.log(
+        `📧 Booking user ${bookingUser.email} is an attendee - no separate confirmation needed`
+      );
+    }
+
+    console.log(
+      `📧 All ${individualQRs.length} individual tickets sent successfully`
+    );
+  } catch (error) {
+    console.error("Failed to send individual tickets and confirmation:", error);
+    throw error;
+  }
+};
+
 module.exports = {
   sendEmail,
   sendVerificationEmail,
   sendTicketConfirmation,
   sendTicketConfirmationToAttendees,
+  sendIndividualTicketsAndConfirmation,
   sendRefundConfirmation,
   sendEventUpdateNotification,
   sendPasswordResetEmail,

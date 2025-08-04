@@ -8,10 +8,14 @@ const {
   calculateFees,
   updateUserEventArrays,
 } = require("../utils/helpers");
-const { generateTicketQR } = require("../utils/qrGenerator");
+const {
+  generateTicketQR,
+  generateIndividualTicketQRs,
+} = require("../utils/qrGenerator");
 const {
   sendTicketConfirmation,
   sendTicketConfirmationToAttendees,
+  sendIndividualTicketsAndConfirmation,
 } = require("../utils/emailService");
 
 // Create booking (direct booking after frontend payment)
@@ -71,8 +75,6 @@ const createBooking = async (req, res) => {
       frontendPaymentId, // Store frontend payment ID
     };
 
-    const { qrCode, qrCodeImage } = await generateTicketQR(bookingData);
-
     // Prepare attendee info array
     let attendeeList = [];
     if (
@@ -101,11 +103,9 @@ const createBooking = async (req, res) => {
       });
     }
 
-    // Create confirmed booking
+    // Create booking first (without QR codes)
     const booking = new Booking({
       ...bookingData,
-      qrCode,
-      qrCodeImage,
       attendeeInfo: attendeeList,
     });
 
@@ -114,6 +114,12 @@ const createBooking = async (req, res) => {
       { path: "user", select: "firstName lastName email phone" },
       { path: "event", select: "title startDate endDate venue organizer" },
     ]);
+
+    // Generate individual QR codes for each attendee
+    const individualQRs = await generateIndividualTicketQRs(
+      booking,
+      attendeeList
+    );
 
     // Update user spending tracking
     try {
@@ -163,17 +169,16 @@ const createBooking = async (req, res) => {
       await event.save();
     }
 
-    // Send confirmation email to booking user and attendees
+    // Send individual ticket emails
     try {
-      await sendTicketConfirmationToAttendees(
+      await sendIndividualTicketsAndConfirmation(
         booking.user,
         booking,
         event,
-        qrCodeImage,
-        attendeeList
+        individualQRs
       );
       console.log(
-        `📧 Ticket confirmations sent for paid event: ${event.title}`
+        `📧 Individual ticket confirmations sent for free event: ${event.title}`
       );
     } catch (emailError) {
       console.error("Ticket email failed:", emailError);
@@ -530,7 +535,7 @@ const registerForFreeEvent = async (req, res) => {
       });
     }
 
-    // Create booking for free event
+    // Create booking for free event (without QR codes)
     const booking = new Booking({
       user: req.user._id,
       event: eventId,
@@ -543,12 +548,16 @@ const registerForFreeEvent = async (req, res) => {
       status: "confirmed", // Free events are auto-confirmed
     });
 
-    // Generate QR code immediately for free events
-    const { qrCode, qrCodeImage } = await generateTicketQR(booking);
-    booking.qrCode = qrCode;
-    booking.qrCodeImage = qrCodeImage;
-
     await booking.save();
+
+    // Populate booking for response
+    await booking.populate("event", "title startDate venue");
+
+    // Generate individual QR codes for each attendee
+    const individualQRs = await generateIndividualTicketQRs(
+      booking,
+      attendeeList
+    );
 
     // Update user's attending events array
     await updateUserEventArrays(req.user._id, eventId, "attending");
@@ -558,17 +567,13 @@ const registerForFreeEvent = async (req, res) => {
     event.currentAttendees += quantity;
     await event.save();
 
-    // Populate booking for response
-    await booking.populate("event", "title startDate venue");
-
-    // Send confirmation email to booking user and attendees
+    // Send individual ticket confirmation emails
     try {
-      await sendTicketConfirmationToAttendees(
+      await sendIndividualTicketsAndConfirmation(
         req.user,
         booking,
         event,
-        qrCodeImage,
-        attendeeList
+        individualQRs
       );
       console.log(
         `📧 Free event registration confirmations sent for: ${event.title}`
