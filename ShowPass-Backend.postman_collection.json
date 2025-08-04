@@ -3901,7 +3901,7 @@
             "url": {
               "raw": "{{baseUrl}}/booking/my-tickets",
               "host": ["{{baseUrl}}"],
-              "path": ["bookings", "my-tickets"]
+              "path": ["booking", "my-tickets"]
             }
           }
         },
@@ -3922,7 +3922,7 @@
             "url": {
               "raw": "{{baseUrl}}/booking/{{bookingId}}",
               "host": ["{{baseUrl}}"],
-              "path": ["bookings", "{{bookingId}}"]
+              "path": ["booking", "{{bookingId}}"]
             }
           }
         },
