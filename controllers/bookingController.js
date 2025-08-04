@@ -9,7 +9,10 @@ const {
   updateUserEventArrays,
 } = require("../utils/helpers");
 const { generateTicketQR } = require("../utils/qrGenerator");
-const { sendTicketConfirmation } = require("../utils/emailService");
+const {
+  sendTicketConfirmation,
+  sendTicketConfirmationToAttendees,
+} = require("../utils/emailService");
 
 // Create booking (direct booking after frontend payment)
 const createBooking = async (req, res) => {
@@ -70,17 +73,40 @@ const createBooking = async (req, res) => {
 
     const { qrCode, qrCodeImage } = await generateTicketQR(bookingData);
 
+    // Prepare attendee info array
+    let attendeeList = [];
+    if (
+      attendeeInfo &&
+      Array.isArray(attendeeInfo) &&
+      attendeeInfo.length > 0
+    ) {
+      attendeeList = attendeeInfo.slice(0, quantity); // Limit to quantity
+    } else {
+      // Default to booking user if no attendee info provided
+      attendeeList = [
+        {
+          name: `${req.user.firstName} ${req.user.lastName}`,
+          email: req.user.email,
+          phone: req.user.phone || "",
+        },
+      ];
+    }
+
+    // Ensure we have enough attendee info for the quantity
+    while (attendeeList.length < quantity) {
+      attendeeList.push({
+        name: `${req.user.firstName} ${req.user.lastName}`,
+        email: req.user.email,
+        phone: req.user.phone || "",
+      });
+    }
+
     // Create confirmed booking
     const booking = new Booking({
       ...bookingData,
       qrCode,
       qrCodeImage,
-      attendeeInfo: {
-        name:
-          attendeeInfo?.name || `${req.user.firstName} ${req.user.lastName}`,
-        email: attendeeInfo?.email || req.user.email,
-        phone: attendeeInfo?.phone || req.user.phone,
-      },
+      attendeeInfo: attendeeList,
     });
 
     await booking.save();
@@ -141,9 +167,18 @@ const createBooking = async (req, res) => {
       await event.save();
     }
 
-    // Send confirmation email
+    // Send confirmation email to booking user and attendees
     try {
-      await sendTicketConfirmation(booking.user, booking, event, qrCodeImage);
+      await sendTicketConfirmationToAttendees(
+        booking.user,
+        booking,
+        event,
+        qrCodeImage,
+        attendeeList
+      );
+      console.log(
+        `📧 Ticket confirmations sent for paid event: ${event.title}`
+      );
     } catch (emailError) {
       console.error("Ticket email failed:", emailError);
     }
@@ -471,18 +506,41 @@ const registerForFreeEvent = async (req, res) => {
       return sendError(res, 400, "You have already registered for this event");
     }
 
+    // Prepare attendee info array for free event
+    let attendeeList = [];
+    if (
+      attendeeInfo &&
+      Array.isArray(attendeeInfo) &&
+      attendeeInfo.length > 0
+    ) {
+      attendeeList = attendeeInfo.slice(0, quantity); // Limit to quantity
+    } else {
+      // Default to booking user if no attendee info provided
+      attendeeList = [
+        {
+          name: `${req.user.firstName} ${req.user.lastName}`,
+          email: req.user.email,
+          phone: req.user.phone || "",
+        },
+      ];
+    }
+
+    // Ensure we have enough attendee info for the quantity
+    while (attendeeList.length < quantity) {
+      attendeeList.push({
+        name: `${req.user.firstName} ${req.user.lastName}`,
+        email: req.user.email,
+        phone: req.user.phone || "",
+      });
+    }
+
     // Create booking for free event
     const booking = new Booking({
       user: req.user._id,
       event: eventId,
       ticketType,
       quantity,
-      attendeeInfo: attendeeInfo || [
-        {
-          name: req.user.firstName + " " + req.user.lastName,
-          email: req.user.email,
-        },
-      ],
+      attendeeInfo: attendeeList,
       totalAmount: 0,
       finalAmount: 0,
       paymentStatus: "not_required",
@@ -507,15 +565,21 @@ const registerForFreeEvent = async (req, res) => {
     // Populate booking for response
     await booking.populate("event", "title startDate venue");
 
-    // Send confirmation email
+    // Send confirmation email to booking user and attendees
     try {
-      await sendTicketConfirmation(req.user, booking, event, qrCodeImage);
+      await sendTicketConfirmationToAttendees(
+        req.user,
+        booking,
+        event,
+        qrCodeImage,
+        attendeeList
+      );
       console.log(
-        `📧 Free event registration confirmation sent to: ${req.user.email}`
+        `📧 Free event registration confirmations sent for: ${event.title}`
       );
     } catch (emailError) {
       console.log(
-        "⚠️ Failed to send registration confirmation email:",
+        "⚠️ Failed to send registration confirmation emails:",
         emailError.message
       );
     }

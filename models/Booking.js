@@ -54,11 +54,13 @@ const bookingSchema = new mongoose.Schema(
     frontendPaymentId: String, // Store frontend payment transaction ID
     qrCode: String,
     qrCodeImage: String,
-    attendeeInfo: {
-      name: String,
-      email: String,
-      phone: String,
-    },
+    attendeeInfo: [
+      {
+        name: String,
+        email: String,
+        phone: String,
+      },
+    ],
     checkInTime: Date,
     isCheckedIn: {
       type: Boolean,

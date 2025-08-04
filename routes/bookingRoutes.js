@@ -26,8 +26,15 @@ router.post(
       .withMessage("Frontend payment ID is required"),
     body("attendeeInfo")
       .optional()
-      .isObject()
-      .withMessage("Attendee info must be an object"),
+      .custom((value) => {
+        if (
+          Array.isArray(value) ||
+          (typeof value === "object" && value !== null)
+        ) {
+          return true;
+        }
+        throw new Error("Attendee info must be an array or object");
+      }),
   ],
   bookingController.createBooking
 );
