@@ -428,6 +428,33 @@ const changePassword = async (req, res) => {
   }
 };
 
+// Check authentication status
+const checkAuth = async (req, res) => {
+  try {
+    // If we reach here, the user is authenticated (middleware passed)
+    const userResult = await UserManager.findById(req.user._id);
+    if (!userResult) {
+      return sendError(res, 404, "User not found");
+    }
+
+    const { user } = userResult;
+
+    sendSuccess(res, "User is authenticated", {
+      isAuthenticated: true,
+      user: sanitizeUser(user),
+      authStatus: "verified",
+    });
+  } catch (error) {
+    console.error("Check auth error:", error);
+    sendError(
+      res,
+      500,
+      "Failed to verify authentication status",
+      error.message
+    );
+  }
+};
+
 // Logout (client-side token removal)
 const logout = async (req, res) => {
   sendSuccess(res, "Logged out successfully");
@@ -444,5 +471,6 @@ module.exports = {
   forgotPassword,
   resetPassword,
   changePassword,
+  checkAuth,
   logout,
 };

@@ -64,6 +64,11 @@ router.post("/reset-password", authController.resetPassword);
 // @access  Private
 router.put("/change-password", requireAuth, authController.changePassword);
 
+// @route   GET /api/auth/check-auth
+// @desc    Check if user is authenticated
+// @access  Private
+router.get("/check-auth", requireAuth, authController.checkAuth);
+
 // @route   POST /api/auth/logout
 // @desc    Logout user
 // @access  Private
