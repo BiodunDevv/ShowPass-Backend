@@ -210,15 +210,29 @@
           Please save this email and present the QR code below for entry.
         </p>
 
-        <div class="qr-section">
-          <h3>🔍 Your Entry QR Code</h3>
-          <div class="qr-code">
-            <img src="{{qrCodeImage}}" alt="Event Ticket QR Code" />
+        <!-- QR Code Section -->
+        <div style="text-align: center; padding: 30px 20px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 15px; margin: 30px 0;">
+          <h2 style="color: white; margin-bottom: 20px; font-size: 24px;">🎫 Your Entry Ticket</h2>
+          <div style="background: white; display: inline-block; padding: 20px; border-radius: 15px; box-shadow: 0 8px 25px rgba(0,0,0,0.15);">
+            <img src="{{qrCodeImage}}" alt="QR Code" style="width: 200px; height: 200px; display: block; margin: 0 auto;" />
           </div>
-          <div class="qr-instructions">
-            <strong>Present this QR code at the event entrance</strong><br />
-            Screenshot or save this image for offline access
+          <div style="color: white; margin-top: 20px;">
+            <p style="font-size: 16px; margin: 10px 0;"><strong>Ticket #{{ticketNumber}}</strong></p>
+            <p style="font-size: 14px; margin: 5px 0;">Reference: {{ticketReference}}</p>
+            <p style="font-size: 12px; margin: 5px 0; opacity: 0.9;">Show this QR code at the venue for entry</p>
           </div>
+        </div>
+
+        <!-- Entry Instructions -->
+        <div style="background: #e8f5e8; border-left: 4px solid #28a745; padding: 20px; margin: 20px 0; border-radius: 8px;">
+          <h3 style="color: #155724; margin: 0 0 15px 0; font-size: 18px;">📱 Entry Instructions</h3>
+          <ul style="color: #155724; margin: 0; padding-left: 20px; line-height: 1.6;">
+            <li><strong>Present this QR code</strong> on your phone or print this email</li>
+            <li><strong>Arrive early:</strong> Come at least 15 minutes before the event starts</li>
+            <li><strong>Bring valid ID:</strong> You may need identification for verification</li>
+            <li><strong>Unique ticket:</strong> Each QR code is unique - sharing won't work</li>
+            <li><strong>Save offline:</strong> Screenshot or download for offline access</li>
+          </ul>
         </div>
 
         <div class="event-details">

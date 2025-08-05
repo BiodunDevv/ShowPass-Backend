@@ -114,4 +114,27 @@ router.post(
   bookingController.verifyQRCode
 );
 
+// @route   POST /api/booking/checkin-ticket
+// @desc    Check-in individual ticket using QR code
+// @access  Private (Organizer/Admin)
+router.post(
+  "/checkin-ticket",
+  [
+    requireAuth,
+    isOrganizer,
+    body("qrCode").notEmpty().withMessage("QR code is required"),
+  ],
+  bookingController.checkInIndividualTicket
+);
+
+// @route   GET /api/booking/debug/:id
+// @desc    Debug individual QRs for a booking (temporary)
+// @access  Private
+router.get(
+  "/debug/:id",
+  validateObjectId(param("id")),
+  requireAuth,
+  bookingController.debugBookingQRs
+);
+
 module.exports = router;

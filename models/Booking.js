@@ -54,6 +54,28 @@ const bookingSchema = new mongoose.Schema(
     frontendPaymentId: String, // Store frontend payment transaction ID
     qrCode: String,
     qrCodeImage: String,
+    individualQRs: [
+      {
+        ticketNumber: Number,
+        reference: String,
+        attendee: {
+          name: String,
+          email: String,
+          phone: String,
+        },
+        qrCodeImage: String,
+        hash: String,
+        isUsed: {
+          type: Boolean,
+          default: false,
+        },
+        checkInTime: Date,
+        checkedInBy: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "Organizer",
+        },
+      },
+    ],
     attendeeInfo: [
       {
         name: String,

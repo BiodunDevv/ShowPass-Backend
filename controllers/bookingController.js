@@ -121,6 +121,13 @@ const createBooking = async (req, res) => {
       attendeeList
     );
 
+    // Save individual QR codes to the booking
+    booking.individualQRs = individualQRs;
+    booking.markModified('individualQRs'); // Ensure MongoDB knows the field changed
+    await booking.save();
+
+    console.log(`✅ Saved ${individualQRs.length} individual QR codes to booking ${booking._id}`);
+
     // Update user spending tracking
     try {
       const userResult = await UserManager.findById(req.user._id);
@@ -219,6 +226,12 @@ const getUserBookings = async (req, res) => {
       .skip(skip)
       .limit(limit);
 
+    // Debug logging
+    console.log(`📊 Retrieved ${bookings.length} bookings for user ${req.user._id}`);
+    bookings.forEach((booking, index) => {
+      console.log(`📋 Booking ${index + 1}: ID=${booking._id}, individualQRs count=${booking.individualQRs?.length || 0}`);
+    });
+
     const total = await Booking.countDocuments(query);
 
     sendSuccess(res, "User bookings retrieved successfully", bookings, {
@@ -249,6 +262,16 @@ const getBookingById = async (req, res) => {
 
     if (!booking) {
       return sendError(res, 404, "Booking not found");
+    }
+
+    console.log(`📋 Retrieved booking ${id}: individualQRs count=${booking.individualQRs?.length || 0}`);
+    if (booking.individualQRs && booking.individualQRs.length > 0) {
+      console.log(`🎫 Individual QRs:`, booking.individualQRs.map(qr => ({
+        ticketNumber: qr.ticketNumber,
+        reference: qr.reference,
+        attendeeName: qr.attendee?.name,
+        hasQRImage: !!qr.qrCodeImage
+      })));
     }
 
     // Check if user owns the booking or is admin/organizer
@@ -390,7 +413,7 @@ const checkInBooking = async (req, res) => {
   }
 };
 
-// Verify QR code for check-in
+// Verify QR code for check-in (updated for individual tickets)
 const verifyQRCode = async (req, res) => {
   try {
     const { qrCode } = req.body;
@@ -406,6 +429,7 @@ const verifyQRCode = async (req, res) => {
       return sendError(res, 400, "Invalid QR code format");
     }
 
+    // Find booking by ID and populate necessary fields
     const booking = await Booking.findById(qrData.bookingId)
       .populate("user", "firstName lastName email")
       .populate("event", "title organizer startDate venue");
@@ -423,22 +447,45 @@ const verifyQRCode = async (req, res) => {
       return sendError(res, 403, "Access denied");
     }
 
-    // Verify QR data matches booking
-    if (qrData.reference !== booking.paymentReference) {
-      return sendError(res, 400, "QR code does not match booking");
+    // Find the specific ticket in individual QRs
+    const ticketQR = booking.individualQRs.find(
+      (qr) => qr.reference === qrData.ticketReference
+    );
+
+    if (!ticketQR) {
+      return sendError(res, 400, "Invalid ticket reference");
+    }
+
+    // Verify QR data matches the specific ticket
+    if (
+      qrData.attendeeName !== ticketQR.attendee.name ||
+      qrData.hash !== ticketQR.hash
+    ) {
+      return sendError(res, 400, "QR code verification failed");
     }
 
     if (booking.status !== "confirmed") {
       return sendError(res, 400, "Invalid booking status");
     }
 
+    // Check if this specific ticket is already used
+    if (ticketQR.isUsed) {
+      return sendError(res, 400, "This ticket has already been used");
+    }
+
     sendSuccess(res, "QR code verified successfully", {
       valid: true,
+      ticket: {
+        ticketNumber: ticketQR.ticketNumber,
+        reference: ticketQR.reference,
+        attendeeName: ticketQR.attendee.name,
+        attendeeEmail: ticketQR.attendee.email,
+        ticketType: booking.ticketType,
+        isUsed: ticketQR.isUsed || false,
+      },
       booking: {
         _id: booking._id,
-        ticketType: booking.ticketType,
         quantity: booking.quantity,
-        attendee: booking.user,
         event: booking.event,
         isCheckedIn: booking.isCheckedIn,
         checkInTime: booking.checkInTime,
@@ -447,6 +494,108 @@ const verifyQRCode = async (req, res) => {
   } catch (error) {
     console.error("Verify QR code error:", error);
     sendError(res, 500, "Failed to verify QR code", error.message);
+  }
+};
+
+// Check-in individual ticket (updated for individual QR codes)
+const checkInIndividualTicket = async (req, res) => {
+  try {
+    const { qrCode } = req.body;
+
+    if (!qrCode) {
+      return sendError(res, 400, "QR code is required");
+    }
+
+    let qrData;
+    try {
+      qrData = JSON.parse(qrCode);
+    } catch (error) {
+      return sendError(res, 400, "Invalid QR code format");
+    }
+
+    // Find booking and populate necessary fields
+    const booking = await Booking.findById(qrData.bookingId)
+      .populate("user", "firstName lastName email")
+      .populate("event", "title organizer startDate venue");
+
+    if (!booking) {
+      return sendError(res, 404, "Booking not found");
+    }
+
+    // Check if user is organizer or admin
+    const isOrganizer =
+      booking.event.organizer.toString() === req.user._id.toString();
+    const isAdmin = req.user.role === "admin";
+
+    if (!isOrganizer && !isAdmin) {
+      return sendError(
+        res,
+        403,
+        "Only event organizers and admins can check-in attendees"
+      );
+    }
+
+    // Find the specific ticket
+    const ticketIndex = booking.individualQRs.findIndex(
+      (qr) => qr.reference === qrData.ticketReference
+    );
+
+    if (ticketIndex === -1) {
+      return sendError(res, 400, "Invalid ticket reference");
+    }
+
+    const ticket = booking.individualQRs[ticketIndex];
+
+    // Verify QR data
+    if (
+      qrData.attendeeName !== ticket.attendee.name ||
+      qrData.hash !== ticket.hash
+    ) {
+      return sendError(res, 400, "QR code verification failed");
+    }
+
+    if (booking.status !== "confirmed") {
+      return sendError(res, 400, "Only confirmed bookings can be checked in");
+    }
+
+    if (ticket.isUsed) {
+      return sendError(res, 400, "This ticket has already been used");
+    }
+
+    // Mark the individual ticket as used
+    booking.individualQRs[ticketIndex].isUsed = true;
+    booking.individualQRs[ticketIndex].checkInTime = new Date();
+    booking.individualQRs[ticketIndex].checkedInBy = req.user._id;
+
+    // Check if all tickets in this booking are now used
+    const allTicketsUsed = booking.individualQRs.every((qr) => qr.isUsed);
+    if (allTicketsUsed) {
+      booking.isCheckedIn = true;
+      booking.checkInTime = new Date();
+      booking.checkedInBy = req.user._id;
+      booking.status = "used";
+    }
+
+    await booking.save();
+
+    sendSuccess(res, "Ticket checked in successfully", {
+      ticket: {
+        ticketNumber: ticket.ticketNumber,
+        reference: ticket.reference,
+        attendeeName: ticket.attendee.name,
+        checkInTime: ticket.checkInTime,
+        isUsed: ticket.isUsed,
+      },
+      booking: {
+        _id: booking._id,
+        allTicketsUsed,
+        totalTickets: booking.individualQRs.length,
+        usedTickets: booking.individualQRs.filter((qr) => qr.isUsed).length,
+      },
+    });
+  } catch (error) {
+    console.error("Check-in individual ticket error:", error);
+    sendError(res, 500, "Failed to check-in ticket", error.message);
   }
 };
 
@@ -559,6 +708,13 @@ const registerForFreeEvent = async (req, res) => {
       attendeeList
     );
 
+    // Save individual QR codes to the booking
+    booking.individualQRs = individualQRs;
+    booking.markModified('individualQRs'); // Ensure MongoDB knows the field changed
+    await booking.save();
+
+    console.log(`✅ Saved ${individualQRs.length} individual QR codes to free event booking ${booking._id}`);
+
     // Update user's attending events array
     await updateUserEventArrays(req.user._id, eventId, "attending");
 
@@ -596,6 +752,35 @@ const registerForFreeEvent = async (req, res) => {
   }
 };
 
+// Debug endpoint to check individual QRs (temporary)
+const debugBookingQRs = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const booking = await Booking.findById(id);
+
+    if (!booking) {
+      return sendError(res, 404, "Booking not found");
+    }
+
+    console.log("🔍 Debug booking QRs:");
+    console.log("📋 Booking ID:", booking._id);
+    console.log("🎫 Individual QRs count:", booking.individualQRs?.length || 0);
+    console.log("📊 Full individualQRs data:", booking.individualQRs);
+
+    sendSuccess(res, "Debug info retrieved", {
+      bookingId: booking._id,
+      individualQRsCount: booking.individualQRs?.length || 0,
+      individualQRs: booking.individualQRs,
+      hasIndividualQRs: !!booking.individualQRs,
+      isArray: Array.isArray(booking.individualQRs),
+    });
+  } catch (error) {
+    console.error("Debug booking QRs error:", error);
+    sendError(res, 500, "Failed to debug booking QRs", error.message);
+  }
+};
+
 module.exports = {
   createBooking,
   getUserBookings,
@@ -603,5 +788,7 @@ module.exports = {
   cancelBooking,
   checkInBooking,
   verifyQRCode,
+  checkInIndividualTicket,
   registerForFreeEvent,
+  debugBookingQRs,
 };

@@ -111,13 +111,11 @@ const generateIndividualTicketQRs = async (bookingData, attendeeList) => {
       const ticketNumber = i + 1;
 
       // Create unique reference for each ticket
-      const ticketReference = `${
-        bookingData.paymentReference || "REF" + Date.now()
-      }_T${ticketNumber}`;
+      const ticketReference = `TKT-${bookingData._id}-${ticketNumber}`;
 
       const qrData = {
         bookingId: bookingData._id,
-        ticketId: `${bookingData._id}_${ticketNumber}`,
+        ticketReference: ticketReference,
         eventId: bookingData.event,
         userId: bookingData.user,
         ticketType: bookingData.ticketType,
@@ -125,7 +123,6 @@ const generateIndividualTicketQRs = async (bookingData, attendeeList) => {
         totalTickets: attendeeList.length,
         attendeeName: attendee.name,
         attendeeEmail: attendee.email,
-        reference: ticketReference,
         issuedAt: new Date().toISOString(),
         // Add a hash for verification
         hash: generateIndividualQRHash(bookingData, ticketNumber, attendee),
@@ -152,6 +149,7 @@ const generateIndividualTicketQRs = async (bookingData, attendeeList) => {
         qrCode: qrCodeString,
         qrCodeImage: qrCodeImage,
         reference: ticketReference,
+        hash: generateIndividualQRHash(bookingData, ticketNumber, attendee),
       });
     }
 
