@@ -5,6 +5,10 @@ const { requireAuth } = require("../middlewares/auth");
 const {
   validateRegister,
   validateLogin,
+  validateComprehensiveProfile,
+  validateSettings,
+  validateAccountDeletion,
+  validateAccountReactivation,
 } = require("../middlewares/validation");
 
 // @route   POST /api/auth/register
@@ -23,9 +27,53 @@ router.post("/login", validateLogin, authController.login);
 router.get("/me", requireAuth, authController.getMe);
 
 // @route   PUT /api/auth/profile
-// @desc    Update user profile
+// @desc    Update user profile (basic fields)
 // @access  Private
 router.put("/profile", requireAuth, authController.updateProfile);
+
+// @route   PUT /api/auth/profile/comprehensive
+// @desc    Update comprehensive user profile with role-specific fields
+// @access  Private
+router.put(
+  "/profile/comprehensive",
+  requireAuth,
+  validateComprehensiveProfile,
+  authController.updateComprehensiveProfile
+);
+
+// @route   GET /api/auth/settings
+// @desc    Get user settings (notifications, preferences, privacy)
+// @access  Private
+router.get("/settings", requireAuth, authController.getSettings);
+
+// @route   PUT /api/auth/settings
+// @desc    Update user settings (notifications, preferences, privacy)
+// @access  Private
+router.put(
+  "/settings",
+  requireAuth,
+  validateSettings,
+  authController.updateSettings
+);
+
+// @route   DELETE /api/auth/account
+// @desc    Delete user account (soft or hard delete)
+// @access  Private
+router.delete(
+  "/account",
+  requireAuth,
+  validateAccountDeletion,
+  authController.deleteAccount
+);
+
+// @route   POST /api/auth/reactivate
+// @desc    Reactivate soft-deleted account
+// @access  Public
+router.post(
+  "/reactivate",
+  validateAccountReactivation,
+  authController.reactivateAccount
+);
 
 // @route   POST /api/auth/verify-email
 // @desc    Verify email address with 6-digit code

@@ -816,6 +816,349 @@
             },
             "description": "Check if the current user is authenticated and retrieve their authentication status. This endpoint validates the JWT token and returns user information if authentication is successful.\n\n🔐 **Authentication Required**: Must include valid JWT token\n\n**Key Features:**\n- Validates JWT token authenticity\n- Checks if user account is active (not blocked)\n- Returns current user information\n- Confirms authentication status\n\n**Use Cases:**\n- Frontend route guards\n- Session validation\n- User authentication verification\n- Token expiration checks\n\n**Expected Responses:**\n- 200: User is authenticated and active\n- 401: Invalid token, expired token, or not logged in (redirect to signin)\n- 403: Account blocked or requires verification\n- 500: Server error\n\n**Frontend Integration:**\n```javascript\n// Example usage in frontend\nconst checkAuth = async () => {\n  try {\n    const response = await fetch('/api/auth/check-auth', {\n      headers: {\n        'Authorization': `Bearer ${localStorage.getItem('token')}`\n      }\n    });\n    \n    if (response.status === 401) {\n      // Redirect to signin page\n      window.location.href = '/signin';\n      return false;\n    }\n    \n    return response.ok;\n  } catch (error) {\n    console.error('Auth check failed:', error);\n    return false;\n  }\n};\n```"
           }
+        },
+        {
+          "name": "Update Comprehensive Profile",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    console.log('✅ Profile updated successfully');",
+                  "    console.log('👤 Updated User Profile:');",
+                  "    console.log('- Name:', response.data.firstName + ' ' + response.data.lastName);",
+                  "    console.log('- Email:', response.data.email);",
+                  "    console.log('- Role:', response.data.role);",
+                  "    console.log('- Bio:', response.data.bio || 'Not set');",
+                  "    console.log('- Website:', response.data.website || 'Not set');",
+                  "    ",
+                  "    if (response.data.role === 'organizer') {",
+                  "        console.log('🏢 Business Information:');",
+                  "        console.log('- Business Name:', response.data.businessName || 'Not set');",
+                  "        console.log('- Business Phone:', response.data.businessPhone || 'Not set');",
+                  "    }",
+                  "    ",
+                  "    if (response.data.role === 'admin') {",
+                  "        console.log('👑 Admin Information:');",
+                  "        console.log('- Department:', response.data.department || 'Not set');",
+                  "        console.log('- Position:', response.data.position || 'Not set');",
+                  "    }",
+                  "} else {",
+                  "    console.log('❌ Profile update failed');",
+                  "    console.log('📊 Status Code:', pm.response.code);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{authToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstName\": \"John\",\n  \"lastName\": \"Doe\",\n  \"phone\": \"+2348123456789\",\n  \"bio\": \"Passionate event organizer with 5+ years of experience creating memorable experiences.\",\n  \"website\": \"https://johndoe.events\",\n  \"socialLinks\": {\n    \"twitter\": \"@johndoe\",\n    \"linkedin\": \"linkedin.com/in/johndoe\",\n    \"instagram\": \"@johndoeevents\"\n  },\n  \"businessName\": \"John Doe Events\",\n  \"businessPhone\": \"+2348087654321\",\n  \"businessWebsite\": \"https://johndoeevents.com\",\n  \"department\": \"operations\",\n  \"position\": \"Senior Event Coordinator\",\n  \"preferences\": {\n    \"favoriteCategories\": [\"Technology\", \"Business\", \"Networking\"],\n    \"autoAcceptBookings\": true,\n    \"showProfile\": true\n  },\n  \"notifications\": {\n    \"email\": true,\n    \"newEvents\": true,\n    \"eventUpdates\": true,\n    \"promotions\": false\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/profile/comprehensive",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "profile", "comprehensive"]
+            },
+            "description": "Update comprehensive user profile with role-specific fields. This endpoint allows updating extended profile information including business details for organizers and department information for admins.\n\n🔐 **Authentication Required**: Must be logged in\n\n**Role-Specific Fields:**\n\n**All Users:**\n- firstName, lastName, phone, bio, website\n- socialLinks (twitter, facebook, instagram, linkedin)\n- preferences (favoriteCategories, autoAcceptBookings, etc.)\n- notifications settings\n\n**Organizers:**\n- businessName, businessAddress, businessPhone\n- businessWebsite, businessType\n\n**Admins:**\n- department, position, employeeId\n\n**Expected Responses:**\n- 200: Profile updated successfully\n- 400: Validation errors\n- 401: Authentication required\n- 500: Server error"
+          }
+        },
+        {
+          "name": "Get User Settings",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    console.log('✅ Settings retrieved successfully');",
+                  "    console.log('⚙️ User Settings:');",
+                  "    console.log('');",
+                  "    console.log('🔔 Notifications:');",
+                  "    console.log('- Email:', response.data.notifications.email);",
+                  "    console.log('- Push:', response.data.notifications.push);",
+                  "    console.log('- New Events:', response.data.notifications.newEvents);",
+                  "    console.log('- Event Updates:', response.data.notifications.eventUpdates);",
+                  "    console.log('- Promotions:', response.data.notifications.promotions);",
+                  "    console.log('');",
+                  "    console.log('🎛️ Preferences:');",
+                  "    console.log('- Auto Accept Bookings:', response.data.preferences.autoAcceptBookings);",
+                  "    console.log('- Show Profile:', response.data.preferences.showProfile);",
+                  "    console.log('- Allow Messages:', response.data.preferences.allowMessages);",
+                  "    console.log('- Favorite Categories:', response.data.preferences.favoriteCategories);",
+                  "    console.log('');",
+                  "    console.log('🔒 Privacy:');",
+                  "    console.log('- Show Email:', response.data.privacy.showEmail);",
+                  "    console.log('- Show Phone:', response.data.privacy.showPhone);",
+                  "    console.log('- Profile Visibility:', response.data.privacy.profileVisibility);",
+                  "    console.log('');",
+                  "    console.log('🎨 UI Settings:');",
+                  "    console.log('- Theme:', response.data.theme);",
+                  "    console.log('- Language:', response.data.language);",
+                  "    console.log('- Timezone:', response.data.timezone);",
+                  "} else {",
+                  "    console.log('❌ Failed to retrieve settings');",
+                  "    console.log('📊 Status Code:', pm.response.code);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{authToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/auth/settings",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "settings"]
+            },
+            "description": "Retrieve current user's settings including notifications, preferences, privacy settings, and UI preferences.\n\n🔐 **Authentication Required**: Must be logged in\n\n**Settings Categories:**\n\n**Notifications:**\n- Email, Push, SMS notifications\n- New events, event updates, reminders\n- Promotions and newsletter preferences\n\n**Preferences:**\n- Favorite event categories\n- Auto-accept bookings (organizers)\n- Profile visibility and messaging\n\n**Privacy:**\n- Contact information visibility\n- Profile visibility (public/private)\n- Event attendance visibility\n\n**UI Settings:**\n- Theme (light/dark/auto)\n- Language preference\n- Timezone\n\n**Expected Responses:**\n- 200: Settings retrieved successfully\n- 401: Authentication required\n- 500: Server error"
+          }
+        },
+        {
+          "name": "Update User Settings",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    console.log('✅ Settings updated successfully');",
+                  "    console.log('⚙️ Updated Settings Summary:');",
+                  "    console.log('');",
+                  "    console.log('🔔 Notifications Updated:');",
+                  "    Object.entries(response.data.notifications).forEach(([key, value]) => {",
+                  "        console.log(`- ${key}: ${value}`);",
+                  "    });",
+                  "    console.log('');",
+                  "    console.log('🎛️ Preferences Updated:');",
+                  "    Object.entries(response.data.preferences).forEach(([key, value]) => {",
+                  "        console.log(`- ${key}: ${value}`);",
+                  "    });",
+                  "    console.log('');",
+                  "    console.log('🔒 Privacy Settings Updated:');",
+                  "    Object.entries(response.data.privacy).forEach(([key, value]) => {",
+                  "        console.log(`- ${key}: ${value}`);",
+                  "    });",
+                  "    console.log('');",
+                  "    console.log('🎨 UI Settings:');",
+                  "    console.log('- Theme:', response.data.theme);",
+                  "    console.log('- Language:', response.data.language);",
+                  "    console.log('- Timezone:', response.data.timezone);",
+                  "} else {",
+                  "    console.log('❌ Settings update failed');",
+                  "    console.log('📊 Status Code:', pm.response.code);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{authToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"notifications\": {\n    \"email\": true,\n    \"push\": true,\n    \"sms\": false,\n    \"newEvents\": true,\n    \"eventUpdates\": true,\n    \"eventReminders\": true,\n    \"promotions\": false,\n    \"newsletter\": false\n  },\n  \"preferences\": {\n    \"favoriteCategories\": [\"Technology\", \"Business\", \"Networking\"],\n    \"eventNotificationRadius\": 25,\n    \"autoAcceptBookings\": true,\n    \"showProfile\": true,\n    \"allowMessages\": true\n  },\n  \"privacy\": {\n    \"showEmail\": false,\n    \"showPhone\": false,\n    \"showAttendingEvents\": true,\n    \"profileVisibility\": \"public\"\n  },\n  \"theme\": \"dark\",\n  \"language\": \"en\",\n  \"timezone\": \"Africa/Lagos\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/settings",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "settings"]
+            },
+            "description": "Update user settings including notifications, preferences, privacy settings, and UI preferences.\n\n🔐 **Authentication Required**: Must be logged in\n\n**Updateable Settings:**\n\n**Notifications:**\n- email, push, sms (boolean)\n- newEvents, eventUpdates, eventReminders (boolean)\n- promotions, newsletter (boolean)\n\n**Preferences:**\n- favoriteCategories (array of strings)\n- eventNotificationRadius (number, km)\n- autoAcceptBookings (boolean)\n- showProfile, allowMessages (boolean)\n\n**Privacy:**\n- showEmail, showPhone (boolean)\n- showAttendingEvents (boolean)\n- profileVisibility (\"public\", \"private\", \"friends\")\n\n**UI Settings:**\n- theme (\"light\", \"dark\", \"auto\")\n- language (string, e.g., \"en\", \"fr\")\n- timezone (string, e.g., \"UTC\", \"Africa/Lagos\")\n\n**Expected Responses:**\n- 200: Settings updated successfully\n- 400: Validation errors\n- 401: Authentication required\n- 500: Server error"
+          }
+        },
+        {
+          "name": "Delete User Account",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    console.log('✅ Account deletion successful');",
+                  "    console.log('🗑️ Account Status:', response.message);",
+                  "    console.log('');",
+                  "    console.log('⚠️ IMPORTANT NOTES:');",
+                  "    console.log('- Soft Delete: Account can be reactivated within 30 days');",
+                  "    console.log('- Hard Delete: Account is permanently removed');",
+                  "    console.log('- Organizers: Cannot delete with active events');",
+                  "    console.log('- Recent Bookings: May prevent hard deletion');",
+                  "    console.log('');",
+                  "    console.log('📧 Next Steps:');",
+                  "    console.log('- Check your email for confirmation');",
+                  "    console.log('- Contact support if you need to reactivate');",
+                  "    console.log('- For hard deletion, all data is permanently removed');",
+                  "} else if (pm.response.code === 400) {",
+                  "    const response = pm.response.json();",
+                  "    console.log('❌ Account deletion failed');",
+                  "    console.log('🚫 Reason:', response.message);",
+                  "    console.log('');",
+                  "    console.log('💡 Common Issues:');",
+                  "    console.log('- Incorrect password provided');",
+                  "    console.log('- Active events preventing deletion');",
+                  "    console.log('- Recent bookings (within 30 days)');",
+                  "} else {",
+                  "    console.log('❌ Account deletion failed');",
+                  "    console.log('📊 Status Code:', pm.response.code);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{authToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"confirmPassword\": \"your_current_password\",\n  \"deleteType\": \"soft\",\n  \"reason\": \"No longer need the account\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/account",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "account"]
+            },
+            "description": "Delete user account with options for soft or hard deletion.\n\n🔐 **Authentication Required**: Must be logged in\n⚠️ **Password Confirmation Required**\n\n**Deletion Types:**\n\n**Soft Delete (Default):**\n- Account is deactivated but data preserved\n- Can be reactivated within 30 days\n- Email and sensitive data are anonymized\n- Account is blocked from login\n\n**Hard Delete:**\n- Account and all data permanently removed\n- Cannot be recovered\n- Requires no active events (organizers)\n- Requires no recent bookings (within 30 days)\n\n**Request Body:**\n- confirmPassword (required): Current account password\n- deleteType (optional): \"soft\" or \"hard\" (default: \"soft\")\n- reason (optional): Reason for deletion (max 500 chars)\n\n**Restrictions:**\n- Organizers: Cannot delete with active/upcoming events\n- Recent bookings: May prevent hard deletion\n- Invalid password: Will reject deletion\n\n**Expected Responses:**\n- 200: Account deleted successfully\n- 400: Invalid password, active events, or recent bookings\n- 401: Authentication required\n- 500: Server error\n\n**⚠️ WARNING:** Hard deletion is permanent and cannot be undone!"
+          }
+        },
+        {
+          "name": "Reactivate Deleted Account",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    console.log('✅ Account reactivated successfully');",
+                  "    console.log('🎉 Welcome back!');",
+                  "    console.log('');",
+                  "    console.log('👤 Reactivated User:');",
+                  "    console.log('- Name:', response.data.user.firstName + ' ' + response.data.user.lastName);",
+                  "    console.log('- Email:', response.data.user.email);",
+                  "    console.log('- Role:', response.data.user.role);",
+                  "    console.log('- Account Status: Active');",
+                  "    console.log('');",
+                  "    // Set the auth token for future requests",
+                  "    if (response.data.token) {",
+                  "        pm.environment.set('authToken', response.data.token);",
+                  "        console.log('🔑 Authentication token updated');",
+                  "    }",
+                  "    console.log('');",
+                  "    console.log('🔄 Next Steps:');",
+                  "    console.log('- Your account is now fully active');",
+                  "    console.log('- You can access all features');",
+                  "    console.log('- Check your profile and settings');",
+                  "} else if (pm.response.code === 400) {",
+                  "    const response = pm.response.json();",
+                  "    console.log('❌ Account reactivation failed');",
+                  "    console.log('🚫 Reason:', response.message);",
+                  "    console.log('');",
+                  "    console.log('💡 Common Issues:');",
+                  "    console.log('- Account not found or not deleted');",
+                  "    console.log('- Reactivation period expired (>30 days)');",
+                  "    console.log('- Invalid credentials');",
+                  "    console.log('- Contact support if period expired');",
+                  "} else {",
+                  "    console.log('❌ Account reactivation failed');",
+                  "    console.log('📊 Status Code:', pm.response.code);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"user@example.com\",\n  \"password\": \"your_password\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/reactivate",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "reactivate"]
+            },
+            "description": "Reactivate a soft-deleted user account within the 30-day reactivation period.\n\n🔓 **No Authentication Required** (account is deleted)\n⏰ **Time Limit**: Must be within 30 days of deletion\n\n**Reactivation Process:**\n- Only works for soft-deleted accounts\n- Must be within 30-day grace period\n- Requires original email and password\n- Restores full account functionality\n\n**Request Body:**\n- email (required): Original account email\n- password (required): Account password\n\n**What Gets Restored:**\n- Full account access and functionality\n- Original user data and preferences\n- Event history and bookings\n- Profile information and settings\n\n**Limitations:**\n- Only soft-deleted accounts can be reactivated\n- 30-day time limit from deletion date\n- Hard-deleted accounts cannot be recovered\n- Email may have been anonymized during deletion\n\n**Expected Responses:**\n- 200: Account reactivated successfully with auth token\n- 400: Account not found, not deleted, expired period, or invalid credentials\n- 404: No account found with email\n- 500: Server error\n\n**After Reactivation:**\n- Account is fully functional\n- Authentication token is provided\n- All previous data is restored\n- Can immediately use all features"
+          }
         }
       ]
     },

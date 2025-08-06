@@ -346,6 +346,35 @@ class UserManager {
 
     return regularUsersCount + organizersCount + adminsCount;
   }
+
+  // Delete user permanently
+  static async deleteUser(userId) {
+    const userResult = await this.findById(userId);
+    if (!userResult) {
+      throw new Error("User not found");
+    }
+
+    const { user, model } = userResult;
+
+    // Delete related data
+    const Event = require("../models/Event");
+    const Booking = require("../models/Booking");
+    const RefundRequest = require("../models/RefundRequest");
+
+    // Delete user's events (if organizer)
+    await Event.deleteMany({ organizer: userId });
+
+    // Delete user's bookings
+    await Booking.deleteMany({ user: userId });
+
+    // Delete user's refund requests
+    await RefundRequest.deleteMany({ user: userId });
+
+    // Delete the user
+    await model.findByIdAndDelete(userId);
+
+    return true;
+  }
 }
 
 module.exports = UserManager;

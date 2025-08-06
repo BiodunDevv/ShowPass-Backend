@@ -46,11 +46,51 @@ const baseUserSchema = new mongoose.Schema(
       state: String,
       country: String,
     },
+    bio: {
+      type: String,
+      maxlength: 500,
+    },
+    website: String,
+    socialLinks: {
+      twitter: String,
+      facebook: String,
+      instagram: String,
+      linkedin: String,
+    },
+    // Account deletion tracking
+    isDeleted: {
+      type: Boolean,
+      default: false,
+    },
+    deletedAt: Date,
+    deletionReason: String,
+    // UI preferences
+    theme: {
+      type: String,
+      enum: ["light", "dark", "auto"],
+      default: "light",
+    },
+    language: {
+      type: String,
+      default: "en",
+    },
+    timezone: {
+      type: String,
+      default: "UTC",
+    },
     // Notification preferences
     notifications: {
       email: {
         type: Boolean,
         default: true,
+      },
+      push: {
+        type: Boolean,
+        default: true,
+      },
+      sms: {
+        type: Boolean,
+        default: false,
       },
       newEvents: {
         type: Boolean,
@@ -59,6 +99,58 @@ const baseUserSchema = new mongoose.Schema(
       eventUpdates: {
         type: Boolean,
         default: true,
+      },
+      eventReminders: {
+        type: Boolean,
+        default: true,
+      },
+      promotions: {
+        type: Boolean,
+        default: false,
+      },
+      newsletter: {
+        type: Boolean,
+        default: false,
+      },
+    },
+    // User preferences
+    preferences: {
+      favoriteCategories: [String],
+      eventNotificationRadius: {
+        type: Number,
+        default: 50,
+      },
+      autoAcceptBookings: {
+        type: Boolean,
+        default: false,
+      },
+      showProfile: {
+        type: Boolean,
+        default: true,
+      },
+      allowMessages: {
+        type: Boolean,
+        default: true,
+      },
+    },
+    // Privacy settings
+    privacy: {
+      showEmail: {
+        type: Boolean,
+        default: false,
+      },
+      showPhone: {
+        type: Boolean,
+        default: false,
+      },
+      showAttendingEvents: {
+        type: Boolean,
+        default: true,
+      },
+      profileVisibility: {
+        type: String,
+        enum: ["public", "private", "friends"],
+        default: "public",
       },
     },
     // Financial tracking

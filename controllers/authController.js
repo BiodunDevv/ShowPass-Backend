@@ -1,4 +1,6 @@
 const UserManager = require("../utils/UserManager");
+const Event = require("../models/Event");
+const Booking = require("../models/Booking");
 const {
   generateToken,
   generateVerificationToken,
@@ -164,6 +166,400 @@ const updateProfile = async (req, res) => {
   } catch (error) {
     console.error("Profile update error:", error);
     sendError(res, 500, "Failed to update profile", error.message);
+  }
+};
+
+// Update comprehensive profile with role-specific fields
+const updateComprehensiveProfile = async (req, res) => {
+  try {
+    const {
+      firstName,
+      lastName,
+      phone,
+      dateOfBirth,
+      address,
+      bio,
+      website,
+      socialLinks,
+      preferences,
+      notifications,
+      // Organizer specific fields
+      businessName,
+      businessAddress,
+      businessPhone,
+      businessWebsite,
+      // Admin specific fields
+      department,
+      position,
+    } = req.body;
+
+    const userResult = await UserManager.findById(req.user._id);
+    if (!userResult) {
+      return sendError(res, 404, "User not found");
+    }
+
+    const { user } = userResult;
+
+    // Update basic fields for all users
+    if (firstName !== undefined) user.firstName = firstName;
+    if (lastName !== undefined) user.lastName = lastName;
+    if (phone !== undefined) user.phone = phone;
+    if (dateOfBirth !== undefined) user.dateOfBirth = dateOfBirth;
+    if (address !== undefined) user.address = address;
+    if (bio !== undefined) user.bio = bio;
+    if (website !== undefined) user.website = website;
+    if (socialLinks !== undefined) user.socialLinks = socialLinks;
+
+    // Update preferences and notifications
+    if (preferences !== undefined) {
+      user.preferences = { ...user.preferences, ...preferences };
+    }
+    if (notifications !== undefined) {
+      user.notifications = { ...user.notifications, ...notifications };
+    }
+
+    // Role-specific updates
+    if (user.role === "organizer") {
+      if (businessName !== undefined) user.businessName = businessName;
+      if (businessAddress !== undefined) user.businessAddress = businessAddress;
+      if (businessPhone !== undefined) user.businessPhone = businessPhone;
+      if (businessWebsite !== undefined) user.businessWebsite = businessWebsite;
+    }
+
+    if (user.role === "admin") {
+      if (department !== undefined) user.department = department;
+      if (position !== undefined) user.position = position;
+    }
+
+    await user.save();
+
+    sendSuccess(res, "Profile updated successfully", sanitizeUser(user));
+  } catch (error) {
+    console.error("Comprehensive profile update error:", error);
+    sendError(res, 500, "Failed to update profile", error.message);
+  }
+};
+
+// Update user settings (notifications, preferences, privacy)
+const updateSettings = async (req, res) => {
+  try {
+    const { notifications, preferences, privacy, theme, language, timezone } =
+      req.body;
+
+    const userResult = await UserManager.findById(req.user._id);
+    if (!userResult) {
+      return sendError(res, 404, "User not found");
+    }
+
+    const { user } = userResult;
+
+    // Update notification settings
+    if (notifications !== undefined) {
+      user.notifications = {
+        email:
+          notifications.email !== undefined
+            ? notifications.email
+            : user.notifications?.email || true,
+        push:
+          notifications.push !== undefined
+            ? notifications.push
+            : user.notifications?.push || true,
+        sms:
+          notifications.sms !== undefined
+            ? notifications.sms
+            : user.notifications?.sms || false,
+        newEvents:
+          notifications.newEvents !== undefined
+            ? notifications.newEvents
+            : user.notifications?.newEvents || true,
+        eventUpdates:
+          notifications.eventUpdates !== undefined
+            ? notifications.eventUpdates
+            : user.notifications?.eventUpdates || true,
+        eventReminders:
+          notifications.eventReminders !== undefined
+            ? notifications.eventReminders
+            : user.notifications?.eventReminders || true,
+        promotions:
+          notifications.promotions !== undefined
+            ? notifications.promotions
+            : user.notifications?.promotions || false,
+        newsletter:
+          notifications.newsletter !== undefined
+            ? notifications.newsletter
+            : user.notifications?.newsletter || false,
+      };
+    }
+
+    // Update preferences
+    if (preferences !== undefined) {
+      user.preferences = {
+        favoriteCategories:
+          preferences.favoriteCategories ||
+          user.preferences?.favoriteCategories ||
+          [],
+        eventNotificationRadius:
+          preferences.eventNotificationRadius ||
+          user.preferences?.eventNotificationRadius ||
+          50,
+        autoAcceptBookings:
+          preferences.autoAcceptBookings !== undefined
+            ? preferences.autoAcceptBookings
+            : user.preferences?.autoAcceptBookings || false,
+        showProfile:
+          preferences.showProfile !== undefined
+            ? preferences.showProfile
+            : user.preferences?.showProfile || true,
+        allowMessages:
+          preferences.allowMessages !== undefined
+            ? preferences.allowMessages
+            : user.preferences?.allowMessages || true,
+        ...preferences,
+      };
+    }
+
+    // Update privacy settings
+    if (privacy !== undefined) {
+      user.privacy = {
+        showEmail:
+          privacy.showEmail !== undefined
+            ? privacy.showEmail
+            : user.privacy?.showEmail || false,
+        showPhone:
+          privacy.showPhone !== undefined
+            ? privacy.showPhone
+            : user.privacy?.showPhone || false,
+        showAttendingEvents:
+          privacy.showAttendingEvents !== undefined
+            ? privacy.showAttendingEvents
+            : user.privacy?.showAttendingEvents || true,
+        profileVisibility:
+          privacy.profileVisibility ||
+          user.privacy?.profileVisibility ||
+          "public",
+        ...privacy,
+      };
+    }
+
+    // Update UI settings
+    if (theme !== undefined) user.theme = theme;
+    if (language !== undefined) user.language = language;
+    if (timezone !== undefined) user.timezone = timezone;
+
+    await user.save();
+
+    sendSuccess(res, "Settings updated successfully", {
+      notifications: user.notifications,
+      preferences: user.preferences,
+      privacy: user.privacy,
+      theme: user.theme,
+      language: user.language,
+      timezone: user.timezone,
+    });
+  } catch (error) {
+    console.error("Settings update error:", error);
+    sendError(res, 500, "Failed to update settings", error.message);
+  }
+};
+
+// Get user settings
+const getSettings = async (req, res) => {
+  try {
+    const userResult = await UserManager.findById(req.user._id);
+    if (!userResult) {
+      return sendError(res, 404, "User not found");
+    }
+
+    const { user } = userResult;
+
+    const settings = {
+      notifications: user.notifications || {
+        email: true,
+        push: true,
+        sms: false,
+        newEvents: true,
+        eventUpdates: true,
+        eventReminders: true,
+        promotions: false,
+        newsletter: false,
+      },
+      preferences: user.preferences || {
+        favoriteCategories: [],
+        eventNotificationRadius: 50,
+        autoAcceptBookings: false,
+        showProfile: true,
+        allowMessages: true,
+      },
+      privacy: user.privacy || {
+        showEmail: false,
+        showPhone: false,
+        showAttendingEvents: true,
+        profileVisibility: "public",
+      },
+      theme: user.theme || "light",
+      language: user.language || "en",
+      timezone: user.timezone || "UTC",
+    };
+
+    sendSuccess(res, "Settings retrieved successfully", settings);
+  } catch (error) {
+    console.error("Get settings error:", error);
+    sendError(res, 500, "Failed to retrieve settings", error.message);
+  }
+};
+
+// Delete user account (soft delete with option for hard delete)
+const deleteAccount = async (req, res) => {
+  try {
+    const { confirmPassword, deleteType = "soft", reason } = req.body;
+
+    if (!confirmPassword) {
+      return sendError(res, 400, "Password confirmation is required");
+    }
+
+    const userResult = await UserManager.findById(req.user._id);
+    if (!userResult) {
+      return sendError(res, 404, "User not found");
+    }
+
+    const { user } = userResult;
+
+    // Verify password
+    const isPasswordValid = await user.comparePassword(confirmPassword);
+    if (!isPasswordValid) {
+      return sendError(res, 400, "Incorrect password");
+    }
+
+    if (deleteType === "soft") {
+      // Soft delete - deactivate account
+      user.isDeleted = true;
+      user.deletedAt = new Date();
+      user.deletionReason = reason || "User requested deletion";
+      user.blocked = true; // Block account to prevent login
+
+      // Anonymize sensitive data but keep for business records
+      user.email = `deleted_${user._id}@deleted.com`;
+      user.phone = null;
+      user.firstName = "Deleted";
+      user.lastName = "User";
+
+      await user.save();
+
+      sendSuccess(
+        res,
+        "Account deactivated successfully. You can reactivate within 30 days by contacting support."
+      );
+    } else if (deleteType === "hard") {
+      // Hard delete - only for non-organizers or organizers with no active events
+      if (user.role === "organizer") {
+        const activeEvents = await Event.countDocuments({
+          organizer: user._id,
+          startDate: { $gte: new Date() },
+          status: { $in: ["approved", "pending"] },
+        });
+
+        if (activeEvents > 0) {
+          return sendError(
+            res,
+            400,
+            "Cannot delete account with active or upcoming events. Please cancel or transfer your events first."
+          );
+        }
+      }
+
+      // Check for recent bookings
+      const recentBookings = await Booking.countDocuments({
+        user: user._id,
+        createdAt: { $gte: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000) }, // Last 30 days
+        status: "confirmed",
+      });
+
+      if (recentBookings > 0) {
+        return sendError(
+          res,
+          400,
+          "Cannot permanently delete account with recent bookings. Please wait 30 days or choose soft delete."
+        );
+      }
+
+      // Hard delete - remove all user data
+      await UserManager.deleteUser(user._id);
+
+      sendSuccess(
+        res,
+        "Account permanently deleted. All data has been removed."
+      );
+    } else {
+      return sendError(
+        res,
+        400,
+        "Invalid deletion type. Use 'soft' or 'hard'."
+      );
+    }
+  } catch (error) {
+    console.error("Delete account error:", error);
+    sendError(res, 500, "Failed to delete account", error.message);
+  }
+};
+
+// Reactivate soft-deleted account
+const reactivateAccount = async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    if (!email || !password) {
+      return sendError(res, 400, "Email and password are required");
+    }
+
+    const userResult = await UserManager.findByEmail(email);
+    if (!userResult) {
+      return sendError(res, 404, "Account not found");
+    }
+
+    const { user } = userResult;
+
+    if (!user.isDeleted) {
+      return sendError(res, 400, "Account is not deleted");
+    }
+
+    // Check if within reactivation period (30 days)
+    const deletionDate = new Date(user.deletedAt);
+    const reactivationDeadline = new Date(
+      deletionDate.getTime() + 30 * 24 * 60 * 60 * 1000
+    );
+
+    if (new Date() > reactivationDeadline) {
+      return sendError(
+        res,
+        400,
+        "Reactivation period has expired. Please contact support."
+      );
+    }
+
+    // Verify password (this might not work if email was anonymized)
+    const isPasswordValid = await user.comparePassword(password);
+    if (!isPasswordValid) {
+      return sendError(res, 400, "Invalid credentials");
+    }
+
+    // Reactivate account
+    user.isDeleted = false;
+    user.deletedAt = null;
+    user.deletionReason = null;
+    user.blocked = false;
+    user.email = email; // Restore original email
+
+    await user.save();
+
+    const token = generateToken(user._id);
+
+    sendSuccess(res, "Account reactivated successfully", {
+      user: sanitizeUser(user),
+      token,
+    });
+  } catch (error) {
+    console.error("Reactivate account error:", error);
+    sendError(res, 500, "Failed to reactivate account", error.message);
   }
 };
 
@@ -465,6 +861,11 @@ module.exports = {
   login,
   getMe,
   updateProfile,
+  updateComprehensiveProfile,
+  updateSettings,
+  getSettings,
+  deleteAccount,
+  reactivateAccount,
   verifyEmail,
   resendVerification,
   resendVerificationByEmail,

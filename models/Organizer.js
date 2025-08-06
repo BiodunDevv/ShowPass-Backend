@@ -52,6 +52,140 @@ const organizerSchema = new mongoose.Schema(
       state: String,
       country: String,
     },
+    bio: {
+      type: String,
+      maxlength: 500,
+    },
+    website: String,
+    socialLinks: {
+      twitter: String,
+      facebook: String,
+      instagram: String,
+      linkedin: String,
+    },
+    // Business information
+    businessName: String,
+    businessAddress: {
+      street: String,
+      city: String,
+      state: String,
+      country: String,
+    },
+    businessPhone: String,
+    businessWebsite: String,
+    businessType: {
+      type: String,
+      enum: ["individual", "company", "nonprofit", "government"],
+      default: "individual",
+    },
+    // Account deletion tracking
+    isDeleted: {
+      type: Boolean,
+      default: false,
+    },
+    deletedAt: Date,
+    deletionReason: String,
+    // UI preferences
+    theme: {
+      type: String,
+      enum: ["light", "dark", "auto"],
+      default: "light",
+    },
+    language: {
+      type: String,
+      default: "en",
+    },
+    timezone: {
+      type: String,
+      default: "UTC",
+    },
+    // Notification preferences
+    notifications: {
+      email: {
+        type: Boolean,
+        default: true,
+      },
+      push: {
+        type: Boolean,
+        default: true,
+      },
+      sms: {
+        type: Boolean,
+        default: false,
+      },
+      newEvents: {
+        type: Boolean,
+        default: true,
+      },
+      eventUpdates: {
+        type: Boolean,
+        default: true,
+      },
+      eventReminders: {
+        type: Boolean,
+        default: true,
+      },
+      promotions: {
+        type: Boolean,
+        default: false,
+      },
+      newsletter: {
+        type: Boolean,
+        default: false,
+      },
+      newBookings: {
+        type: Boolean,
+        default: true,
+      },
+      eventApproval: {
+        type: Boolean,
+        default: true,
+      },
+    },
+    // Organizer preferences
+    preferences: {
+      autoAcceptBookings: {
+        type: Boolean,
+        default: false,
+      },
+      showProfile: {
+        type: Boolean,
+        default: true,
+      },
+      allowMessages: {
+        type: Boolean,
+        default: true,
+      },
+      requireEventApproval: {
+        type: Boolean,
+        default: true,
+      },
+      defaultEventPrivacy: {
+        type: String,
+        enum: ["public", "private"],
+        default: "public",
+      },
+    },
+    // Privacy settings
+    privacy: {
+      showEmail: {
+        type: Boolean,
+        default: false,
+      },
+      showPhone: {
+        type: Boolean,
+        default: false,
+      },
+      showBusinessInfo: {
+        type: Boolean,
+        default: true,
+      },
+      profileVisibility: {
+        type: String,
+        enum: ["public", "private"],
+        default: "public",
+      },
+    },
     // Events created by organizer
     createdEvents: [
       {

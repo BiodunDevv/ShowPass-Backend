@@ -52,6 +52,126 @@ const adminSchema = new mongoose.Schema(
       state: String,
       country: String,
     },
+    bio: {
+      type: String,
+      maxlength: 500,
+    },
+    // Admin-specific professional information
+    department: {
+      type: String,
+      enum: ["operations", "marketing", "support", "development", "management"],
+    },
+    position: String,
+    employeeId: String,
+    startDate: {
+      type: Date,
+      default: Date.now,
+    },
+    // Account deletion tracking
+    isDeleted: {
+      type: Boolean,
+      default: false,
+    },
+    deletedAt: Date,
+    deletionReason: String,
+    // UI preferences
+    theme: {
+      type: String,
+      enum: ["light", "dark", "auto"],
+      default: "light",
+    },
+    language: {
+      type: String,
+      default: "en",
+    },
+    timezone: {
+      type: String,
+      default: "UTC",
+    },
+    // Enhanced notification preferences for admins
+    notifications: {
+      email: {
+        type: Boolean,
+        default: true,
+      },
+      push: {
+        type: Boolean,
+        default: true,
+      },
+      sms: {
+        type: Boolean,
+        default: false,
+      },
+      newEvents: {
+        type: Boolean,
+        default: true,
+      },
+      eventUpdates: {
+        type: Boolean,
+        default: true,
+      },
+      newEventReviews: {
+        type: Boolean,
+        default: true,
+      },
+      systemAlerts: {
+        type: Boolean,
+        default: true,
+      },
+      userReports: {
+        type: Boolean,
+        default: true,
+      },
+      financialAlerts: {
+        type: Boolean,
+        default: true,
+      },
+      securityAlerts: {
+        type: Boolean,
+        default: true,
+      },
+    },
+    // Admin preferences
+    preferences: {
+      autoApproveEvents: {
+        type: Boolean,
+        default: false,
+      },
+      dashboardLayout: {
+        type: String,
+        enum: ["compact", "detailed", "grid"],
+        default: "detailed",
+      },
+      showDetailedLogs: {
+        type: Boolean,
+        default: true,
+      },
+      defaultEventView: {
+        type: String,
+        enum: ["all", "pending", "approved"],
+        default: "pending",
+      },
+    },
+    // Privacy settings
+    privacy: {
+      showEmail: {
+        type: Boolean,
+        default: false,
+      },
+      showPhone: {
+        type: Boolean,
+        default: false,
+      },
+      showDepartment: {
+        type: Boolean,
+        default: true,
+      },
+      profileVisibility: {
+        type: String,
+        enum: ["public", "internal", "private"],
+        default: "internal",
+      },
+    },
     // Events approved by admin
     approvedEvents: [
       {

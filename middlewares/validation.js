@@ -208,6 +208,109 @@ const validateRefundRequest = [
   handleValidation,
 ];
 
+// Comprehensive profile update validation
+const validateComprehensiveProfile = [
+  body("firstName")
+    .optional()
+    .trim()
+    .isLength({ min: 2, max: 50 })
+    .withMessage("First name must be between 2 and 50 characters"),
+
+  body("lastName")
+    .optional()
+    .trim()
+    .isLength({ min: 2, max: 50 })
+    .withMessage("Last name must be between 2 and 50 characters"),
+
+  body("phone")
+    .optional()
+    .isMobilePhone()
+    .withMessage("Please provide a valid phone number"),
+
+  body("bio")
+    .optional()
+    .trim()
+    .isLength({ max: 500 })
+    .withMessage("Bio must not exceed 500 characters"),
+
+  body("website")
+    .optional()
+    .isURL()
+    .withMessage("Please provide a valid website URL"),
+
+  body("businessName")
+    .optional()
+    .trim()
+    .isLength({ min: 2, max: 100 })
+    .withMessage("Business name must be between 2 and 100 characters"),
+
+  body("department")
+    .optional()
+    .isIn(["operations", "marketing", "support", "development", "management"])
+    .withMessage("Invalid department"),
+
+  handleValidation,
+];
+
+// Settings update validation
+const validateSettings = [
+  body("notifications")
+    .optional()
+    .isObject()
+    .withMessage("Notifications must be an object"),
+
+  body("preferences")
+    .optional()
+    .isObject()
+    .withMessage("Preferences must be an object"),
+
+  body("privacy")
+    .optional()
+    .isObject()
+    .withMessage("Privacy settings must be an object"),
+
+  body("theme")
+    .optional()
+    .isIn(["light", "dark", "auto"])
+    .withMessage("Theme must be light, dark, or auto"),
+
+  body("language")
+    .optional()
+    .isLength({ min: 2, max: 5 })
+    .withMessage("Invalid language code"),
+
+  handleValidation,
+];
+
+// Account deletion validation
+const validateAccountDeletion = [
+  body("confirmPassword")
+    .notEmpty()
+    .withMessage("Password confirmation is required"),
+
+  body("deleteType")
+    .optional()
+    .isIn(["soft", "hard"])
+    .withMessage("Delete type must be either soft or hard"),
+
+  body("reason")
+    .optional()
+    .trim()
+    .isLength({ max: 500 })
+    .withMessage("Reason must not exceed 500 characters"),
+
+  handleValidation,
+];
+
+// Account reactivation validation
+const validateAccountReactivation = [
+  body("email").isEmail().withMessage("Please provide a valid email"),
+
+  body("password").notEmpty().withMessage("Password is required"),
+
+  handleValidation,
+];
+
 // MongoDB ObjectId validation
 const validateObjectId = (param) => [
   param.isMongoId().withMessage("Please provide a valid ID"),
@@ -220,6 +323,10 @@ module.exports = {
   validateEvent,
   validateBooking,
   validateRefundRequest,
+  validateComprehensiveProfile,
+  validateSettings,
+  validateAccountDeletion,
+  validateAccountReactivation,
   validateObjectId,
   handleValidation,
 };
