@@ -94,10 +94,10 @@ const optionalAuth = async (req, res, next) => {
 
     if (token) {
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
-      const user = await User.findById(decoded.id).select("-password");
+      const userResult = await UserManager.findById(decoded.id);
 
-      if (user && !user.blocked) {
-        req.user = user;
+      if (userResult && userResult.user && !userResult.user.blocked) {
+        req.user = userResult.user;
       }
     }
   } catch (error) {

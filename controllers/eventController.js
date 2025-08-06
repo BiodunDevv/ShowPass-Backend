@@ -213,27 +213,129 @@ const getEventById = async (req, res) => {
   try {
     const { id } = req.params;
 
-    const event = await Event.findById(id).populate(
-      "organizer",
-      "firstName lastName email phone"
-    );
+    // Validate event ID format
+    if (!id.match(/^[0-9a-fA-F]{24}$/)) {
+      return sendError(res, 400, "Invalid event ID format");
+    }
+
+    const event = await Event.findById(id)
+      .populate("organizer", "firstName lastName email phone")
+      .populate("approvedBy", "firstName lastName")
+      .populate("flaggedBy", "firstName lastName");
 
     if (!event) {
       return sendError(res, 404, "Event not found");
     }
 
-    // Only show approved events to regular users
-    if (
-      !event.approved &&
-      req.user?.role !== "admin" &&
-      event.organizer._id.toString() !== req.user?._id.toString()
-    ) {
-      return sendError(res, 404, "Event not found");
+    // Check if user is authenticated first
+    if (!req.user) {
+      // For unauthenticated users, only show approved public events
+      if (!event.approved || event.status !== "approved" || !event.isPublic) {
+        return sendError(res, 404, "Event not found");
+      }
+    } else {
+      // For authenticated users, determine access permissions
+      const isOwner =
+        event.organizer._id.toString() === req.user._id.toString();
+      const isAdmin = req.user.role === "admin";
+      const isApproved = event.approved && event.status === "approved";
+      const isPending = event.status === "pending";
+
+      // Access control logic for authenticated users
+      // Allow access if: event is approved OR user is admin OR user owns the event
+      if (!isApproved && !isAdmin && !isOwner) {
+        return sendError(res, 404, "Event not found");
+      }
     }
 
-    sendSuccess(res, "Event retrieved successfully", event);
+    // Determine access permissions for response (safely handle unauthenticated users)
+    const isOwner = req.user
+      ? event.organizer._id.toString() === req.user._id.toString()
+      : false;
+    const isAdmin = req.user ? req.user.role === "admin" : false;
+    const isApproved = event.approved && event.status === "approved";
+    const isPending = event.status === "pending";
+
+    // Prepare response data with additional context
+    const eventData = {
+      ...event.toObject(),
+      accessContext: {
+        canEdit: isOwner || isAdmin,
+        canDelete: isOwner || isAdmin,
+        canApprove: isAdmin && isPending,
+        canFlag: isAdmin,
+        viewingAs: isAdmin ? "admin" : isOwner ? "owner" : "public",
+      },
+      statusInfo: {
+        isApproved,
+        isPending,
+        isOwner,
+        requiresApproval: isPending && !isApproved,
+        visibilityReason: !isApproved
+          ? isOwner
+            ? "You can view your own pending event"
+            : "Admin can view all events"
+          : "Event is publicly visible",
+      },
+    };
+
+    // Add warning information for admins
+    if (isAdmin && event.warnings?.length > 0) {
+      eventData.adminInfo = {
+        totalWarnings: event.warningCount,
+        flaggedForDeletion: event.flaggedForDeletion,
+        latestWarning: event.warnings[event.warnings.length - 1],
+        unreviewed_modifications:
+          event.postApprovalModifications?.filter((mod) => !mod.reviewedByAdmin)
+            .length || 0,
+      };
+    }
+
+    // Add booking statistics if user is owner or admin
+    if (isOwner || isAdmin) {
+      try {
+        const bookingStats = await Booking.aggregate([
+          { $match: { event: event._id } },
+          {
+            $group: {
+              _id: "$status",
+              count: { $sum: 1 },
+              totalQuantity: { $sum: "$quantity" },
+            },
+          },
+        ]);
+
+        eventData.bookingStats = {
+          confirmed:
+            bookingStats.find((s) => s._id === "confirmed")?.count || 0,
+          pending: bookingStats.find((s) => s._id === "pending")?.count || 0,
+          cancelled:
+            bookingStats.find((s) => s._id === "cancelled")?.count || 0,
+          totalTicketsSold:
+            bookingStats.find((s) => s._id === "confirmed")?.totalQuantity || 0,
+        };
+      } catch (statsError) {
+        console.warn("Failed to fetch booking stats:", statsError);
+      }
+    }
+
+    // Success message based on context
+    let message = "Event retrieved successfully";
+    if (!isApproved && isOwner) {
+      message = "Your event retrieved successfully (pending approval)";
+    } else if (!isApproved && isAdmin) {
+      message = "Event retrieved successfully (admin view - pending approval)";
+    }
+
+    sendSuccess(res, message, eventData);
   } catch (error) {
     console.error("Get event error:", error);
+
+    // Handle specific MongoDB errors
+    if (error.name === "CastError") {
+      return sendError(res, 400, "Invalid event ID format");
+    }
+
     sendError(res, 500, "Failed to retrieve event", error.message);
   }
 };

@@ -258,6 +258,40 @@ eventSchema.virtual("isOngoing").get(function () {
   return now >= new Date(this.startDate) && now <= new Date(this.endDate);
 });
 
+// Method to sync sold tickets with actual bookings
+eventSchema.methods.syncSoldTickets = async function () {
+  const Booking = require("./Booking");
+
+  // Get all confirmed bookings for this event
+  const bookings = await Booking.find({
+    event: this._id,
+    status: "confirmed",
+  });
+
+  // Reset sold counts
+  this.ticketTypes.forEach((ticketType) => {
+    ticketType.sold = 0;
+  });
+
+  // Count bookings by ticket type
+  bookings.forEach((booking) => {
+    const ticketType = this.ticketTypes.find(
+      (tt) => tt.name === booking.ticketType
+    );
+    if (ticketType) {
+      ticketType.sold += booking.quantity;
+    }
+  });
+
+  // Update current attendees
+  this.currentAttendees = bookings.reduce(
+    (total, booking) => total + booking.quantity,
+    0
+  );
+
+  return this.save();
+};
+
 // Ensure virtual fields are serialized
 eventSchema.set("toJSON", { virtuals: true });
 

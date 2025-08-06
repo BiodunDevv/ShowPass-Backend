@@ -18,7 +18,7 @@
   "variable": [
     {
       "key": "baseUrl",
-      "value": "http://localhost:3000/api",
+      "value": "http://localhost:3002/api",
       "type": "string"
     },
     {
@@ -1158,6 +1158,339 @@
               "path": ["auth", "reactivate"]
             },
             "description": "Reactivate a soft-deleted user account within the 30-day reactivation period.\n\n🔓 **No Authentication Required** (account is deleted)\n⏰ **Time Limit**: Must be within 30 days of deletion\n\n**Reactivation Process:**\n- Only works for soft-deleted accounts\n- Must be within 30-day grace period\n- Requires original email and password\n- Restores full account functionality\n\n**Request Body:**\n- email (required): Original account email\n- password (required): Account password\n\n**What Gets Restored:**\n- Full account access and functionality\n- Original user data and preferences\n- Event history and bookings\n- Profile information and settings\n\n**Limitations:**\n- Only soft-deleted accounts can be reactivated\n- 30-day time limit from deletion date\n- Hard-deleted accounts cannot be recovered\n- Email may have been anonymized during deletion\n\n**Expected Responses:**\n- 200: Account reactivated successfully with auth token\n- 400: Account not found, not deleted, expired period, or invalid credentials\n- 404: No account found with email\n- 500: Server error\n\n**After Reactivation:**\n- Account is fully functional\n- Authentication token is provided\n- All previous data is restored\n- Can immediately use all features"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Role-Specific Profile Management",
+      "item": [
+        {
+          "name": "Get Organizer Profile",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    console.log('✅ Organizer profile retrieved successfully');",
+                  "    console.log('👨‍💼 Organizer Profile Summary:');",
+                  "    console.log('');",
+                  "    console.log('👤 Personal Information:');",
+                  "    console.log('- Name:', response.data.firstName + ' ' + response.data.lastName);",
+                  "    console.log('- Email:', response.data.email);",
+                  "    console.log('- Phone:', response.data.phone || 'Not provided');",
+                  "    console.log('- Verified:', response.data.isVerified ? '✅' : '❌');",
+                  "    console.log('- Account Age:', response.data.accountAge);",
+                  "    console.log('- Profile Completeness:', response.data.profileCompleteness + '%');",
+                  "    console.log('');",
+                  "    console.log('📊 Organizer Metrics:');",
+                  "    console.log('- Total Events Created:', response.data.organizerMetrics.totalEvents);",
+                  "    console.log('- Pending Events:', response.data.organizerMetrics.pendingEvents);",
+                  "    console.log('- Approved Events:', response.data.organizerMetrics.approvedEvents);",
+                  "    console.log('- Rejected Events:', response.data.organizerMetrics.rejectedEvents);",
+                  "    console.log('- Total Bookings:', response.data.organizerMetrics.totalBookings);",
+                  "    console.log('- Total Revenue: ₦' + response.data.organizerMetrics.totalRevenue.toLocaleString());",
+                  "    console.log('- Average Tickets Sold:', response.data.organizerMetrics.averageTicketsSold);",
+                  "    console.log('- Success Rate:', response.data.organizerMetrics.successRate + '%');",
+                  "    console.log('');",
+                  "    console.log('🎪 Recent Events:');",
+                  "    response.data.recentEvents.forEach((event, index) => {",
+                  "        console.log(`Event ${index + 1}: ${event.title} (${event.status})`);",
+                  "        console.log(`  - Date: ${new Date(event.startDate).toLocaleDateString()}`);",
+                  "        console.log(`  - Category: ${event.category}`);",
+                  "        console.log(`  - Tickets: ${event.soldTickets}/${event.totalTickets} (${event.sellRate}%)`);",
+                  "    });",
+                  "} else {",
+                  "    console.log('❌ Failed to retrieve organizer profile');",
+                  "    console.log('📊 Status Code:', pm.response.code);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{authToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/profiles/organizer/profile",
+              "host": ["{{baseUrl}}"],
+              "path": ["profiles", "organizer", "profile"]
+            },
+            "description": "Get comprehensive organizer profile with role-specific metrics and statistics.\n\n🔐 **Authentication Required**: Must be logged in as organizer\n👨‍💼 **Role Required**: Organizer only\n\n**Profile Information Includes:**\n\n**Personal Details:**\n- Basic information (name, email, phone)\n- Profile picture and bio\n- Website and social links\n- Business information\n- Account verification status\n- Real-time account age calculation\n- Profile completeness percentage\n\n**Organizer Metrics:**\n- Total events created\n- Events by status (pending, approved, rejected)\n- Total bookings across all events\n- Total revenue generated\n- Average tickets sold per event\n- Success rate (approved/total events)\n\n**Recent Events:**\n- Last 5 events created\n- Event details with performance metrics\n- Ticket sales statistics\n- Event status and dates\n\n**Expected Responses:**\n- 200: Profile retrieved successfully\n- 401: Authentication required\n- 403: Access denied (not an organizer)\n- 404: Organizer not found\n- 500: Server error\n\n**Real-time Calculations:**\n- Account age updates in real-time\n- Current revenue and booking counts\n- Live event performance metrics"
+          }
+        },
+        {
+          "name": "Get User Profile",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    console.log('✅ User profile retrieved successfully');",
+                  "    console.log('👤 User Profile Summary:');",
+                  "    console.log('');",
+                  "    console.log('👤 Personal Information:');",
+                  "    console.log('- Name:', response.data.firstName + ' ' + response.data.lastName);",
+                  "    console.log('- Email:', response.data.email);",
+                  "    console.log('- Phone:', response.data.phone || 'Not provided');",
+                  "    console.log('- Verified:', response.data.isVerified ? '✅' : '❌');",
+                  "    console.log('- Account Age:', response.data.accountAge);",
+                  "    console.log('- Profile Completeness:', response.data.profileCompleteness + '%');",
+                  "    console.log('');",
+                  "    console.log('📊 User Metrics:');",
+                  "    console.log('- Total Bookings:', response.data.userMetrics.totalBookings);",
+                  "    console.log('- Events Attended (Checked-in):', response.data.userMetrics.eventsAttended);",
+                  "    console.log('- Upcoming Events:', response.data.userMetrics.upcomingEvents);",
+                  "    console.log('- Past Events:', response.data.userMetrics.pastEvents);",
+                  "    console.log('- Attendance Rate:', response.data.userMetrics.attendanceRate + '%');",
+                  "    console.log('- Favorite Category:', response.data.userMetrics.favoriteCategory);",
+                  "    console.log('');",
+                  "    console.log('💰 Financial Summary:');",
+                  "    console.log('- Total Spent: ₦' + response.data.financialSummary.totalSpent.toLocaleString());",
+                  "    console.log('- Total with Fees: ₦' + response.data.financialSummary.totalWithFees.toLocaleString());",
+                  "    console.log('- Average per Event: ₦' + response.data.financialSummary.averageSpentPerEvent.toLocaleString());",
+                  "    console.log('- Savings from Bookings: ₦' + response.data.financialSummary.savingsFromBookings.toLocaleString());",
+                  "    console.log('');",
+                  "    console.log('🎫 Recent Bookings:');",
+                  "    response.data.recentBookings.forEach((booking, index) => {",
+                  "        console.log(`Booking ${index + 1}: ${booking.eventTitle}`);",
+                  "        console.log(`  - Amount: ₦${booking.amount.toLocaleString()}`);",
+                  "        console.log(`  - Date: ${new Date(booking.bookingDate).toLocaleDateString()}`);",
+                  "        console.log(`  - Checked In: ${booking.isCheckedIn ? '✅' : '❌'}`);",
+                  "    });",
+                  "    console.log('');",
+                  "    console.log('🎪 Upcoming Events:');",
+                  "    response.data.upcomingEvents.forEach((event, index) => {",
+                  "        console.log(`Event ${index + 1}: ${event.eventTitle}`);",
+                  "        console.log(`  - Date: ${new Date(event.eventDate).toLocaleDateString()}`);",
+                  "        console.log(`  - Days Until: ${event.daysUntilEvent} days`);",
+                  "    });",
+                  "} else {",
+                  "    console.log('❌ Failed to retrieve user profile');",
+                  "    console.log('📊 Status Code:', pm.response.code);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{authToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/profiles/user/profile",
+              "host": ["{{baseUrl}}"],
+              "path": ["profiles", "user", "profile"]
+            },
+            "description": "Get comprehensive user profile with corrected financial calculations and attendance tracking.\n\n🔐 **Authentication Required**: Must be logged in as user\n👤 **Role Required**: Regular user only\n\n**Profile Information Includes:**\n\n**Personal Details:**\n- Basic information (name, email, phone)\n- Profile picture and bio\n- Website and social links\n- User preferences\n- Account verification status\n- Real-time account age calculation\n- Profile completeness percentage\n\n**User Metrics (FIXED):**\n- Total confirmed bookings\n- Events attended (only checked-in events)\n- Upcoming and past events\n- Attendance rate calculation\n- Favorite event category\n\n**Financial Summary (CORRECTED):**\n- Total spent (actual booking amounts)\n- Total with fees (including platform fees)\n- Average spent per event\n- Savings from platform fees\n- Last purchase details\n\n**Recent Activity:**\n- Recent bookings with check-in status\n- Upcoming events with countdown\n- Booking history with event details\n\n**Expected Responses:**\n- 200: Profile retrieved successfully\n- 401: Authentication required\n- 403: Access denied (not a regular user)\n- 404: User not found\n- 500: Server error\n\n**Fixes Applied:**\n- ✅ Total spent now shows actual booking amounts (not 0)\n- ✅ Events attended only counts checked-in events\n- ✅ Account age calculates in real-time\n- ✅ Financial tracking uses aggregation for accuracy"
+          }
+        },
+        {
+          "name": "Update Organizer Profile",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    console.log('✅ Organizer profile updated successfully');",
+                  "    console.log('👨‍💼 Profile Update Summary:');",
+                  "    console.log('');",
+                  "    console.log('🔄 Updated Fields:');",
+                  "    response.data.updatedFields.forEach(field => {",
+                  "        console.log('- ' + field);",
+                  "    });",
+                  "    console.log('');",
+                  "    console.log('📊 Profile Completeness:', response.data.profileCompleteness + '%');",
+                  "    console.log('');",
+                  "    console.log('💡 Profile completed! Check your updated profile.');",
+                  "} else {",
+                  "    console.log('❌ Failed to update organizer profile');",
+                  "    console.log('📊 Status Code:', pm.response.code);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{authToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstName\": \"John\",\n  \"lastName\": \"Smith\",\n  \"phone\": \"+234-803-123-4567\",\n  \"bio\": \"Professional event organizer with 5+ years experience in corporate events and conferences.\",\n  \"website\": \"https://johnsmithevents.com\",\n  \"profilePicture\": \"https://example.com/profile.jpg\",\n  \"socialLinks\": {\n    \"twitter\": \"https://twitter.com/johnsmithevents\",\n    \"linkedin\": \"https://linkedin.com/in/johnsmith\",\n    \"instagram\": \"https://instagram.com/johnsmithevents\"\n  },\n  \"businessInfo\": {\n    \"companyName\": \"Smith Events Ltd\",\n    \"businessAddress\": \"123 Event Street, Lagos, Nigeria\",\n    \"businessPhone\": \"+234-1-234-5678\",\n    \"businessEmail\": \"info@johnsmithevents.com\",\n    \"registrationNumber\": \"RC123456\",\n    \"taxId\": \"TAX789012\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/profiles/organizer/profile",
+              "host": ["{{baseUrl}}"],
+              "path": ["profiles", "organizer", "profile"]
+            },
+            "description": "Update organizer profile with business-specific information and professional details.\n\n🔐 **Authentication Required**: Must be logged in as organizer\n👨‍💼 **Role Required**: Organizer only\n\n**Allowed Update Fields:**\n\n**Personal Information:**\n- firstName, lastName, phone\n- bio, website, profilePicture\n- socialLinks (object with social media URLs)\n\n**Business Information:**\n- businessInfo (object with company details)\n- companyName, businessAddress\n- businessPhone, businessEmail\n- registrationNumber, taxId\n\n**Security Features:**\n- Only organizer-specific fields can be updated\n- Email cannot be changed via this endpoint\n- Profile completeness recalculated after update\n- Invalid fields are filtered out\n\n**Expected Responses:**\n- 200: Profile updated successfully\n- 400: No valid fields provided or validation errors\n- 401: Authentication required\n- 403: Access denied (not an organizer)\n- 404: Organizer not found\n- 500: Server error\n\n**Best Practices:**\n- Include business registration details for credibility\n- Add professional social media links\n- Complete all business information fields\n- Use professional profile picture"
+          }
+        },
+        {
+          "name": "Update User Profile",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    console.log('✅ User profile updated successfully');",
+                  "    console.log('👤 Profile Update Summary:');",
+                  "    console.log('');",
+                  "    console.log('🔄 Updated Fields:');",
+                  "    response.data.updatedFields.forEach(field => {",
+                  "        console.log('- ' + field);",
+                  "    });",
+                  "    console.log('');",
+                  "    console.log('📊 Profile Completeness:', response.data.profileCompleteness + '%');",
+                  "    console.log('');",
+                  "    console.log('💡 Profile updated! Check your new information.');",
+                  "} else {",
+                  "    console.log('❌ Failed to update user profile');",
+                  "    console.log('📊 Status Code:', pm.response.code);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{authToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstName\": \"Jane\",\n  \"lastName\": \"Doe\",\n  \"phone\": \"+234-802-987-6543\",\n  \"bio\": \"Event enthusiast who loves discovering new experiences and connecting with like-minded people.\",\n  \"website\": \"https://janedoe.blog\",\n  \"profilePicture\": \"https://example.com/jane-profile.jpg\",\n  \"socialLinks\": {\n    \"twitter\": \"https://twitter.com/janedoe\",\n    \"instagram\": \"https://instagram.com/janedoe\",\n    \"facebook\": \"https://facebook.com/jane.doe\"\n  },\n  \"preferences\": {\n    \"favoriteCategories\": [\"music\", \"tech\", \"business\"],\n    \"notificationPreferences\": {\n      \"eventReminders\": true,\n      \"newEvents\": true,\n      \"promotions\": false\n    },\n    \"privacySettings\": {\n      \"profileVisibility\": \"public\",\n      \"showAttendanceHistory\": true,\n      \"allowMessages\": true\n    }\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/profiles/user/profile",
+              "host": ["{{baseUrl}}"],
+              "path": ["profiles", "user", "profile"]
+            },
+            "description": "Update user profile with personal information and user preferences.\n\n🔐 **Authentication Required**: Must be logged in as user\n👤 **Role Required**: Regular user only\n\n**Allowed Update Fields:**\n\n**Personal Information:**\n- firstName, lastName, phone\n- bio, website, profilePicture\n- socialLinks (object with social media URLs)\n\n**User Preferences:**\n- preferences (object with user settings)\n- favoriteCategories array\n- notificationPreferences object\n- privacySettings object\n\n**Security Features:**\n- Only user-specific fields can be updated\n- Email cannot be changed via this endpoint\n- Profile completeness recalculated after update\n- Invalid fields are filtered out\n\n**Expected Responses:**\n- 200: Profile updated successfully\n- 400: No valid fields provided or validation errors\n- 401: Authentication required\n- 403: Access denied (not a regular user)\n- 404: User not found\n- 500: Server error\n\n**Best Practices:**\n- Set favorite categories for better event recommendations\n- Configure notification preferences\n- Adjust privacy settings as needed\n- Complete bio for better networking"
+          }
+        },
+        {
+          "name": "Sync Event Ticket Sales (Fix Data)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    console.log('✅ Event ticket sales synchronized successfully');",
+                  "    console.log('🎫 Ticket Sales Summary:');",
+                  "    console.log('');",
+                  "    console.log('🎪 Event:', response.data.title);",
+                  "    console.log('📊 Total Tickets:', response.data.totalTickets);",
+                  "    console.log('🎟️ Tickets Sold:', response.data.ticketsSold);",
+                  "    console.log('👥 Current Attendees:', response.data.currentAttendees);",
+                  "    console.log('');",
+                  "    console.log('🎫 Ticket Types:');",
+                  "    response.data.ticketTypes.forEach((ticketType, index) => {",
+                  "        console.log(`${index + 1}. ${ticketType.name}:`);",
+                  "        console.log(`   - Total: ${ticketType.quantity}`);",
+                  "        console.log(`   - Sold: ${ticketType.sold}`);",
+                  "        console.log(`   - Available: ${ticketType.available}`);",
+                  "    });",
+                  "    console.log('');",
+                  "    console.log('💡 Ticket sales data is now synchronized with actual bookings!');",
+                  "} else {",
+                  "    console.log('❌ Failed to sync ticket sales');",
+                  "    console.log('📊 Status Code:', pm.response.code);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{authToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/profiles/sync-tickets/{{eventId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["profiles", "sync-tickets", "{{eventId}}"]
+            },
+            "description": "Synchronize event ticket sales data with actual booking records. This utility route fixes any discrepancies between the event's sold ticket count and actual confirmed bookings.\n\n🔐 **Authentication Required**: Must be logged in as organizer\n👨‍💼 **Role Required**: Organizer only (can only sync own events)\n\n**Purpose:**\n- Fix sold ticket counts that don't match actual bookings\n- Synchronize currentAttendees with confirmed bookings\n- Ensure data consistency between Event and Booking collections\n\n**What it does:**\n1. Verifies organizer owns the event\n2. Counts all confirmed bookings for the event\n3. Resets and recalculates sold tickets per ticket type\n4. Updates currentAttendees count\n5. Saves synchronized data\n\n**Response includes:**\n- Updated total tickets and tickets sold\n- Current attendees count\n- Breakdown by ticket type with availability\n\n**When to use:**\n- When sold tickets show 0 but bookings exist\n- After data migration or manual database changes\n- When ticket counts seem inconsistent\n- For regular data validation\n\n**Expected Responses:**\n- 200: Synchronization successful with updated data\n- 401: Authentication required\n- 403: Access denied (not an organizer)\n- 404: Event not found or access denied\n- 500: Server error\n\n**Example Usage:**\n```\nPOST /api/profiles/sync-tickets/64f7b1234567890abcdef123\n```\n\nThis will fix the issue where totalBookings shows 4 but soldTickets shows 0."
           }
         }
       ]

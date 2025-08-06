@@ -371,14 +371,42 @@ const getUserProfile = async (req, res) => {
 
     const { user } = userResult;
 
-    // Get additional statistics
-    const [eventsCreated, bookings, lastBooking] = await Promise.all([
-      Event.countDocuments({ organizer: userId }),
-      Booking.countDocuments({ user: userId, status: "confirmed" }),
-      Booking.findOne({ user: userId, status: "confirmed" })
-        .sort({ createdAt: -1 })
-        .populate("event", "title category"),
+    // Get additional statistics with corrected calculations
+    const [eventsCreated, checkedInBookings, allBookings, lastBooking] =
+      await Promise.all([
+        Event.countDocuments({ organizer: userId }),
+        Booking.countDocuments({
+          user: userId,
+          status: "confirmed",
+          isCheckedIn: true,
+        }), // Only checked-in events
+        Booking.countDocuments({ user: userId, status: "confirmed" }), // All confirmed bookings
+        Booking.findOne({ user: userId, status: "confirmed" })
+          .sort({ createdAt: -1 })
+          .populate("event", "title category"),
+      ]);
+
+    // Calculate total spent correctly from booking amounts
+    const spentCalculation = await Booking.aggregate([
+      {
+        $match: {
+          user: userId,
+          status: "confirmed",
+        },
+      },
+      {
+        $group: {
+          _id: null,
+          totalSpent: { $sum: "$totalAmount" },
+          totalWithFees: { $sum: "$finalAmount" },
+        },
+      },
     ]);
+
+    const totalSpent =
+      spentCalculation.length > 0 ? spentCalculation[0].totalSpent : 0;
+    const totalWithFees =
+      spentCalculation.length > 0 ? spentCalculation[0].totalWithFees : 0;
 
     // Get purchase history with event details
     const purchaseHistory = await Booking.find({
@@ -443,7 +471,8 @@ const getUserProfile = async (req, res) => {
         .limit(5);
 
       roleSpecificData.userMetrics = {
-        totalEventsAttended: bookings,
+        totalEventsAttended: checkedInBookings, // Only count checked-in events
+        totalBookings: allBookings, // Total confirmed bookings
         favoriteCategory,
         upcomingEvents: upcomingBookings.filter(
           (booking) => new Date(booking.event.startDate) > new Date()
@@ -452,11 +481,11 @@ const getUserProfile = async (req, res) => {
       };
     }
 
-    // Financial summary
+    // Financial summary with corrected calculations
     const financialSummary = {
-      totalSpent: user.totalSpent || 0,
-      averageSpentPerEvent:
-        bookings > 0 ? (user.totalSpent || 0) / bookings : 0,
+      totalSpent: totalSpent,
+      totalWithFees: totalWithFees,
+      averageSpentPerEvent: allBookings > 0 ? totalSpent / allBookings : 0,
       lastPurchase: lastBooking
         ? {
             event: lastBooking.event?.title,
@@ -470,7 +499,7 @@ const getUserProfile = async (req, res) => {
     // Comprehensive profile data
     const profileData = {
       ...((user.toObject && user.toObject()) || user),
-      totalSpent: user.totalSpent || 0,
+      totalSpent: totalSpent, // Corrected total spent
       purchaseHistory: purchaseHistory.map((booking) => ({
         eventTitle: booking.event?.title,
         eventCategory: booking.event?.category,
@@ -480,8 +509,9 @@ const getUserProfile = async (req, res) => {
       })),
       statistics: {
         eventsCreated,
-        eventsAttended: bookings,
-        accountAge: calculateAccountAge(user.createdAt),
+        eventsAttended: checkedInBookings, // Only checked-in events
+        totalBookings: allBookings, // Total confirmed bookings
+        accountAge: calculateAccountAge(user.createdAt), // Real-time calculation
         lastActivity: user.updatedAt,
         verificationStatus: user.isVerified,
         accountStatus: user.blocked ? "blocked" : "active",
@@ -490,7 +520,8 @@ const getUserProfile = async (req, res) => {
       financialSummary,
       profileCompleteness: calculateProfileCompleteness(user),
       activitySummary: {
-        totalBookings: bookings,
+        totalBookings: allBookings,
+        attendedEvents: checkedInBookings,
         lastBooking: lastBooking ? lastBooking.createdAt : null,
         joinDate: user.createdAt,
         lastLogin: user.lastLogin || null,

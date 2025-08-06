@@ -12,6 +12,7 @@ const refundRoutes = require("./routes/refundRoutes");
 const userDetailsRoutes = require("./routes/userDetailsRoutes");
 const articleRoutes = require("./routes/articleRoutes");
 const messagingRoutes = require("./routes/messagingRoutes");
+const userProfileRoutes = require("./routes/userProfileRoutes");
 
 const app = express();
 
@@ -36,6 +37,7 @@ app.get("/", (req, res) => {
       userDetails: "/api/user-details",
       articles: "/api/articles",
       messaging: "/api/messaging",
+      userProfiles: "/api/profiles",
     },
   });
 });
@@ -49,6 +51,7 @@ app.use("/api/refund", refundRoutes);
 app.use("/api/user-details", userDetailsRoutes);
 app.use("/api/articles", articleRoutes);
 app.use("/api/messaging", messagingRoutes);
+app.use("/api/profiles", userProfileRoutes);
 
 // Global error handler
 app.use((err, req, res, next) => {
