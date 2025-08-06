@@ -10,9 +10,9 @@
           "Helvetica Neue", Arial, sans-serif;
         line-height: 1.6;
         color: #333;
-        max-width: 600px;
+        max-width: 100%;
         margin: 0 auto;
-        padding: 20px;
+        padding: 10px;
         background-color: #f8f9fa;
       }
       .container {
@@ -238,7 +238,7 @@
           </p>
           {{#each attendees}}
           <div class="attendee-item">
-            <div class="attendee-number">{{@index}}</div>
+            <div class="attendee-number">{{this.index}}</div>
             <div>
               <strong>{{this.name}}</strong><br />
               <span style="color: #6c757d; font-size: 14px"

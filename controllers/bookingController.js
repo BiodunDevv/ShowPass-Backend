@@ -123,10 +123,12 @@ const createBooking = async (req, res) => {
 
     // Save individual QR codes to the booking
     booking.individualQRs = individualQRs;
-    booking.markModified('individualQRs'); // Ensure MongoDB knows the field changed
+    booking.markModified("individualQRs"); // Ensure MongoDB knows the field changed
     await booking.save();
 
-    console.log(`✅ Saved ${individualQRs.length} individual QR codes to booking ${booking._id}`);
+    console.log(
+      `✅ Saved ${individualQRs.length} individual QR codes to booking ${booking._id}`
+    );
 
     // Update user spending tracking
     try {
@@ -227,9 +229,15 @@ const getUserBookings = async (req, res) => {
       .limit(limit);
 
     // Debug logging
-    console.log(`📊 Retrieved ${bookings.length} bookings for user ${req.user._id}`);
+    console.log(
+      `📊 Retrieved ${bookings.length} bookings for user ${req.user._id}`
+    );
     bookings.forEach((booking, index) => {
-      console.log(`📋 Booking ${index + 1}: ID=${booking._id}, individualQRs count=${booking.individualQRs?.length || 0}`);
+      console.log(
+        `📋 Booking ${index + 1}: ID=${booking._id}, individualQRs count=${
+          booking.individualQRs?.length || 0
+        }`
+      );
     });
 
     const total = await Booking.countDocuments(query);
@@ -264,14 +272,21 @@ const getBookingById = async (req, res) => {
       return sendError(res, 404, "Booking not found");
     }
 
-    console.log(`📋 Retrieved booking ${id}: individualQRs count=${booking.individualQRs?.length || 0}`);
+    console.log(
+      `📋 Retrieved booking ${id}: individualQRs count=${
+        booking.individualQRs?.length || 0
+      }`
+    );
     if (booking.individualQRs && booking.individualQRs.length > 0) {
-      console.log(`🎫 Individual QRs:`, booking.individualQRs.map(qr => ({
-        ticketNumber: qr.ticketNumber,
-        reference: qr.reference,
-        attendeeName: qr.attendee?.name,
-        hasQRImage: !!qr.qrCodeImage
-      })));
+      console.log(
+        `🎫 Individual QRs:`,
+        booking.individualQRs.map((qr) => ({
+          ticketNumber: qr.ticketNumber,
+          reference: qr.reference,
+          attendeeName: qr.attendee?.name,
+          hasQRImage: !!qr.qrCodeImage,
+        }))
+      );
     }
 
     // Check if user owns the booking or is admin/organizer
@@ -693,7 +708,11 @@ const registerForFreeEvent = async (req, res) => {
       attendeeInfo: attendeeList,
       totalAmount: 0,
       finalAmount: 0,
-      paymentStatus: "not_required",
+      paymentStatus: "paid", // Use "paid" for free events since no payment is required
+      paymentReference: `FREE-${Date.now()}-${Math.random()
+        .toString(36)
+        .substring(2, 8)
+        .toUpperCase()}`, // Generate unique reference for free events
       status: "confirmed", // Free events are auto-confirmed
     });
 
@@ -710,10 +729,12 @@ const registerForFreeEvent = async (req, res) => {
 
     // Save individual QR codes to the booking
     booking.individualQRs = individualQRs;
-    booking.markModified('individualQRs'); // Ensure MongoDB knows the field changed
+    booking.markModified("individualQRs"); // Ensure MongoDB knows the field changed
     await booking.save();
 
-    console.log(`✅ Saved ${individualQRs.length} individual QR codes to free event booking ${booking._id}`);
+    console.log(
+      `✅ Saved ${individualQRs.length} individual QR codes to free event booking ${booking._id}`
+    );
 
     // Update user's attending events array
     await updateUserEventArrays(req.user._id, eventId, "attending");
