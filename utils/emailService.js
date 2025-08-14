@@ -345,7 +345,10 @@ const sendEventUpdateNotification = async (user, event, changeDetails) => {
     startTime: event.startTime,
     endTime: event.endTime,
     venueName: event.venue.name,
-    venueAddress: event.venue.address,
+    venueAddress: `${event.venue.address}, ${event.venue.city}, ${event.venue.state}`,
+    venueCity: event.venue.city,
+    venueState: event.venue.state,
+    category: event.category,
     supportEmail: process.env.EMAIL_FROM,
   };
 

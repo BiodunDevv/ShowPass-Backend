@@ -34,6 +34,29 @@
         border-radius: 10px;
         margin: 20px 0;
       }
+      .change-highlight {
+        background-color: white;
+        padding: 15px;
+        border-radius: 8px;
+        margin: 15px 0;
+        border-left: 4px solid #ffc107;
+        line-height: 1.8;
+      }
+      .info-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 15px 0;
+      }
+      .info-table td {
+        padding: 12px;
+        border-bottom: 1px solid #ddd;
+        vertical-align: top;
+      }
+      .info-table td:first-child {
+        font-weight: bold;
+        width: 30%;
+        background-color: #f8f9fa;
+      }
       .footer {
         text-align: center;
         padding: 20px;
@@ -61,13 +84,30 @@
 
         <div class="update-details">
           <h4>📅 Event: {{eventTitle}}</h4>
+          <p><strong>Category:</strong> {{category}}</p>
+
           <h4>🔄 What Changed:</h4>
-          <p>{{changeDetails}}</p>
+          <div class="change-highlight">{{changeDetails}}</div>
 
           <h4>📍 Current Event Details:</h4>
-          <p><strong>Date:</strong> {{eventDate}}</p>
-          <p><strong>Time:</strong> {{startTime}} - {{endTime}}</p>
-          <p><strong>Venue:</strong> {{venueName}}, {{venueAddress}}</p>
+          <table class="info-table">
+            <tr>
+              <td>📅 Date:</td>
+              <td>{{eventDate}}</td>
+            </tr>
+            <tr>
+              <td>🕐 Time:</td>
+              <td>{{startTime}} - {{endTime}}</td>
+            </tr>
+            <tr>
+              <td>📍 Venue:</td>
+              <td>{{venueName}}</td>
+            </tr>
+            <tr>
+              <td>🗺️ Address:</td>
+              <td>{{venueAddress}}</td>
+            </tr>
+          </table>
         </div>
 
         <p>

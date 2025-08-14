@@ -346,40 +346,159 @@ const updateEvent = async (req, res) => {
     const { id } = req.params;
     const updates = req.body;
 
+    // Define updatable fields for validation
+    const allowedFields = [
+      "title",
+      "description",
+      "category",
+      "venue",
+      "startDate",
+      "endDate",
+      "startTime",
+      "endTime",
+      "ticketTypes",
+      "images",
+      "tags",
+      "maxAttendees",
+      "isPublic",
+      "requiresApproval",
+      "featured",
+    ];
+
+    // Define fields that admins can update but organizers cannot
+    const adminOnlyFields = [
+      "featured",
+      "approved",
+      "status",
+      "rejectionReason",
+    ];
+
+    // Define restricted fields that cannot be updated
+    const restrictedFields = [
+      "organizer",
+      "createdAt",
+      "updatedAt",
+      "_id",
+      "approvedBy",
+      "approvedAt",
+      "currentAttendees",
+      "notificationsSent",
+      "warnings",
+      "warningCount",
+      "postApprovalModifications",
+      "isFreeEvent",
+    ];
+
     const event = await Event.findById(id);
     if (!event) {
       return sendError(res, 404, "Event not found");
     }
 
     // Check if user owns the event or is admin
-    if (
-      event.organizer.toString() !== req.user._id.toString() &&
-      req.user.role !== "admin"
-    ) {
+    const isOwner = event.organizer.toString() === req.user._id.toString();
+    const isAdmin = req.user.role === "admin";
+
+    if (!isOwner && !isAdmin) {
       return sendError(res, 403, "You can only update your own events");
     }
 
-    // Don't allow updating certain fields after approval
-    if (event.approved && updates.ticketTypes) {
+    // Validate updateable fields
+    const invalidFields = Object.keys(updates).filter(
+      (key) =>
+        restrictedFields.includes(key) ||
+        (!isAdmin && adminOnlyFields.includes(key))
+    );
+
+    if (invalidFields.length > 0) {
       return sendError(
         res,
         400,
-        "Cannot modify ticket types after event is approved"
+        `Cannot update fields: ${invalidFields.join(", ")}`
       );
     }
 
-    // Update event
+    // Don't allow updating certain fields after approval (unless admin)
+    if (event.approved && updates.ticketTypes && !isAdmin) {
+      return sendError(
+        res,
+        400,
+        "Cannot modify ticket types after event is approved. Please contact admin for major changes."
+      );
+    }
+
+    // Validate ticket types if provided
+    if (updates.ticketTypes) {
+      const ticketValidation = validateFreeEventTickets(updates.ticketTypes);
+      if (!ticketValidation.isValid) {
+        return sendError(res, 400, ticketValidation.message);
+      }
+    }
+
+    // Validate dates if provided
+    if (updates.startDate && updates.endDate) {
+      if (new Date(updates.startDate) >= new Date(updates.endDate)) {
+        return sendError(res, 400, "Start date must be before end date");
+      }
+    } else if (
+      updates.startDate &&
+      new Date(updates.startDate) >= new Date(event.endDate)
+    ) {
+      return sendError(res, 400, "Start date must be before current end date");
+    } else if (
+      updates.endDate &&
+      new Date(event.startDate) >= new Date(updates.endDate)
+    ) {
+      return sendError(res, 400, "End date must be after current start date");
+    }
+
+    // Validate maxAttendees if provided
+    if (updates.maxAttendees && updates.maxAttendees < event.currentAttendees) {
+      return sendError(
+        res,
+        400,
+        `Cannot reduce max attendees below current attendees (${event.currentAttendees})`
+      );
+    }
+
+    // Check if the event is free and handle isFreeEvent flag
+    if (updates.ticketTypes) {
+      const isFree = checkEventIsFree(updates.ticketTypes);
+      updates.isFreeEvent = isFree;
+    }
+
+    // Update event fields
     Object.keys(updates).forEach((key) => {
-      if (updates[key] !== undefined) {
-        event[key] = updates[key];
+      if (updates[key] !== undefined && allowedFields.includes(key)) {
+        if (key === "venue" && typeof updates[key] === "object") {
+          // Handle venue object updates
+          event.venue = { ...event.venue.toObject(), ...updates[key] };
+        } else {
+          event[key] = updates[key];
+        }
       }
     });
 
-    // Define major change fields first
-    const majorChangeFields = ["startDate", "endDate", "venue", "ticketTypes"];
+    // Define major change fields first (venue is now considered minor change)
+    // Major changes reset approval status and require re-approval
+    // Minor changes (venue, title, description, times, etc.) maintain approval status
+    const majorChangeFields = ["startDate", "endDate", "ticketTypes"];
 
-    // Generate change details for all notifications
-    let changeDetails = generateChangeDetails(updates, majorChangeFields);
+    // Generate change details for different recipients
+    const userChangeDetails = generateChangeDetails(
+      updates,
+      majorChangeFields,
+      "user"
+    );
+    const organizerChangeDetails = generateChangeDetails(
+      updates,
+      majorChangeFields,
+      "organizer"
+    );
+    const adminChangeDetails = generateChangeDetails(
+      updates,
+      majorChangeFields,
+      "admin"
+    );
 
     // If major changes are made, reset approval status
     const hasMajorChanges = majorChangeFields.some(
@@ -416,7 +535,7 @@ const updateEvent = async (req, res) => {
               await sendEventUpdateNotification(
                 booking.user,
                 event,
-                changeDetails
+                userChangeDetails
               );
             } catch (emailError) {
               console.error(
@@ -446,6 +565,7 @@ const updateEvent = async (req, res) => {
           "startTime",
           "endTime",
           "category",
+          "venue",
         ];
         const hasNotifiableChanges = notifiableFields.some(
           (field) => updates[field] !== undefined
@@ -466,7 +586,7 @@ const updateEvent = async (req, res) => {
                 await sendEventUpdateNotification(
                   booking.user,
                   event,
-                  changeDetails
+                  userChangeDetails
                 );
               } catch (emailError) {
                 console.error(
@@ -499,7 +619,7 @@ const updateEvent = async (req, res) => {
       await sendOrganizerEventUpdateNotification(
         event.organizer,
         event,
-        changeDetails
+        organizerChangeDetails
       );
       console.log(
         `📧 Organizer update notification sent to: ${event.organizer.email}`
@@ -519,7 +639,7 @@ const updateEvent = async (req, res) => {
           admin,
           event,
           event.organizer,
-          changeDetails
+          adminChangeDetails
         );
         console.log(`📧 Admin update notification sent to: ${admin.email}`);
       }
@@ -1208,65 +1328,158 @@ const getFreeEvents = async (req, res) => {
 };
 
 // Helper function to generate change details message
-const generateChangeDetails = (updates, majorChangeFields) => {
+const generateChangeDetails = (
+  updates,
+  majorChangeFields,
+  recipient = "user"
+) => {
   const changes = [];
+
+  // Format based on recipient type
+  const isEmailFormat =
+    recipient === "user" || recipient === "organizer" || recipient === "admin";
+
+  if (updates.title) {
+    changes.push(
+      isEmailFormat
+        ? `📝 <strong>Event Title:</strong> Changed to "${updates.title}"`
+        : `📝 Event title changed to "${updates.title}"`
+    );
+  }
+
+  if (updates.description) {
+    changes.push(
+      isEmailFormat
+        ? `📄 <strong>Event Description:</strong> Event description has been updated`
+        : `📄 Event description has been updated`
+    );
+  }
+
+  if (updates.category) {
+    changes.push(
+      isEmailFormat
+        ? `🏷️ <strong>Event Category:</strong> Changed to ${updates.category}`
+        : `🏷️ Event category changed to ${updates.category}`
+    );
+  }
 
   if (updates.startDate || updates.endDate) {
     if (updates.startDate) {
       changes.push(
-        `📅 Event date changed to ${new Date(
-          updates.startDate
-        ).toLocaleDateString()}`
+        isEmailFormat
+          ? `📅 <strong>Event Start Date:</strong> Changed to ${new Date(
+              updates.startDate
+            ).toLocaleDateString()}`
+          : `📅 Event date changed to ${new Date(
+              updates.startDate
+            ).toLocaleDateString()}`
       );
     }
     if (updates.endDate) {
       changes.push(
-        `📅 Event end date changed to ${new Date(
-          updates.endDate
-        ).toLocaleDateString()}`
+        isEmailFormat
+          ? `📅 <strong>Event End Date:</strong> Changed to ${new Date(
+              updates.endDate
+            ).toLocaleDateString()}`
+          : `📅 Event end date changed to ${new Date(
+              updates.endDate
+            ).toLocaleDateString()}`
       );
     }
   }
 
   if (updates.startTime || updates.endTime) {
     if (updates.startTime) {
-      changes.push(`🕐 Start time changed to ${updates.startTime}`);
+      changes.push(
+        isEmailFormat
+          ? `🕐 <strong>Start Time:</strong> Changed to ${updates.startTime}`
+          : `🕐 Start time changed to ${updates.startTime}`
+      );
     }
     if (updates.endTime) {
-      changes.push(`🕐 End time changed to ${updates.endTime}`);
+      changes.push(
+        isEmailFormat
+          ? `🕐 <strong>End Time:</strong> Changed to ${updates.endTime}`
+          : `🕐 End time changed to ${updates.endTime}`
+      );
     }
   }
 
   if (updates.venue) {
+    const venueChanges = [];
     if (updates.venue.name) {
-      changes.push(`📍 Venue changed to ${updates.venue.name}`);
+      venueChanges.push(`Venue: ${updates.venue.name}`);
     }
     if (updates.venue.address) {
-      changes.push(`🗺️ Address changed to ${updates.venue.address}`);
+      venueChanges.push(`Address: ${updates.venue.address}`);
     }
-    if (updates.venue.city) {
-      changes.push(`🏙️ City changed to ${updates.venue.city}`);
+    if (updates.venue.city && updates.venue.state) {
+      venueChanges.push(
+        `Location: ${updates.venue.city}, ${updates.venue.state}`
+      );
+    }
+
+    if (venueChanges.length > 0) {
+      changes.push(
+        isEmailFormat
+          ? `📍 <strong>Venue Information:</strong><br/>&nbsp;&nbsp;&nbsp;&nbsp;${venueChanges.join(
+              "<br/>&nbsp;&nbsp;&nbsp;&nbsp;"
+            )}`
+          : `📍 Venue updated: ${venueChanges.join(", ")}`
+      );
     }
   }
 
   if (updates.ticketTypes) {
-    changes.push(`🎟️ Ticket types and pricing have been updated`);
+    changes.push(
+      isEmailFormat
+        ? `🎟️ <strong>Ticket Information:</strong> Ticket types and pricing have been updated`
+        : `🎟️ Ticket types and pricing have been updated`
+    );
   }
 
-  if (updates.title) {
-    changes.push(`📝 Event title changed to "${updates.title}"`);
+  if (updates.maxAttendees) {
+    changes.push(
+      isEmailFormat
+        ? `� <strong>Capacity:</strong> Maximum attendees changed to ${updates.maxAttendees}`
+        : `👥 Maximum attendees changed to ${updates.maxAttendees}`
+    );
   }
 
-  if (updates.description) {
-    changes.push(`📄 Event description has been updated`);
+  if (updates.images && updates.images.length > 0) {
+    changes.push(
+      isEmailFormat
+        ? `�️ <strong>Event Images:</strong> Event photos have been updated`
+        : `🖼️ Event photos have been updated`
+    );
   }
 
-  if (updates.category) {
-    changes.push(`🏷️ Event category changed to ${updates.category}`);
+  if (updates.tags && updates.tags.length > 0) {
+    changes.push(
+      isEmailFormat
+        ? `🏷️ <strong>Event Tags:</strong> Event tags have been updated`
+        : `🏷️ Event tags have been updated`
+    );
   }
+
+  if (updates.isPublic !== undefined) {
+    changes.push(
+      isEmailFormat
+        ? `👁️ <strong>Visibility:</strong> Event is now ${
+            updates.isPublic ? "public" : "private"
+          }`
+        : `👁️ Event visibility changed to ${
+            updates.isPublic ? "public" : "private"
+          }`
+    );
+  }
+
+  const separator = isEmailFormat ? "<br/><br/>" : "<br/>";
 
   return changes.length > 0
-    ? changes.join("<br/>")
+    ? changes.join(separator)
+    : isEmailFormat
+    ? "Event details have been updated. Please review the current information."
     : "Event details have been updated. Please review the current information above.";
 };
 

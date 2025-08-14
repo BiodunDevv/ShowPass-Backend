@@ -34,6 +34,25 @@
         margin: 20px 0;
         border-left: 4px solid #17a2b8;
       }
+      .change-highlight {
+        padding: 15px;
+        background-color: white;
+        border-radius: 8px;
+        margin: 15px 0;
+        line-height: 1.8;
+      }
+      .summary-list {
+        margin: 15px 0;
+        padding: 0;
+        list-style: none;
+      }
+      .summary-list li {
+        padding: 8px 0;
+        border-bottom: 1px solid #e9ecef;
+      }
+      .summary-list li:last-child {
+        border-bottom: none;
+      }
       .change-item {
         margin: 10px 0;
         padding: 10px;
@@ -74,7 +93,23 @@
 
         <div class="changes">
           <h4>📋 Changes Made:</h4>
-          {{changeDetails}}
+          <div class="change-highlight">{{changeDetails}}</div>
+
+          <h4>📊 Update Summary:</h4>
+          <ul class="summary-list">
+            <li>
+              📧 <strong>Attendee Notifications:</strong> All registered
+              attendees have been automatically notified of these changes
+            </li>
+            <li>
+              👑 <strong>Admin Review:</strong> Administrators have been
+              notified and will review the updates
+            </li>
+            <li>
+              🔄 <strong>Status:</strong> Your event information has been
+              successfully updated in our system
+            </li>
+          </ul>
         </div>
 
         {{statusSection}}

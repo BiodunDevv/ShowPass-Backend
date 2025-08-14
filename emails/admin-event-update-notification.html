@@ -40,6 +40,40 @@
         margin: 20px 0;
         border-left: 4px solid #ffc107;
       }
+      .change-highlight {
+        padding: 15px;
+        background-color: white;
+        border-radius: 8px;
+        margin: 15px 0;
+        line-height: 1.8;
+      }
+      .info-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 15px 0;
+      }
+      .info-table td {
+        padding: 12px;
+        border-bottom: 1px solid #ddd;
+        vertical-align: top;
+      }
+      .info-table td:first-child {
+        font-weight: bold;
+        width: 30%;
+        background-color: #f8f9fa;
+      }
+      .impact-list {
+        margin: 15px 0;
+        padding: 0;
+        list-style: none;
+      }
+      .impact-list li {
+        padding: 8px 0;
+        border-bottom: 1px solid #e9ecef;
+      }
+      .impact-list li:last-child {
+        border-bottom: none;
+      }
       .change-item {
         margin: 10px 0;
         padding: 10px;
@@ -83,18 +117,46 @@
 
         <div class="event-info">
           <h4>📅 Event Information</h4>
-          <p><strong>Event Title:</strong> {{eventTitle}}</p>
-          <p>
-            <strong>Organizer:</strong> {{organizerName}} ({{organizerEmail}})
-          </p>
-          <p><strong>Category:</strong> {{category}}</p>
-          <p><strong>Date:</strong> {{eventDate}}</p>
-          <p><strong>Time:</strong> {{startTime}} - {{endTime}}</p>
+          <table class="info-table">
+            <tr>
+              <td>Event Title:</td>
+              <td>{{eventTitle}}</td>
+            </tr>
+            <tr>
+              <td>Organizer:</td>
+              <td>{{organizerName}} ({{organizerEmail}})</td>
+            </tr>
+            <tr>
+              <td>Category:</td>
+              <td>{{category}}</td>
+            </tr>
+            <tr>
+              <td>Date:</td>
+              <td>{{eventDate}}</td>
+            </tr>
+            <tr>
+              <td>Time:</td>
+              <td>{{startTime}} - {{endTime}}</td>
+            </tr>
+          </table>
         </div>
 
         <div class="changes">
           <h4>🔄 Changes Made by Organizer:</h4>
-          {{changeDetails}}
+          <div class="change-highlight">{{changeDetails}}</div>
+
+          <h4>📊 Impact Assessment:</h4>
+          <ul class="impact-list">
+            <li>
+              📧 <strong>Attendee Notifications:</strong> All registered
+              attendees have been automatically notified
+            </li>
+            <li>
+              🔍 <strong>Review Required:</strong> Please verify that all
+              changes are appropriate and comply with platform guidelines
+            </li>
+            <li>📈 <strong>Event Status:</strong> {{approvalStatusMessage}}</li>
+          </ul>
         </div>
 
         <div class="approval-status {{approvalStatusClass}}">

@@ -1163,339 +1163,6 @@
       ]
     },
     {
-      "name": "Role-Specific Profile Management",
-      "item": [
-        {
-          "name": "Get Organizer Profile",
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "if (pm.response.code === 200) {",
-                  "    const response = pm.response.json();",
-                  "    console.log('✅ Organizer profile retrieved successfully');",
-                  "    console.log('👨‍💼 Organizer Profile Summary:');",
-                  "    console.log('');",
-                  "    console.log('👤 Personal Information:');",
-                  "    console.log('- Name:', response.data.firstName + ' ' + response.data.lastName);",
-                  "    console.log('- Email:', response.data.email);",
-                  "    console.log('- Phone:', response.data.phone || 'Not provided');",
-                  "    console.log('- Verified:', response.data.isVerified ? '✅' : '❌');",
-                  "    console.log('- Account Age:', response.data.accountAge);",
-                  "    console.log('- Profile Completeness:', response.data.profileCompleteness + '%');",
-                  "    console.log('');",
-                  "    console.log('📊 Organizer Metrics:');",
-                  "    console.log('- Total Events Created:', response.data.organizerMetrics.totalEvents);",
-                  "    console.log('- Pending Events:', response.data.organizerMetrics.pendingEvents);",
-                  "    console.log('- Approved Events:', response.data.organizerMetrics.approvedEvents);",
-                  "    console.log('- Rejected Events:', response.data.organizerMetrics.rejectedEvents);",
-                  "    console.log('- Total Bookings:', response.data.organizerMetrics.totalBookings);",
-                  "    console.log('- Total Revenue: ₦' + response.data.organizerMetrics.totalRevenue.toLocaleString());",
-                  "    console.log('- Average Tickets Sold:', response.data.organizerMetrics.averageTicketsSold);",
-                  "    console.log('- Success Rate:', response.data.organizerMetrics.successRate + '%');",
-                  "    console.log('');",
-                  "    console.log('🎪 Recent Events:');",
-                  "    response.data.recentEvents.forEach((event, index) => {",
-                  "        console.log(`Event ${index + 1}: ${event.title} (${event.status})`);",
-                  "        console.log(`  - Date: ${new Date(event.startDate).toLocaleDateString()}`);",
-                  "        console.log(`  - Category: ${event.category}`);",
-                  "        console.log(`  - Tickets: ${event.soldTickets}/${event.totalTickets} (${event.sellRate}%)`);",
-                  "    });",
-                  "} else {",
-                  "    console.log('❌ Failed to retrieve organizer profile');",
-                  "    console.log('📊 Status Code:', pm.response.code);",
-                  "}"
-                ],
-                "type": "text/javascript"
-              }
-            }
-          ],
-          "request": {
-            "auth": {
-              "type": "bearer",
-              "bearer": [
-                {
-                  "key": "token",
-                  "value": "{{authToken}}",
-                  "type": "string"
-                }
-              ]
-            },
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/profiles/organizer/profile",
-              "host": ["{{baseUrl}}"],
-              "path": ["profiles", "organizer", "profile"]
-            },
-            "description": "Get comprehensive organizer profile with role-specific metrics and statistics.\n\n🔐 **Authentication Required**: Must be logged in as organizer\n👨‍💼 **Role Required**: Organizer only\n\n**Profile Information Includes:**\n\n**Personal Details:**\n- Basic information (name, email, phone)\n- Profile picture and bio\n- Website and social links\n- Business information\n- Account verification status\n- Real-time account age calculation\n- Profile completeness percentage\n\n**Organizer Metrics:**\n- Total events created\n- Events by status (pending, approved, rejected)\n- Total bookings across all events\n- Total revenue generated\n- Average tickets sold per event\n- Success rate (approved/total events)\n\n**Recent Events:**\n- Last 5 events created\n- Event details with performance metrics\n- Ticket sales statistics\n- Event status and dates\n\n**Expected Responses:**\n- 200: Profile retrieved successfully\n- 401: Authentication required\n- 403: Access denied (not an organizer)\n- 404: Organizer not found\n- 500: Server error\n\n**Real-time Calculations:**\n- Account age updates in real-time\n- Current revenue and booking counts\n- Live event performance metrics"
-          }
-        },
-        {
-          "name": "Get User Profile",
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "if (pm.response.code === 200) {",
-                  "    const response = pm.response.json();",
-                  "    console.log('✅ User profile retrieved successfully');",
-                  "    console.log('👤 User Profile Summary:');",
-                  "    console.log('');",
-                  "    console.log('👤 Personal Information:');",
-                  "    console.log('- Name:', response.data.firstName + ' ' + response.data.lastName);",
-                  "    console.log('- Email:', response.data.email);",
-                  "    console.log('- Phone:', response.data.phone || 'Not provided');",
-                  "    console.log('- Verified:', response.data.isVerified ? '✅' : '❌');",
-                  "    console.log('- Account Age:', response.data.accountAge);",
-                  "    console.log('- Profile Completeness:', response.data.profileCompleteness + '%');",
-                  "    console.log('');",
-                  "    console.log('📊 User Metrics:');",
-                  "    console.log('- Total Bookings:', response.data.userMetrics.totalBookings);",
-                  "    console.log('- Events Attended (Checked-in):', response.data.userMetrics.eventsAttended);",
-                  "    console.log('- Upcoming Events:', response.data.userMetrics.upcomingEvents);",
-                  "    console.log('- Past Events:', response.data.userMetrics.pastEvents);",
-                  "    console.log('- Attendance Rate:', response.data.userMetrics.attendanceRate + '%');",
-                  "    console.log('- Favorite Category:', response.data.userMetrics.favoriteCategory);",
-                  "    console.log('');",
-                  "    console.log('💰 Financial Summary:');",
-                  "    console.log('- Total Spent: ₦' + response.data.financialSummary.totalSpent.toLocaleString());",
-                  "    console.log('- Total with Fees: ₦' + response.data.financialSummary.totalWithFees.toLocaleString());",
-                  "    console.log('- Average per Event: ₦' + response.data.financialSummary.averageSpentPerEvent.toLocaleString());",
-                  "    console.log('- Savings from Bookings: ₦' + response.data.financialSummary.savingsFromBookings.toLocaleString());",
-                  "    console.log('');",
-                  "    console.log('🎫 Recent Bookings:');",
-                  "    response.data.recentBookings.forEach((booking, index) => {",
-                  "        console.log(`Booking ${index + 1}: ${booking.eventTitle}`);",
-                  "        console.log(`  - Amount: ₦${booking.amount.toLocaleString()}`);",
-                  "        console.log(`  - Date: ${new Date(booking.bookingDate).toLocaleDateString()}`);",
-                  "        console.log(`  - Checked In: ${booking.isCheckedIn ? '✅' : '❌'}`);",
-                  "    });",
-                  "    console.log('');",
-                  "    console.log('🎪 Upcoming Events:');",
-                  "    response.data.upcomingEvents.forEach((event, index) => {",
-                  "        console.log(`Event ${index + 1}: ${event.eventTitle}`);",
-                  "        console.log(`  - Date: ${new Date(event.eventDate).toLocaleDateString()}`);",
-                  "        console.log(`  - Days Until: ${event.daysUntilEvent} days`);",
-                  "    });",
-                  "} else {",
-                  "    console.log('❌ Failed to retrieve user profile');",
-                  "    console.log('📊 Status Code:', pm.response.code);",
-                  "}"
-                ],
-                "type": "text/javascript"
-              }
-            }
-          ],
-          "request": {
-            "auth": {
-              "type": "bearer",
-              "bearer": [
-                {
-                  "key": "token",
-                  "value": "{{authToken}}",
-                  "type": "string"
-                }
-              ]
-            },
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/profiles/user/profile",
-              "host": ["{{baseUrl}}"],
-              "path": ["profiles", "user", "profile"]
-            },
-            "description": "Get comprehensive user profile with corrected financial calculations and attendance tracking.\n\n🔐 **Authentication Required**: Must be logged in as user\n👤 **Role Required**: Regular user only\n\n**Profile Information Includes:**\n\n**Personal Details:**\n- Basic information (name, email, phone)\n- Profile picture and bio\n- Website and social links\n- User preferences\n- Account verification status\n- Real-time account age calculation\n- Profile completeness percentage\n\n**User Metrics (FIXED):**\n- Total confirmed bookings\n- Events attended (only checked-in events)\n- Upcoming and past events\n- Attendance rate calculation\n- Favorite event category\n\n**Financial Summary (CORRECTED):**\n- Total spent (actual booking amounts)\n- Total with fees (including platform fees)\n- Average spent per event\n- Savings from platform fees\n- Last purchase details\n\n**Recent Activity:**\n- Recent bookings with check-in status\n- Upcoming events with countdown\n- Booking history with event details\n\n**Expected Responses:**\n- 200: Profile retrieved successfully\n- 401: Authentication required\n- 403: Access denied (not a regular user)\n- 404: User not found\n- 500: Server error\n\n**Fixes Applied:**\n- ✅ Total spent now shows actual booking amounts (not 0)\n- ✅ Events attended only counts checked-in events\n- ✅ Account age calculates in real-time\n- ✅ Financial tracking uses aggregation for accuracy"
-          }
-        },
-        {
-          "name": "Update Organizer Profile",
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "if (pm.response.code === 200) {",
-                  "    const response = pm.response.json();",
-                  "    console.log('✅ Organizer profile updated successfully');",
-                  "    console.log('👨‍💼 Profile Update Summary:');",
-                  "    console.log('');",
-                  "    console.log('🔄 Updated Fields:');",
-                  "    response.data.updatedFields.forEach(field => {",
-                  "        console.log('- ' + field);",
-                  "    });",
-                  "    console.log('');",
-                  "    console.log('📊 Profile Completeness:', response.data.profileCompleteness + '%');",
-                  "    console.log('');",
-                  "    console.log('💡 Profile completed! Check your updated profile.');",
-                  "} else {",
-                  "    console.log('❌ Failed to update organizer profile');",
-                  "    console.log('📊 Status Code:', pm.response.code);",
-                  "}"
-                ],
-                "type": "text/javascript"
-              }
-            }
-          ],
-          "request": {
-            "auth": {
-              "type": "bearer",
-              "bearer": [
-                {
-                  "key": "token",
-                  "value": "{{authToken}}",
-                  "type": "string"
-                }
-              ]
-            },
-            "method": "PUT",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"firstName\": \"John\",\n  \"lastName\": \"Smith\",\n  \"phone\": \"+234-803-123-4567\",\n  \"bio\": \"Professional event organizer with 5+ years experience in corporate events and conferences.\",\n  \"website\": \"https://johnsmithevents.com\",\n  \"profilePicture\": \"https://example.com/profile.jpg\",\n  \"socialLinks\": {\n    \"twitter\": \"https://twitter.com/johnsmithevents\",\n    \"linkedin\": \"https://linkedin.com/in/johnsmith\",\n    \"instagram\": \"https://instagram.com/johnsmithevents\"\n  },\n  \"businessInfo\": {\n    \"companyName\": \"Smith Events Ltd\",\n    \"businessAddress\": \"123 Event Street, Lagos, Nigeria\",\n    \"businessPhone\": \"+234-1-234-5678\",\n    \"businessEmail\": \"info@johnsmithevents.com\",\n    \"registrationNumber\": \"RC123456\",\n    \"taxId\": \"TAX789012\"\n  }\n}"
-            },
-            "url": {
-              "raw": "{{baseUrl}}/profiles/organizer/profile",
-              "host": ["{{baseUrl}}"],
-              "path": ["profiles", "organizer", "profile"]
-            },
-            "description": "Update organizer profile with business-specific information and professional details.\n\n🔐 **Authentication Required**: Must be logged in as organizer\n👨‍💼 **Role Required**: Organizer only\n\n**Allowed Update Fields:**\n\n**Personal Information:**\n- firstName, lastName, phone\n- bio, website, profilePicture\n- socialLinks (object with social media URLs)\n\n**Business Information:**\n- businessInfo (object with company details)\n- companyName, businessAddress\n- businessPhone, businessEmail\n- registrationNumber, taxId\n\n**Security Features:**\n- Only organizer-specific fields can be updated\n- Email cannot be changed via this endpoint\n- Profile completeness recalculated after update\n- Invalid fields are filtered out\n\n**Expected Responses:**\n- 200: Profile updated successfully\n- 400: No valid fields provided or validation errors\n- 401: Authentication required\n- 403: Access denied (not an organizer)\n- 404: Organizer not found\n- 500: Server error\n\n**Best Practices:**\n- Include business registration details for credibility\n- Add professional social media links\n- Complete all business information fields\n- Use professional profile picture"
-          }
-        },
-        {
-          "name": "Update User Profile",
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "if (pm.response.code === 200) {",
-                  "    const response = pm.response.json();",
-                  "    console.log('✅ User profile updated successfully');",
-                  "    console.log('👤 Profile Update Summary:');",
-                  "    console.log('');",
-                  "    console.log('🔄 Updated Fields:');",
-                  "    response.data.updatedFields.forEach(field => {",
-                  "        console.log('- ' + field);",
-                  "    });",
-                  "    console.log('');",
-                  "    console.log('📊 Profile Completeness:', response.data.profileCompleteness + '%');",
-                  "    console.log('');",
-                  "    console.log('💡 Profile updated! Check your new information.');",
-                  "} else {",
-                  "    console.log('❌ Failed to update user profile');",
-                  "    console.log('📊 Status Code:', pm.response.code);",
-                  "}"
-                ],
-                "type": "text/javascript"
-              }
-            }
-          ],
-          "request": {
-            "auth": {
-              "type": "bearer",
-              "bearer": [
-                {
-                  "key": "token",
-                  "value": "{{authToken}}",
-                  "type": "string"
-                }
-              ]
-            },
-            "method": "PUT",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"firstName\": \"Jane\",\n  \"lastName\": \"Doe\",\n  \"phone\": \"+234-802-987-6543\",\n  \"bio\": \"Event enthusiast who loves discovering new experiences and connecting with like-minded people.\",\n  \"website\": \"https://janedoe.blog\",\n  \"profilePicture\": \"https://example.com/jane-profile.jpg\",\n  \"socialLinks\": {\n    \"twitter\": \"https://twitter.com/janedoe\",\n    \"instagram\": \"https://instagram.com/janedoe\",\n    \"facebook\": \"https://facebook.com/jane.doe\"\n  },\n  \"preferences\": {\n    \"favoriteCategories\": [\"music\", \"tech\", \"business\"],\n    \"notificationPreferences\": {\n      \"eventReminders\": true,\n      \"newEvents\": true,\n      \"promotions\": false\n    },\n    \"privacySettings\": {\n      \"profileVisibility\": \"public\",\n      \"showAttendanceHistory\": true,\n      \"allowMessages\": true\n    }\n  }\n}"
-            },
-            "url": {
-              "raw": "{{baseUrl}}/profiles/user/profile",
-              "host": ["{{baseUrl}}"],
-              "path": ["profiles", "user", "profile"]
-            },
-            "description": "Update user profile with personal information and user preferences.\n\n🔐 **Authentication Required**: Must be logged in as user\n👤 **Role Required**: Regular user only\n\n**Allowed Update Fields:**\n\n**Personal Information:**\n- firstName, lastName, phone\n- bio, website, profilePicture\n- socialLinks (object with social media URLs)\n\n**User Preferences:**\n- preferences (object with user settings)\n- favoriteCategories array\n- notificationPreferences object\n- privacySettings object\n\n**Security Features:**\n- Only user-specific fields can be updated\n- Email cannot be changed via this endpoint\n- Profile completeness recalculated after update\n- Invalid fields are filtered out\n\n**Expected Responses:**\n- 200: Profile updated successfully\n- 400: No valid fields provided or validation errors\n- 401: Authentication required\n- 403: Access denied (not a regular user)\n- 404: User not found\n- 500: Server error\n\n**Best Practices:**\n- Set favorite categories for better event recommendations\n- Configure notification preferences\n- Adjust privacy settings as needed\n- Complete bio for better networking"
-          }
-        },
-        {
-          "name": "Sync Event Ticket Sales (Fix Data)",
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "if (pm.response.code === 200) {",
-                  "    const response = pm.response.json();",
-                  "    console.log('✅ Event ticket sales synchronized successfully');",
-                  "    console.log('🎫 Ticket Sales Summary:');",
-                  "    console.log('');",
-                  "    console.log('🎪 Event:', response.data.title);",
-                  "    console.log('📊 Total Tickets:', response.data.totalTickets);",
-                  "    console.log('🎟️ Tickets Sold:', response.data.ticketsSold);",
-                  "    console.log('👥 Current Attendees:', response.data.currentAttendees);",
-                  "    console.log('');",
-                  "    console.log('🎫 Ticket Types:');",
-                  "    response.data.ticketTypes.forEach((ticketType, index) => {",
-                  "        console.log(`${index + 1}. ${ticketType.name}:`);",
-                  "        console.log(`   - Total: ${ticketType.quantity}`);",
-                  "        console.log(`   - Sold: ${ticketType.sold}`);",
-                  "        console.log(`   - Available: ${ticketType.available}`);",
-                  "    });",
-                  "    console.log('');",
-                  "    console.log('💡 Ticket sales data is now synchronized with actual bookings!');",
-                  "} else {",
-                  "    console.log('❌ Failed to sync ticket sales');",
-                  "    console.log('📊 Status Code:', pm.response.code);",
-                  "}"
-                ],
-                "type": "text/javascript"
-              }
-            }
-          ],
-          "request": {
-            "auth": {
-              "type": "bearer",
-              "bearer": [
-                {
-                  "key": "token",
-                  "value": "{{authToken}}",
-                  "type": "string"
-                }
-              ]
-            },
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{}"
-            },
-            "url": {
-              "raw": "{{baseUrl}}/profiles/sync-tickets/{{eventId}}",
-              "host": ["{{baseUrl}}"],
-              "path": ["profiles", "sync-tickets", "{{eventId}}"]
-            },
-            "description": "Synchronize event ticket sales data with actual booking records. This utility route fixes any discrepancies between the event's sold ticket count and actual confirmed bookings.\n\n🔐 **Authentication Required**: Must be logged in as organizer\n👨‍💼 **Role Required**: Organizer only (can only sync own events)\n\n**Purpose:**\n- Fix sold ticket counts that don't match actual bookings\n- Synchronize currentAttendees with confirmed bookings\n- Ensure data consistency between Event and Booking collections\n\n**What it does:**\n1. Verifies organizer owns the event\n2. Counts all confirmed bookings for the event\n3. Resets and recalculates sold tickets per ticket type\n4. Updates currentAttendees count\n5. Saves synchronized data\n\n**Response includes:**\n- Updated total tickets and tickets sold\n- Current attendees count\n- Breakdown by ticket type with availability\n\n**When to use:**\n- When sold tickets show 0 but bookings exist\n- After data migration or manual database changes\n- When ticket counts seem inconsistent\n- For regular data validation\n\n**Expected Responses:**\n- 200: Synchronization successful with updated data\n- 401: Authentication required\n- 403: Access denied (not an organizer)\n- 404: Event not found or access denied\n- 500: Server error\n\n**Example Usage:**\n```\nPOST /api/profiles/sync-tickets/64f7b1234567890abcdef123\n```\n\nThis will fix the issue where totalBookings shows 4 but soldTickets shows 0."
-          }
-        }
-      ]
-    },
-    {
       "name": "Event Discovery & Management",
       "item": [
         {
@@ -1952,7 +1619,39 @@
           }
         },
         {
-          "name": "Update Event (Organizer)",
+          "name": "Update Event (Organizer) - Comprehensive Example",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    console.log('✅ Event updated successfully');",
+                  "    console.log('📝 Updated Event Details:');",
+                  "    console.log('- Title:', response.data.title);",
+                  "    console.log('- Category:', response.data.category);",
+                  "    console.log('- Venue:', response.data.venue.name);",
+                  "    console.log('- Start Date:', new Date(response.data.startDate).toLocaleDateString());",
+                  "    console.log('- Start Time:', response.data.startTime);",
+                  "    console.log('- Max Attendees:', response.data.maxAttendees);",
+                  "    console.log('- Ticket Types:', response.data.ticketTypes.length);",
+                  "    console.log('- Public Event:', response.data.isPublic);",
+                  "    console.log('- Event Status:', response.data.status);",
+                  "    console.log('- Is Free Event:', response.data.isFreeEvent);",
+                  "    ",
+                  "    // Check if major changes reset approval",
+                  "    if (response.data.approved === false && response.data.status === 'pending') {",
+                  "        console.log('⚠️ Major changes detected - event requires re-approval');",
+                  "    }",
+                  "} else {",
+                  "    console.log('❌ Failed to update event');",
+                  "    console.log('Error:', pm.response.text());",
+                  "}"
+                ]
+              }
+            }
+          ],
           "request": {
             "auth": {
               "type": "bearer",
@@ -1973,17 +1672,51 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"title\": \"Updated Postman Test Event\",\n  \"description\": \"Updated description for the test event.\"\n}"
+              "raw": "{\n  \"title\": \"Updated Lagos Tech Summit 2025 - Enhanced Version\",\n  \"description\": \"Updated comprehensive description: Join us for the enhanced version of Lagos Tech Summit 2025! This premium technology conference now features additional workshops, more renowned speakers, extended networking sessions, and enhanced venue amenities. Perfect for developers, entrepreneurs, tech leaders, and innovation enthusiasts. We've listened to your feedback and made significant improvements to deliver an even better experience.\",\n  \"category\": \"Technology\",\n  \"venue\": {\n    \"name\": \"Lagos Continental Hotel - Grand Ballroom\",\n    \"address\": \"52A, Kofo Abayomi Street, Victoria Island\",\n    \"city\": \"Lagos\",\n    \"state\": \"Lagos\",\n    \"coordinates\": {\n      \"latitude\": 6.4281,\n      \"longitude\": 3.4219\n    }\n  },\n  \"startDate\": \"2025-04-15T08:00:00.000Z\",\n  \"endDate\": \"2025-04-16T18:00:00.000Z\",\n  \"startTime\": \"08:00\",\n  \"endTime\": \"18:00\",\n  \"ticketTypes\": [\n    {\n      \"name\": \"Early Bird\",\n      \"price\": 35000,\n      \"quantity\": 75,\n      \"description\": \"Enhanced early bird package with premium benefits\",\n      \"benefits\": [\n        \"Priority seating in first 3 rows\",\n        \"Welcome breakfast & premium lunch\",\n        \"Exclusive networking cocktail\",\n        \"Premium conference swag bag\",\n        \"Access to VIP lounge during breaks\",\n        \"Digital resource library access\"\n      ],\n      \"isFree\": false\n    },\n    {\n      \"name\": \"Regular\",\n      \"price\": 50000,\n      \"quantity\": 200,\n      \"description\": \"Standard conference admission with full access\",\n      \"benefits\": [\n        \"All main conference sessions\",\n        \"Lunch & refreshments included\",\n        \"Networking opportunities\",\n        \"Conference materials & swag\",\n        \"Access to workshop sessions\",\n        \"Digital certificates\"\n      ],\n      \"isFree\": false\n    },\n    {\n      \"name\": \"VIP\",\n      \"price\": 125000,\n      \"quantity\": 40,\n      \"description\": \"Premium VIP experience with exclusive access\",\n      \"benefits\": [\n        \"Reserved front row seating\",\n        \"Meet & greet with keynote speakers\",\n        \"VIP lounge with premium catering\",\n        \"Exclusive VIP networking dinner\",\n        \"Premium swag bag with tech gadgets\",\n        \"1-on-1 mentor consultation session\",\n        \"Priority booking for future events\",\n        \"Professional headshots session\"\n      ],\n      \"isFree\": false\n    },\n    {\n      \"name\": \"Premium\",\n      \"price\": 200000,\n      \"quantity\": 15,\n      \"description\": \"Ultimate conference experience with backstage access\",\n      \"benefits\": [\n        \"Backstage access to speaker green room\",\n        \"Private dinner with speakers & sponsors\",\n        \"All VIP benefits included\",\n        \"Personal concierge service\",\n        \"Professional photography coverage\",\n        \"Lifetime alumni network access\",\n        \"Custom branded merchandise\",\n        \"Post-event consultation call\",\n        \"LinkedIn feature opportunity\"\n      ],\n      \"isFree\": false\n    }\n  ],\n  \"images\": [\n    \"https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=800&h=400&fit=crop\",\n    \"https://images.unsplash.com/photo-1559136555-9303baea8ebd?w=800&h=400&fit=crop\",\n    \"https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?w=800&h=400&fit=crop\"\n  ],\n  \"tags\": [\n    \"technology\", \"conference\", \"networking\", \"innovation\", \"startup\", \n    \"AI\", \"blockchain\", \"fintech\", \"lagos\", \"nigeria\", \"2025\", \"premium\", \n    \"workshops\", \"speakers\", \"entrepreneurs\", \"developers\"\n  ],\n  \"maxAttendees\": 330,\n  \"isPublic\": true,\n  \"requiresApproval\": false\n}"
             },
             "url": {
               "raw": "{{baseUrl}}/events/{{eventId}}",
               "host": ["{{baseUrl}}"],
               "path": ["events", "{{eventId}}"]
-            }
+            },
+            "description": "Update an existing event with comprehensive field updates. This example shows all the fields that can be updated by an organizer including:\n\n**Core Event Details:**\n- title: Event name/title\n- description: Detailed event description\n- category: Event category (Music, Sports, Technology, Business, Education, etc.)\n\n**Venue Information:**\n- venue.name: Venue name\n- venue.address: Street address\n- venue.city: City location\n- venue.state: State location\n- venue.coordinates: Latitude and longitude for mapping\n\n**Date & Time:**\n- startDate: Event start date (ISO format)\n- endDate: Event end date (ISO format)\n- startTime: Start time (24-hour format)\n- endTime: End time (24-hour format)\n\n**Tickets & Pricing:**\n- ticketTypes: Array of ticket types with pricing, quantities, descriptions, and benefits\n  - name: Ticket type name (VIP, Regular, Premium, etc.)\n  - price: Ticket price in naira (0 for free events)\n  - quantity: Available tickets for this type\n  - description: Ticket type description\n  - benefits: Array of ticket benefits/features\n  - isFree: Boolean indicating if ticket is free\n\n**Event Metadata:**\n- images: Array of event image URLs\n- tags: Array of searchable tags\n- maxAttendees: Maximum number of attendees\n- isPublic: Whether event is publicly visible\n- requiresApproval: Whether bookings need approval\n\n**Important Notes:**\n\n⚠️ **Major Changes Reset Approval:**\nUpdating these fields will reset event approval status:\n- startDate, endDate\n- ticketTypes (pricing/quantities)\n\n✅ **Minor Changes (No Re-approval Required):**\nThese fields can be updated without affecting approval status:\n- venue (name, address, city, state, coordinates)\n- title, description, category\n- startTime, endTime (time adjustments only)\n- images, tags, maxAttendees, isPublic\n\n🔒 **Restricted After Approval:**\n- ticketTypes cannot be modified after approval (contact admin)\n- maxAttendees cannot be reduced below current bookings\n\n👑 **Admin-Only Fields:**\n- featured: Whether event is featured\n- approved: Approval status\n- status: Event status\n\n📧 **Automatic Notifications:**\n- Major changes notify all attendees\n- Minor changes notify attendees of relevant updates\n- All changes notify organizer and admins\n\n**Expected Responses:**\n- 200: Event updated successfully\n- 400: Validation errors or invalid field updates\n- 403: Permission denied (not event owner)\n- 404: Event not found"
           }
         },
         {
           "name": "Minor Event Update (Notifications Test)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    console.log('✅ Minor event update successful');",
+                  "    console.log('📝 Updated Fields:');",
+                  "    console.log('- Description updated');",
+                  "    console.log('- Start time:', response.data.startTime);",
+                  "    console.log('- End time:', response.data.endTime);",
+                  "    console.log('- Category:', response.data.category);",
+                  "    console.log('- Venue:', response.data.venue.name);",
+                  "    console.log('- Venue Address:', response.data.venue.address);",
+                  "    console.log('- Venue City:', response.data.venue.city);",
+                  "    console.log('- Tags:', response.data.tags.join(', '));",
+                  "    console.log('- Images:', response.data.images.length + ' images updated');",
+                  "    ",
+                  "    // Minor changes should NOT reset approval",
+                  "    if (response.data.approved === true) {",
+                  "        console.log('✅ Event approval maintained (minor changes including venue update)');",
+                  "    } else {",
+                  "        console.log('⚠️ Unexpected: Minor changes should not affect approval');",
+                  "    }",
+                  "} else {",
+                  "    console.log('❌ Minor update failed');",
+                  "    console.log('Error:', pm.response.text());",
+                  "}"
+                ]
+              }
+            }
+          ],
           "request": {
             "auth": {
               "type": "bearer",
@@ -2004,13 +1737,74 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"description\": \"Minor update - testing attendee notifications for small changes\",\n  \"startTime\": \"19:00\",\n  \"category\": \"Business\"\n}"
+              "raw": "{\n  \"description\": \"Enhanced networking opportunities and refreshments. We've added more interactive sessions and improved the networking experience based on feedback from previous events.\",\n  \"startTime\": \"09:00\",\n  \"endTime\": \"17:30\",\n  \"category\": \"Business\",\n  \"venue\": {\n    \"name\": \"Lagos Continental Hotel - Grand Ballroom\",\n    \"address\": \"52A, Kofo Abayomi Street, Victoria Island\",\n    \"city\": \"Lagos\",\n    \"state\": \"Lagos\",\n    \"coordinates\": {\n      \"latitude\": 6.4281,\n      \"longitude\": 3.4219\n    }\n  },\n  \"tags\": [\"business\", \"networking\", \"updated\", \"enhanced\", \"interactive\", \"professional\"],\n  \"images\": [\n    \"https://images.unsplash.com/photo-1505373877841-8d25f7d46678?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8dGVjaCUyMGV2ZW50fGVufDB8fDB8fHww\",\n    \"https://media.istockphoto.com/id/1482846285/photo/young-female-sitting-in-a-crowded-audience-at-a-science-conference-delegate-cheering-and.webp?a=1&b=1&s=612x612&w=0&k=20&c=ivvUFNu_mBYQwuOgtu5Q4DcWXCWFtZpsCLkdVrvNVws=\",\n    \"https://images.unsplash.com/photo-1700936655679-83f4b37d7d74?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8OHx8dGVjaCUyMGV2ZW50fGVufDB8fDB8fHww\"\n  ]\n}"
             },
             "url": {
               "raw": "{{baseUrl}}/events/{{eventId}}",
               "host": ["{{baseUrl}}"],
               "path": ["events", "{{eventId}}"]
+            },
+            "description": "Test minor event updates that should NOT reset approval status. These changes include:\n\n**Minor Change Fields:**\n- description: Event description updates\n- startTime/endTime: Time adjustments (not date changes)\n- category: Event category changes\n- venue: Venue location updates (name, address, city, state, coordinates)\n- tags: Searchable tags updates\n- images: Event image updates\n\n**Key Characteristics:**\n- ✅ Maintains event approval status\n- 📧 Sends notifications to attendees about relevant changes\n- 🔄 Does not require re-approval process\n- 📱 Suitable for improvements, clarifications, and venue updates\n\n**Venue Update Benefits:**\n- Update venue name, address, or location details\n- Add or update GPS coordinates for better mapping\n- Change to better venues without losing approval status\n- Notify attendees about venue improvements\n\n**Notification Behavior:**\n- Attendees receive update notifications with venue changes\n- Organizer receives confirmation\n- Admins receive update summary\n- Changes are tracked in event history"
+          }
+        },
+        {
+          "name": "Free Event Update Example",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    console.log('✅ Free event updated successfully');",
+                  "    console.log('🆓 Free Event Details:');",
+                  "    console.log('- Title:', response.data.title);",
+                  "    console.log('- Is Free Event:', response.data.isFreeEvent);",
+                  "    console.log('- Max Attendees:', response.data.maxAttendees);",
+                  "    ",
+                  "    // Check ticket pricing",
+                  "    const freeTickets = response.data.ticketTypes.filter(t => t.price === 0);",
+                  "    console.log('- Free Ticket Types:', freeTickets.length);",
+                  "    ",
+                  "    response.data.ticketTypes.forEach((ticket, index) => {",
+                  "        console.log(`  ${index + 1}. ${ticket.name}: ${ticket.price === 0 ? 'FREE' : '₦' + ticket.price}`);",
+                  "    });",
+                  "} else {",
+                  "    console.log('❌ Free event update failed');",
+                  "    console.log('Error:', pm.response.text());",
+                  "}"
+                ]
+              }
             }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{authToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Lagos Developer Meetup 2025 - Updated Community Event\",\n  \"description\": \"Updated: Join our expanded developer community meetup! We've increased capacity and added more interactive sessions. This free event now features lightning talks, code review sessions, open source project showcases, and enhanced networking opportunities. Perfect for developers of all skill levels who want to connect, learn, and share knowledge.\",\n  \"maxAttendees\": 200,\n  \"ticketTypes\": [\n    {\n      \"name\": \"Free\",\n      \"price\": 0,\n      \"quantity\": 150,\n      \"description\": \"Free admission to all sessions with reserved seating\",\n      \"benefits\": [\n        \"All sessions and workshops access\",\n        \"Reserved seating\",\n        \"Networking opportunities\",\n        \"Light refreshments & coffee\",\n        \"Developer swag bag\",\n        \"Access to exclusive Discord community\"\n      ],\n      \"isFree\": true\n    },\n    {\n      \"name\": \"Regular\",\n      \"price\": 0,\n      \"quantity\": 50,\n      \"description\": \"Free admission with priority access and enhanced benefits\",\n      \"benefits\": [\n        \"Priority seating in front rows\",\n        \"All Free ticket benefits\",\n        \"Priority networking session\",\n        \"Welcome drink and premium snacks\",\n        \"Extended Q&A session access\",\n        \"LinkedIn networking group invitation\"\n      ],\n      \"isFree\": true\n    }\n  ],\n  \"venue\": {\n    \"name\": \"TechPoint Africa Hub\",\n    \"address\": \"10 Adebayo Doherty Road, Lekki Phase 1\",\n    \"city\": \"Lagos\",\n    \"state\": \"Lagos\",\n    \"coordinates\": {\n      \"latitude\": 6.4474,\n      \"longitude\": 3.4553\n    }\n  },\n  \"tags\": [\"developers\", \"meetup\", \"community\", \"free\", \"networking\", \"lagos\", \"tech\", \"programming\", \"opensource\", \"updated\"],\n  \"isPublic\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/events/{{freeEventId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["events", "{{freeEventId}}"]
+            },
+            "description": "Update a free community event. This example demonstrates updating free events with:\\n\\n**Free Event Specific Features:**\\n- All ticket types have price: 0\\n- isFree: true flag for all tickets\\n- isFreeEvent: true is automatically set by the system\\n- No payment processing required\\n- Focus on community building and access\\n\\n**Updated Fields:**\\n- title: Enhanced event title\\n- description: Expanded event description\\n- maxAttendees: Increased capacity\\n- ticketTypes: Updated free ticket options with different benefit levels\\n- venue: Updated venue information\\n- tags: Enhanced searchability\\n\\n**Free Event Benefits:**\\n- No payment barriers\\n- Easy registration process\\n- Community-focused approach\\n- Enhanced networking opportunities\\n- Educational and skill-building focus\\n\\n**Validation Notes:**\\n- System automatically detects free events (all prices = 0)\\n- Sets isFreeEvent flag automatically\\n- Validates ticket structure for consistency"
           }
         },
         {
@@ -4843,847 +4637,6 @@
             },
             "description": "This is an informational endpoint explaining the frontend payment integration approach. Payment processing is handled entirely on the frontend, and the backend creates bookings after payment confirmation."
           }
-        }
-      ]
-    },
-    {
-      "name": "Refund Management",
-      "item": [
-        {
-          "name": "Request Refund for Paid Event",
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "if (pm.response.code === 200 || pm.response.code === 201) {",
-                  "    const response = pm.response.json();",
-                  "    console.log('✅ Refund request submitted successfully');",
-                  "    console.log('\\n💰 Refund Request Details:');",
-                  "    console.log('- Request ID:', response.data._id);",
-                  "    console.log('- Booking ID:', response.data.booking);",
-                  "    console.log('- Original Amount: ₦' + response.data.originalAmount);",
-                  "    console.log('- Processing Fee: ₦' + response.data.processingFee);",
-                  "    console.log('- Refund Amount: ₦' + response.data.refundAmount);",
-                  "    console.log('- Status:', response.data.status);",
-                  "    console.log('- Priority:', response.data.priority);",
-                  "    console.log('- Reason:', response.data.reason);",
-                  "    console.log('- Requested At:', new Date(response.data.createdAt).toLocaleString());",
-                  "    ",
-                  "    console.log('\\n⏱️ Processing Timeline:');",
-                  "    if (response.data.priority === 'high') {",
-                  "        console.log('- High Priority: 1-2 business days');",
-                  "    } else if (response.data.priority === 'medium') {",
-                  "        console.log('- Medium Priority: 3-5 business days');",
-                  "    } else {",
-                  "        console.log('- Normal Priority: 5-7 business days');",
-                  "    }",
-                  "    ",
-                  "    console.log('\\n📧 Notifications:');",
-                  "    console.log('- ✅ Refund request confirmation sent');",
-                  "    console.log('- ✅ Admin notified for processing');",
-                  "} else {",
-                  "    console.log('❌ Refund request failed');",
-                  "    console.log('Response:', pm.response.text());",
-                  "}"
-                ]
-              }
-            }
-          ],
-          "request": {
-            "auth": {
-              "type": "bearer",
-              "bearer": [
-                {
-                  "key": "token",
-                  "value": "{{authToken}}",
-                  "type": "string"
-                }
-              ]
-            },
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"bookingId\": \"{{paidBookingId}}\",\n  \"reason\": \"Unable to attend due to personal emergency. I have a medical situation that prevents me from traveling to the event location. Please process my refund at your earliest convenience.\"\n}"
-            },
-            "url": {
-              "raw": "{{baseUrl}}/refunds",
-              "host": ["{{baseUrl}}"],
-              "path": ["refunds"]
-            }
-          }
-        },
-        {
-          "name": "Get User Refund Requests",
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "if (pm.response.code === 200) {",
-                  "    const response = pm.response.json();",
-                  "    console.log('✅ User refund requests retrieved successfully');",
-                  "    console.log('\\n💰 Refund History Summary:');",
-                  "    console.log('- Total Refund Requests:', response.data.length);",
-                  "    ",
-                  "    let pending = 0, approved = 0, rejected = 0, processed = 0;",
-                  "    let totalRequested = 0, totalApproved = 0;",
-                  "    ",
-                  "    response.data.forEach((refund, index) => {",
-                  "        console.log(`\\n💸 Refund ${index + 1}:`);",
-                  "        console.log('- Request ID:', refund._id);",
-                  "        console.log('- Event:', refund.booking?.event?.title || 'Event details not available');",
-                  "        console.log('- Original Amount: ₦' + refund.originalAmount);",
-                  "        console.log('- Processing Fee: ₦' + refund.processingFee);",
-                  "        console.log('- Refund Amount: ₦' + refund.refundAmount);",
-                  "        console.log('- Status:', refund.status);",
-                  "        console.log('- Priority:', refund.priority);",
-                  "        console.log('- Requested:', new Date(refund.createdAt).toLocaleDateString());",
-                  "        ",
-                  "        if (refund.processedAt) {",
-                  "            console.log('- Processed:', new Date(refund.processedAt).toLocaleDateString());",
-                  "        }",
-                  "        ",
-                  "        if (refund.adminComments) {",
-                  "            console.log('- Admin Comments:', refund.adminComments);",
-                  "        }",
-                  "        ",
-                  "        // Count statistics",
-                  "        switch(refund.status) {",
-                  "            case 'pending': pending++; break;",
-                  "            case 'approved': approved++; break;",
-                  "            case 'rejected': rejected++; break;",
-                  "            case 'processed': processed++; break;",
-                  "        }",
-                  "        ",
-                  "        totalRequested += refund.refundAmount;",
-                  "        if (refund.status === 'approved' || refund.status === 'processed') {",
-                  "            totalApproved += refund.refundAmount;",
-                  "        }",
-                  "    });",
-                  "    ",
-                  "    console.log('\\n📊 Refund Statistics:');",
-                  "    console.log('- Pending:', pending);",
-                  "    console.log('- Approved:', approved);",
-                  "    console.log('- Processed:', processed);",
-                  "    console.log('- Rejected:', rejected);",
-                  "    console.log('- Total Requested: ₦' + totalRequested.toLocaleString());",
-                  "    console.log('- Total Approved: ₦' + totalApproved.toLocaleString());",
-                  "} else {",
-                  "    console.log('❌ Failed to retrieve refund requests');",
-                  "}"
-                ]
-              }
-            }
-          ],
-          "request": {
-            "auth": {
-              "type": "bearer",
-              "bearer": [
-                {
-                  "key": "token",
-                  "value": "{{authToken}}",
-                  "type": "string"
-                }
-              ]
-            },
-            "method": "GET",
-            "url": {
-              "raw": "{{baseUrl}}/refunds",
-              "host": ["{{baseUrl}}"],
-              "path": ["refunds"]
-            }
-          }
-        },
-        {
-          "name": "Get All Refunds (Admin)",
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "if (pm.response.code === 200) {",
-                  "    const response = pm.response.json();",
-                  "    console.log('✅ All refund requests retrieved successfully');",
-                  "    console.log('\\n💰 Admin Refund Management Dashboard:');",
-                  "    console.log('- Total Refund Requests:', response.data.length);",
-                  "    console.log('- Page:', response.meta?.pagination?.page || 1);",
-                  "    console.log('- Total in System:', response.meta?.pagination?.total || 0);",
-                  "    ",
-                  "    let pending = 0, approved = 0, rejected = 0, processed = 0;",
-                  "    let highPriority = 0, mediumPriority = 0, lowPriority = 0;",
-                  "    let totalRefundAmount = 0;",
-                  "    ",
-                  "    response.data.forEach((refund, index) => {",
-                  "        console.log(`\\n💸 Refund Request ${index + 1}:`);",
-                  "        console.log('- Request ID:', refund._id);",
-                  "        console.log('- User:', refund.user?.firstName + ' ' + refund.user?.lastName);",
-                  "        console.log('- User Email:', refund.user?.email);",
-                  "        console.log('- Event:', refund.booking?.event?.title || 'N/A');",
-                  "        console.log('- Booking ID:', refund.booking?._id);",
-                  "        console.log('- Original Amount: ₦' + refund.originalAmount);",
-                  "        console.log('- Refund Amount: ₦' + refund.refundAmount);",
-                  "        console.log('- Status:', refund.status);",
-                  "        console.log('- Priority:', refund.priority);",
-                  "        console.log('- Reason:', refund.reason);",
-                  "        console.log('- Requested:', new Date(refund.createdAt).toLocaleDateString());",
-                  "        ",
-                  "        if (refund.processedBy) {",
-                  "            console.log('- Processed By:', refund.processedBy.firstName + ' ' + refund.processedBy.lastName);",
-                  "        }",
-                  "        ",
-                  "        // Count statistics",
-                  "        switch(refund.status) {",
-                  "            case 'pending': pending++; break;",
-                  "            case 'approved': approved++; break;",
-                  "            case 'rejected': rejected++; break;",
-                  "            case 'processed': processed++; break;",
-                  "        }",
-                  "        ",
-                  "        switch(refund.priority) {",
-                  "            case 'high': highPriority++; break;",
-                  "            case 'medium': mediumPriority++; break;",
-                  "            case 'low': lowPriority++; break;",
-                  "        }",
-                  "        ",
-                  "        totalRefundAmount += refund.refundAmount;",
-                  "    });",
-                  "    ",
-                  "    console.log('\\n📊 Admin Refund Statistics:');",
-                  "    console.log('- Pending Review:', pending);",
-                  "    console.log('- Approved:', approved);",
-                  "    console.log('- Processed:', processed);",
-                  "    console.log('- Rejected:', rejected);",
-                  "    ",
-                  "    console.log('\\n⚡ Priority Distribution:');",
-                  "    console.log('- High Priority:', highPriority);",
-                  "    console.log('- Medium Priority:', mediumPriority);",
-                  "    console.log('- Low Priority:', lowPriority);",
-                  "    ",
-                  "    console.log('\\n💰 Financial Impact:');",
-                  "    console.log('- Total Refund Amount: ₦' + totalRefundAmount.toLocaleString());",
-                  "} else {",
-                  "    console.log('❌ Failed to retrieve refund requests');",
-                  "    console.log('Make sure you are logged in as an admin');",
-                  "}"
-                ]
-              }
-            }
-          ],
-          "request": {
-            "auth": {
-              "type": "bearer",
-              "bearer": [
-                {
-                  "key": "token",
-                  "value": "{{authToken}}",
-                  "type": "string"
-                }
-              ]
-            },
-            "method": "GET",
-            "url": {
-              "raw": "{{baseUrl}}/admin/refunds?page=1&limit=20",
-              "host": ["{{baseUrl}}"],
-              "path": ["admin", "refunds"],
-              "query": [
-                {
-                  "key": "page",
-                  "value": "1"
-                },
-                {
-                  "key": "limit",
-                  "value": "20"
-                },
-                {
-                  "key": "status",
-                  "value": "",
-                  "description": "Filter by status: pending, approved, rejected, processed",
-                  "disabled": true
-                },
-                {
-                  "key": "priority",
-                  "value": "",
-                  "description": "Filter by priority: high, medium, low",
-                  "disabled": true
-                }
-              ]
-            }
-          }
-        },
-        {
-          "name": "Approve Refund (Admin)",
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "if (pm.response.code === 200) {",
-                  "    const response = pm.response.json();",
-                  "    console.log('✅ Refund approved successfully');",
-                  "    console.log('\\n💰 Refund Approval Details:');",
-                  "    console.log('- Refund ID:', response.data._id || 'N/A');",
-                  "    console.log('- User:', response.data.user?.firstName + ' ' + response.data.user?.lastName);",
-                  "    console.log('- Refund Amount: ₦' + response.data.refundAmount);",
-                  "    console.log('- New Status:', response.data.status);",
-                  "    console.log('- Approved By:', 'Current Admin');",
-                  "    console.log('- Approval Time:', new Date().toLocaleString());",
-                  "    console.log('- Admin Comments:', response.data.adminComments || 'Refund approved');",
-                  "    ",
-                  "    console.log('\\n📋 Next Steps:');",
-                  "    console.log('- ✅ User notified of approval');",
-                  "    console.log('- ⏳ Refund will be processed within 3-5 business days');",
-                  "    console.log('- 💳 Amount will be credited to original payment method');",
-                  "    console.log('- 📧 User will receive confirmation once processed');",
-                  "} else {",
-                  "    console.log('❌ Refund approval failed');",
-                  "    console.log('Response:', pm.response.text());",
-                  "}"
-                ]
-              }
-            }
-          ],
-          "request": {
-            "auth": {
-              "type": "bearer",
-              "bearer": [
-                {
-                  "key": "token",
-                  "value": "{{authToken}}",
-                  "type": "string"
-                }
-              ]
-            },
-            "method": "PUT",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"approved\": true,\n  \"comments\": \"Refund approved due to legitimate personal emergency. Medical documentation provided supports the request. Refund will be processed within 3-5 business days to the original payment method.\"\n}"
-            },
-            "url": {
-              "raw": "{{baseUrl}}/admin/refunds/REFUND_ID/process",
-              "host": ["{{baseUrl}}"],
-              "path": ["admin", "refunds", "REFUND_ID", "process"],
-              "variable": [
-                {
-                  "key": "REFUND_ID",
-                  "value": "{{refundId}}",
-                  "description": "Replace with actual refund ID from previous requests"
-                }
-              ]
-            }
-          }
-        },
-        {
-          "name": "Reject Refund (Admin)",
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "if (pm.response.code === 200) {",
-                  "    const response = pm.response.json();",
-                  "    console.log('✅ Refund rejected successfully');",
-                  "    console.log('\\n❌ Refund Rejection Details:');",
-                  "    console.log('- Refund ID:', response.data._id || 'N/A');",
-                  "    console.log('- User:', response.data.user?.firstName + ' ' + response.data.user?.lastName);",
-                  "    console.log('- Requested Amount: ₦' + response.data.refundAmount);",
-                  "    console.log('- New Status:', response.data.status);",
-                  "    console.log('- Rejected By:', 'Current Admin');",
-                  "    console.log('- Rejection Time:', new Date().toLocaleString());",
-                  "    console.log('- Rejection Reason:', response.data.adminComments || 'See rejection details');",
-                  "    ",
-                  "    console.log('\\n📧 Notifications:');",
-                  "    console.log('- ✅ User notified of rejection with detailed reason');",
-                  "    console.log('- ✅ User can appeal decision if circumstances change');",
-                  "} else {",
-                  "    console.log('❌ Refund rejection failed');",
-                  "    console.log('Response:', pm.response.text());",
-                  "}"
-                ]
-              }
-            }
-          ],
-          "request": {
-            "auth": {
-              "type": "bearer",
-              "bearer": [
-                {
-                  "key": "token",
-                  "value": "{{authToken}}",
-                  "type": "string"
-                }
-              ]
-            },
-            "method": "PUT",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"approved\": false,\n  \"comments\": \"Refund request does not meet our refund policy criteria. The event is less than 24 hours away and our terms clearly state that refunds are not available within this timeframe unless due to event cancellation by the organizer. Please review our refund policy for future reference.\"\n}"
-            },
-            "url": {
-              "raw": "{{baseUrl}}/admin/refunds/REFUND_ID/process",
-              "host": ["{{baseUrl}}"],
-              "path": ["admin", "refunds", "REFUND_ID", "process"],
-              "variable": [
-                {
-                  "key": "REFUND_ID",
-                  "value": "{{refundId}}",
-                  "description": "Replace with actual refund ID from previous requests"
-                }
-              ]
-            }
-          }
-        }
-      ]
-    },
-    {
-      "name": "Complete Workflow Examples",
-      "item": [
-        {
-          "name": "🔄 Free Event Complete Workflow",
-          "item": [
-            {
-              "name": "Step 1: Login as Organizer",
-              "request": {
-                "method": "POST",
-                "header": [
-                  {
-                    "key": "Content-Type",
-                    "value": "application/json"
-                  }
-                ],
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n  \"email\": \"louisdiaz43@gmail.com\",\n  \"password\": \"Balikiss12\"\n}"
-                },
-                "url": {
-                  "raw": "{{baseUrl}}/auth/login",
-                  "host": ["{{baseUrl}}"],
-                  "path": ["auth", "login"]
-                }
-              }
-            },
-            {
-              "name": "Step 2: Create Free Event",
-              "request": {
-                "auth": {
-                  "type": "bearer",
-                  "bearer": [
-                    {
-                      "key": "token",
-                      "value": "{{authToken}}",
-                      "type": "string"
-                    }
-                  ]
-                },
-                "method": "POST",
-                "header": [
-                  {
-                    "key": "Content-Type",
-                    "value": "application/json"
-                  }
-                ],
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n  \"title\": \"Free Community Workshop: Web Development Basics\",\n  \"description\": \"Join us for a hands-on workshop covering HTML, CSS, and JavaScript fundamentals. Perfect for beginners!\",\n  \"category\": \"Technology\",\n  \"venue\": {\n    \"name\": \"Tech Hub Lagos\",\n    \"address\": \"123 Tech Street, Victoria Island\",\n    \"city\": \"Lagos\",\n    \"state\": \"Lagos\"\n  },\n  \"startDate\": \"2025-03-10T14:00:00.000Z\",\n  \"endDate\": \"2025-03-10T17:00:00.000Z\",\n  \"startTime\": \"14:00\",\n  \"endTime\": \"17:00\",\n  \"ticketTypes\": [\n    {\n      \"name\": \"Free\",\n      \"price\": 0,\n      \"quantity\": 50,\n      \"description\": \"Free workshop attendance\",\n      \"isFree\": true\n    }\n  ],\n  \"maxAttendees\": 50,\n  \"tags\": [\"free\", \"workshop\", \"web development\", \"beginners\"]\n}"
-                },
-                "url": {
-                  "raw": "{{baseUrl}}/events",
-                  "host": ["{{baseUrl}}"],
-                  "path": ["events"]
-                }
-              }
-            },
-            {
-              "name": "Step 3: Login as Admin to Approve",
-              "request": {
-                "method": "POST",
-                "header": [
-                  {
-                    "key": "Content-Type",
-                    "value": "application/json"
-                  }
-                ],
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n  \"email\": \"mustapha.muhammed@bowen.edu.ng\",\n  \"password\": \"Balikiss12\"\n}"
-                },
-                "url": {
-                  "raw": "{{baseUrl}}/auth/login",
-                  "host": ["{{baseUrl}}"],
-                  "path": ["auth", "login"]
-                }
-              }
-            },
-            {
-              "name": "Step 4: Approve Free Event",
-              "request": {
-                "auth": {
-                  "type": "bearer",
-                  "bearer": [
-                    {
-                      "key": "token",
-                      "value": "{{authToken}}",
-                      "type": "string"
-                    }
-                  ]
-                },
-                "method": "PUT",
-                "header": [
-                  {
-                    "key": "Content-Type",
-                    "value": "application/json"
-                  }
-                ],
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n  \"approved\": true,\n  \"comments\": \"Great free community event! Approved for publication.\"\n}"
-                },
-                "url": {
-                  "raw": "{{baseUrl}}/admin/events/{{freeEventId}}/review",
-                  "host": ["{{baseUrl}}"],
-                  "path": ["admin", "events", "{{freeEventId}}", "review"]
-                }
-              }
-            },
-            {
-              "name": "Step 5: Login as User to Register",
-              "request": {
-                "method": "POST",
-                "header": [
-                  {
-                    "key": "Content-Type",
-                    "value": "application/json"
-                  }
-                ],
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n  \"email\": \"muhammedabiodun42@gmail.com\",\n  \"password\": \"Balikiss12\"\n}"
-                },
-                "url": {
-                  "raw": "{{baseUrl}}/auth/login",
-                  "host": ["{{baseUrl}}"],
-                  "path": ["auth", "login"]
-                }
-              }
-            },
-            {
-              "name": "Step 6: Register for Free Event",
-              "request": {
-                "auth": {
-                  "type": "bearer",
-                  "bearer": [
-                    {
-                      "key": "token",
-                      "value": "{{authToken}}",
-                      "type": "string"
-                    }
-                  ]
-                },
-                "method": "POST",
-                "header": [
-                  {
-                    "key": "Content-Type",
-                    "value": "application/json"
-                  }
-                ],
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n  \"eventId\": \"{{freeEventId}}\",\n  \"ticketType\": \"Free\",\n  \"quantity\": 1\n}"
-                },
-                "url": {
-                  "raw": "{{baseUrl}}/booking/free-event",
-                  "host": ["{{baseUrl}}"],
-                  "path": ["booking", "free-event"]
-                }
-              }
-            }
-          ]
-        },
-        {
-          "name": "💰 Paid Event Complete Workflow",
-          "item": [
-            {
-              "name": "Step 1: Login as Organizer",
-              "request": {
-                "method": "POST",
-                "header": [
-                  {
-                    "key": "Content-Type",
-                    "value": "application/json"
-                  }
-                ],
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n  \"email\": \"louisdiaz43@gmail.com\",\n  \"password\": \"Balikiss12\"\n}"
-                },
-                "url": {
-                  "raw": "{{baseUrl}}/auth/login",
-                  "host": ["{{baseUrl}}"],
-                  "path": ["auth", "login"]
-                }
-              }
-            },
-            {
-              "name": "Step 2: Create Paid Event",
-              "request": {
-                "auth": {
-                  "type": "bearer",
-                  "bearer": [
-                    {
-                      "key": "token",
-                      "value": "{{authToken}}",
-                      "type": "string"
-                    }
-                  ]
-                },
-                "method": "POST",
-                "header": [
-                  {
-                    "key": "Content-Type",
-                    "value": "application/json"
-                  }
-                ],
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n  \"title\": \"Professional Business Conference 2025\",\n  \"description\": \"Premium business conference featuring industry leaders, networking opportunities, and professional development sessions.\",\n  \"category\": \"Business\",\n  \"venue\": {\n    \"name\": \"Lagos Business Center\",\n    \"address\": \"456 Business Avenue, Victoria Island\",\n    \"city\": \"Lagos\",\n    \"state\": \"Lagos\"\n  },\n  \"startDate\": \"2025-04-15T09:00:00.000Z\",\n  \"endDate\": \"2025-04-15T17:00:00.000Z\",\n  \"startTime\": \"09:00\",\n  \"endTime\": \"17:00\",\n  \"ticketTypes\": [\n    {\n      \"name\": \"Regular\",\n      \"price\": 50000,\n      \"quantity\": 100,\n      \"description\": \"Standard conference access\",\n      \"isFree\": false\n    },\n    {\n      \"name\": \"VIP\",\n      \"price\": 100000,\n      \"quantity\": 20,\n      \"description\": \"VIP access with networking dinner\",\n      \"isFree\": false\n    }\n  ],\n  \"maxAttendees\": 120,\n  \"tags\": [\"business\", \"networking\", \"professional\"]\n}"
-                },
-                "url": {
-                  "raw": "{{baseUrl}}/events",
-                  "host": ["{{baseUrl}}"],
-                  "path": ["events"]
-                }
-              }
-            },
-            {
-              "name": "Step 3: Login as Admin",
-              "request": {
-                "method": "POST",
-                "header": [
-                  {
-                    "key": "Content-Type",
-                    "value": "application/json"
-                  }
-                ],
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n  \"email\": \"mustapha.muhammed@bowen.edu.ng\",\n  \"password\": \"Balikiss12\"\n}"
-                },
-                "url": {
-                  "raw": "{{baseUrl}}/auth/login",
-                  "host": ["{{baseUrl}}"],
-                  "path": ["auth", "login"]
-                }
-              }
-            },
-            {
-              "name": "Step 4: Approve Paid Event",
-              "request": {
-                "auth": {
-                  "type": "bearer",
-                  "bearer": [
-                    {
-                      "key": "token",
-                      "value": "{{authToken}}",
-                      "type": "string"
-                    }
-                  ]
-                },
-                "method": "PUT",
-                "header": [
-                  {
-                    "key": "Content-Type",
-                    "value": "application/json"
-                  }
-                ],
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n  \"approved\": true,\n  \"comments\": \"Excellent business conference with great speaker lineup. Approved!\"\n}"
-                },
-                "url": {
-                  "raw": "{{baseUrl}}/admin/events/{{paidEventId}}/review",
-                  "host": ["{{baseUrl}}"],
-                  "path": ["admin", "events", "{{paidEventId}}", "review"]
-                }
-              }
-            },
-            {
-              "name": "Step 5: Login as User",
-              "request": {
-                "method": "POST",
-                "header": [
-                  {
-                    "key": "Content-Type",
-                    "value": "application/json"
-                  }
-                ],
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n  \"email\": \"muhammedabiodun42@gmail.com\",\n  \"password\": \"Balikiss12\"\n}"
-                },
-                "url": {
-                  "raw": "{{baseUrl}}/auth/login",
-                  "host": ["{{baseUrl}}"],
-                  "path": ["auth", "login"]
-                }
-              }
-            },
-            {
-              "name": "Step 6: Create Booking for Paid Event",
-              "request": {
-                "auth": {
-                  "type": "bearer",
-                  "bearer": [
-                    {
-                      "key": "token",
-                      "value": "{{authToken}}",
-                      "type": "string"
-                    }
-                  ]
-                },
-                "method": "POST",
-                "header": [
-                  {
-                    "key": "Content-Type",
-                    "value": "application/json"
-                  }
-                ],
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n  \"eventId\": \"{{paidEventId}}\",\n  \"ticketType\": \"Regular\",\n  \"quantity\": 1,\n  \"attendeeInfo\": {\n    \"name\": \"John Business\",\n    \"email\": \"john.business@example.com\",\n    \"phone\": \"+2348123456789\"\n  }\n}"
-                },
-                "url": {
-                  "raw": "{{baseUrl}}/booking",
-                  "host": ["{{baseUrl}}"],
-                  "path": ["booking"]
-                }
-              }
-            },
-            {
-              "name": "Step 7: Simulate Frontend Payment (Info)",
-              "event": [
-                {
-                  "listen": "test",
-                  "script": {
-                    "exec": [
-                      "// Simulate frontend payment completion",
-                      "const frontendPaymentId = 'frontend_pay_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);",
-                      "pm.environment.set('frontendPaymentId', frontendPaymentId);",
-                      "console.log('💳 Frontend Payment Simulation');",
-                      "console.log('');",
-                      "console.log('✅ Payment processed successfully on frontend');",
-                      "console.log('- Payment Processor: Stripe/PayPal/Flutterwave (your choice)');",
-                      "console.log('- Transaction ID:', frontendPaymentId);",
-                      "console.log('- Amount: ₦35,000 (example)');",
-                      "console.log('- Status: Success');",
-                      "console.log('- Payment Method: Card');",
-                      "console.log('');",
-                      "console.log('🎯 Next Step:');",
-                      "console.log('Use this transaction ID to create booking on backend');",
-                      "console.log('Environment variable frontendPaymentId has been set for next request');",
-                      "console.log('');",
-                      "console.log('📝 In real implementation:');",
-                      "console.log('1. User selects payment method on frontend');",
-                      "console.log('2. Frontend processes payment with chosen processor');",
-                      "console.log('3. Frontend receives transaction confirmation');",
-                      "console.log('4. Frontend calls backend booking endpoint');",
-                      "console.log('5. Backend creates confirmed booking immediately');"
-                    ]
-                  }
-                }
-              ],
-              "request": {
-                "method": "GET",
-                "header": [],
-                "url": {
-                  "raw": "{{baseUrl}}/info/simulate-frontend-payment",
-                  "host": ["{{baseUrl}}"],
-                  "path": ["info", "simulate-frontend-payment"]
-                },
-                "description": "This simulates a successful frontend payment process. In real implementation, this would be handled by your frontend payment integration."
-              }
-            },
-            {
-              "name": "Step 8: Create Booking After Frontend Payment",
-              "event": [
-                {
-                  "listen": "test",
-                  "script": {
-                    "exec": [
-                      "if (pm.response.code === 200 || pm.response.code === 201) {",
-                      "    const response = pm.response.json();",
-                      "    console.log('✅ Booking created successfully after frontend payment');",
-                      "    console.log('🎫 Booking Details:');",
-                      "    console.log('- Booking ID:', response.data._id);",
-                      "    console.log('- Event ID:', response.data.event);",
-                      "    console.log('- Status:', response.data.status);",
-                      "    console.log('- Payment Status:', response.data.paymentStatus);",
-                      "    console.log('- Frontend Payment ID:', response.data.frontendPaymentId);",
-                      "    console.log('- QR Code Generated:', !!response.data.qrCode);",
-                      "    console.log('- Final Amount: ₦' + response.data.finalAmount);",
-                      "    console.log('');",
-                      "    console.log('🎯 Workflow Complete!');",
-                      "    console.log('- ✅ Event created and approved');",
-                      "    console.log('- ✅ Payment processed on frontend');",
-                      "    console.log('- ✅ Booking confirmed immediately');",
-                      "    console.log('- ✅ QR code generated for entry');",
-                      "    console.log('- ✅ Email confirmation sent');",
-                      "} else {",
-                      "    console.log('❌ Failed to create booking');",
-                      "    console.log('Response:', pm.response.text());",
-                      "}"
-                    ]
-                  }
-                }
-              ],
-              "request": {
-                "auth": {
-                  "type": "bearer",
-                  "bearer": [
-                    {
-                      "key": "token",
-                      "value": "{{authToken}}",
-                      "type": "string"
-                    }
-                  ]
-                },
-                "method": "POST",
-                "header": [
-                  {
-                    "key": "Content-Type",
-                    "value": "application/json"
-                  }
-                ],
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n  \"eventId\": \"{{paidEventId}}\",\n  \"ticketType\": \"Regular\",\n  \"quantity\": 1,\n  \"frontendPaymentId\": \"{{frontendPaymentId}}\",\n  \"attendeeInfo\": [\n    {\n      \"name\": \"John Doe\",\n      \"email\": \"john.doe@example.com\",\n      \"phone\": \"+2348123456789\"\n    }\n  ]\n}"
-                },
-                "url": {
-                  "raw": "{{baseUrl}}/booking",
-                  "host": ["{{baseUrl}}"],
-                  "path": ["booking"]
-                },
-                "description": "Create booking after successful frontend payment processing. This replaces the previous Paystack verification step."
-              }
-            }
-          ]
         }
       ]
     }
