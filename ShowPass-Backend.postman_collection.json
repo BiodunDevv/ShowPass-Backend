@@ -18,7 +18,7 @@
   "variable": [
     {
       "key": "baseUrl",
-      "value": "http://localhost:3002/api",
+      "value": "http://localhost:3000/api",
       "type": "string"
     },
     {
@@ -2081,7 +2081,7 @@
           }
         },
         {
-          "name": "Verify QR Code for Check-in",
+          "name": "Verify QR Code and Use Ticket (Camera Scanning)",
           "event": [
             {
               "listen": "test",
@@ -2089,20 +2089,32 @@
                 "exec": [
                   "if (pm.response.code === 200) {",
                   "    const response = pm.response.json();",
-                  "    console.log('✅ QR Code verified successfully');",
-                  "    console.log('🔍 QR Verification Results:');",
-                  "    console.log('- Valid:', response.data.valid);",
-                  "    if (response.data.booking) {",
-                  "        console.log('- Booking ID:', response.data.booking._id);",
-                  "        console.log('- Attendee:', response.data.booking.attendee?.firstName + ' ' + response.data.booking.attendee?.lastName);",
-                  "        console.log('- Ticket Type:', response.data.booking.ticketType);",
-                  "        console.log('- Quantity:', response.data.booking.quantity);",
-                  "        console.log('- Already Checked In:', response.data.booking.isCheckedIn);",
-                  "        console.log('- Event:', response.data.booking.event?.title);",
-                  "    }",
+                  "    console.log('✅ QR Code verified and ticket used successfully');",
+                  "    console.log('� Email notification sent to user');",
+                  "    console.log('\\n🎫 Ticket Details:');",
+                  "    console.log('- Ticket Number:', response.data.ticket.ticketNumber);",
+                  "    console.log('- Attendee Name:', response.data.ticket.attendeeName);",
+                  "    console.log('- Attendee Email:', response.data.ticket.attendeeEmail);",
+                  "    console.log('- Ticket Type:', response.data.ticket.ticketType);",
+                  "    console.log('- Reference:', response.data.ticket.reference);",
+                  "    console.log('- Check-in Time:', response.data.ticket.checkInTime);",
+                  "    console.log('- Is Used:', response.data.ticket.isUsed);",
+                  "    console.log('\\n📋 Booking Summary:');",
+                  "    console.log('- Booking ID:', response.data.booking._id);",
+                  "    console.log('- Total Tickets:', response.data.booking.totalTickets);",
+                  "    console.log('- Used Tickets:', response.data.booking.usedTickets);",
+                  "    console.log('- All Tickets Used:', response.data.booking.allTicketsUsed);",
+                  "    console.log('\\n🎪 Event Info:');",
+                  "    console.log('- Event Title:', response.data.event.title);",
+                  "    console.log('- Event Date:', response.data.event.startDate);",
+                  "    console.log('- Venue:', response.data.event.venue.name);",
                   "} else {",
                   "    console.log('❌ QR Code verification failed');",
-                  "    console.log('Response:', pm.response.text());",
+                  "    const errorResponse = pm.response.json();",
+                  "    console.log('Error:', errorResponse.message);",
+                  "    if (errorResponse.data) {",
+                  "        console.log('Additional Info:', errorResponse.data);",
+                  "    }",
                   "}"
                 ]
               }
@@ -2128,13 +2140,13 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"qrCode\": \"{\\\"bookingId\\\":\\\"{{bookingId}}\\\",\\\"eventId\\\":\\\"{{eventId}}\\\",\\\"reference\\\":\\\"{{paymentReference}}\\\",\\\"generatedAt\\\":\\\"2025-01-30T10:30:00.000Z\\\"}\"\n}",
-              "description": "QR code data in JSON string format"
+              "raw": "{\n  \"qrCode\": \"{\\\"bookingId\\\":\\\"{{freeBookingId}}\\\",\\\"ticketReference\\\":\\\"TKT-{{freeBookingId}}-1\\\",\\\"eventId\\\":\\\"{{freeEventId}}\\\",\\\"userId\\\":\\\"{{userId}}\\\",\\\"ticketType\\\":\\\"Regular\\\",\\\"ticketNumber\\\":1,\\\"totalTickets\\\":1,\\\"attendeeName\\\":\\\"John Doe\\\",\\\"attendeeEmail\\\":\\\"john.doe@example.com\\\",\\\"issuedAt\\\":\\\"2025-08-16T10:30:00.000Z\\\",\\\"hash\\\":\\\"sample_hash_for_testing\\\"}\"\n}",
+              "description": "QR code data for individual ticket verification and usage. This endpoint:\n\n1. ✅ Verifies the QR code authenticity\n2. ✅ Marks the specific ticket as used\n3. ✅ Updates booking status if all tickets are used\n4. ✅ Sends email notification to the ticket holder\n5. ✅ Prevents duplicate usage\n\n**Use Case**: Perfect for camera-based QR scanning at event entrances.\n\n**QR Code Structure** (JSON string):\n- bookingId: The booking ID containing this ticket\n- ticketReference: Unique reference for this specific ticket\n- attendeeName: Name of the ticket holder\n- hash: Security hash for verification\n\n**Expected Responses**:\n- 200: Ticket verified and used successfully + email sent\n- 400: Invalid QR code or ticket already used\n- 403: Only organizers/admins can verify tickets\n- 404: Booking not found"
             },
             "url": {
               "raw": "{{baseUrl}}/booking/verify-qr",
               "host": ["{{baseUrl}}"],
-              "path": ["bookings", "verify-qr"]
+              "path": ["booking", "verify-qr"]
             }
           }
         },

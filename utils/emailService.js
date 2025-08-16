@@ -1011,6 +1011,60 @@ const sendIndividualTicketsAndConfirmation = async (
   }
 };
 
+// Send ticket usage notification
+const sendTicketUsageNotification = async (
+  user,
+  ticket,
+  booking,
+  event,
+  checkedInBy
+) => {
+  try {
+    const templateData = {
+      userName: user.firstName,
+      attendeeName: ticket.attendee.name,
+      eventTitle: event.title,
+      eventDate: new Date(event.startDate).toLocaleDateString("en-US", {
+        weekday: "long",
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+      }),
+      eventVenue: `${event.venue.name}, ${event.venue.address}`,
+      ticketType: booking.ticketType,
+      ticketNumber: ticket.ticketNumber,
+      totalTickets: booking.quantity,
+      ticketReference: ticket.reference,
+      checkInTime: new Date(ticket.checkInTime).toLocaleDateString("en-US", {
+        weekday: "long",
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+      }),
+      checkedInBy:
+        `${checkedInBy.firstName} ${checkedInBy.lastName}` || "Event Staff",
+    };
+
+    await sendEmail(
+      user.email,
+      `🎉 Ticket Check-In Confirmed - ${event.title}`,
+      "ticket-usage-notification",
+      templateData
+    );
+
+    console.log(
+      `📧 Ticket usage notification sent to ${user.email} for event: ${event.title}`
+    );
+  } catch (error) {
+    console.error("Failed to send ticket usage notification:", error);
+    throw error;
+  }
+};
+
 module.exports = {
   sendEmail,
   sendVerificationEmail,
@@ -1030,4 +1084,5 @@ module.exports = {
   sendOrganizerWarningNotification,
   sendEventDeletionNotification,
   sendAdminEventDeletionNotification,
+  sendTicketUsageNotification,
 };
