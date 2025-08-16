@@ -478,10 +478,10 @@ const updateEvent = async (req, res) => {
       }
     });
 
-    // Define major change fields first (venue is now considered minor change)
+    // Define major change fields first (venue, dates, and times are now considered minor changes)
     // Major changes reset approval status and require re-approval
-    // Minor changes (venue, title, description, times, etc.) maintain approval status
-    const majorChangeFields = ["startDate", "endDate", "ticketTypes"];
+    // Minor changes (venue, title, description, times, dates, etc.) maintain approval status
+    const majorChangeFields = ["ticketTypes"];
 
     // Generate change details for different recipients
     const userChangeDetails = generateChangeDetails(

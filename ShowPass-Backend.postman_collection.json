@@ -1748,6 +1748,70 @@
           }
         },
         {
+          "name": "Minor Date & Time Update (New Minor Change)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    console.log('✅ Date & time update successful as minor change');",
+                  "    console.log('📅 Updated Date Information:');",
+                  "    console.log('- Start Date:', new Date(response.data.startDate).toLocaleDateString());",
+                  "    console.log('- End Date:', new Date(response.data.endDate).toLocaleDateString());",
+                  "    console.log('- Start Time:', response.data.startTime);",
+                  "    console.log('- End Time:', response.data.endTime);",
+                  "    console.log('- Description updated:', response.data.description.length > 0);",
+                  "    console.log('- Venue:', response.data.venue.name);",
+                  "    console.log('- Updated Tags:', response.data.tags.join(', '));",
+                  "    ",
+                  "    // Date changes should now be MINOR and NOT reset approval",
+                  "    if (response.data.approved === true) {",
+                  "        console.log('✅ Event approval maintained (date changes are now minor updates!)');",
+                  "        console.log('🎉 Attendees will be notified of the date changes without re-approval');",
+                  "    } else {",
+                  "        console.log('⚠️ Unexpected: Date changes should now be minor changes');",
+                  "    }",
+                  "} else {",
+                  "    console.log('❌ Date update failed');",
+                  "    console.log('Error:', pm.response.text());",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{authToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"description\": \"Enhanced networking opportunities and refreshments. We've added more interactive sessions and improved the networking experience based on feedback from previous events.\",\n  \"startDate\": \"2025-11-10T08:00:00.000Z\",\n  \"endDate\": \"2025-11-10T18:00:00.000Z\",\n  \"startTime\": \"09:00\",\n  \"endTime\": \"17:30\",\n  \"category\": \"Business\",\n  \"venue\": {\n    \"name\": \"Lagos Continental Hotel - Grand Ballroom\",\n    \"address\": \"52A, Kofo Abayomi Street, Victoria Island\",\n    \"city\": \"Lagos\",\n    \"state\": \"Lagos\",\n    \"coordinates\": {\n      \"latitude\": 6.4281,\n      \"longitude\": 3.4219\n    }\n  },\n  \"tags\": [\"business\", \"networking\", \"updated\", \"enhanced\", \"interactive\", \"professional\"],\n  \"images\": [\n    \"https://images.unsplash.com/photo-1505373877841-8d25f7d46678?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8dGVjaCUyMGV2ZW50fGVufDB8fDB8fHww\",\n    \"https://media.istockphoto.com/id/1482846285/photo/young-female-sitting-in-a-crowded-audience-at-a-science-conference-delegate-cheering-and.webp?a=1&b=1&s=612x612&w=0&k=20&c=ivvUFNu_mBYQwuOgtu5Q4DcWXCWFtZpsCLkdVrvNVws=\",\n    \"https://images.unsplash.com/photo-1700936655679-83f4b37d7d74?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8OHx8dGVjaCUyMGV2ZW50fGVufDB8fDB8fHww\"\n  ]\n}",
+              "description": "Test event date and time updates as MINOR changes (new behavior). These changes now include:\n\n**NEW: Date Changes as Minor Updates:**\n- startDate: Event start date changes\n- endDate: Event end date changes\n- startTime: Event start time adjustments\n- endTime: Event end time adjustments\n\n**Other Minor Change Fields:**\n- description: Event description updates\n- category: Event category changes\n- venue: Complete venue information updates\n- tags: Searchable tags updates\n- images: Event image updates\n\n**Key Benefits of Date Changes as Minor Updates:**\n- ✅ Event maintains approval status when dates change\n- 📧 Attendees receive immediate notification of date changes\n- 🔄 No re-approval process required for date adjustments\n- ⚡ Faster event management and flexibility\n- 🎯 Perfect for schedule optimizations and venue availability\n\n**Use Cases:**\n- Venue availability changes require date adjustment\n- Better time slots become available\n- Weather considerations for outdoor events\n- Speaker schedule adjustments\n- Optimizing event timing for better attendance\n\n**Major Changes (Still Require Re-approval):**\n- ticketTypes: Pricing and availability changes only\n\n**Notification Behavior:**\n- Attendees get date change notifications immediately\n- Email alerts include new date/time information\n- Calendar updates and reminders\n- No confusion about event approval status"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/events/{{eventId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["events", "{{eventId}}"]
+            }
+          }
+        },
+        {
           "name": "Free Event Update Example",
           "event": [
             {

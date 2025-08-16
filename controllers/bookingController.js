@@ -845,9 +845,41 @@ const verifyAndUseTicket = async (req, res) => {
     }
 
     // Validate QR code structure
-    if (!qrData.bookingId || !qrData.ticketReference || !qrData.hash) {
-      return sendError(res, 400, "Invalid QR code data");
+    if (!qrData.bookingId || !qrData.ticketReference) {
+      return sendError(
+        res,
+        400,
+        "Invalid QR code data - missing required fields"
+      );
     }
+
+    // Extract event ID - handle both string and object formats
+    let eventIdToCheck;
+    if (typeof qrData.eventId === "string") {
+      eventIdToCheck = qrData.eventId;
+    } else if (qrData.eventId && qrData.eventId._id) {
+      eventIdToCheck = qrData.eventId._id;
+    } else if (qrData.eventId && qrData.eventId.id) {
+      eventIdToCheck = qrData.eventId.id;
+    }
+
+    // Extract user ID - handle both string and object formats
+    let userIdToCheck;
+    if (typeof qrData.userId === "string") {
+      userIdToCheck = qrData.userId;
+    } else if (qrData.userId && qrData.userId._id) {
+      userIdToCheck = qrData.userId._id;
+    } else if (qrData.userId && qrData.userId.id) {
+      userIdToCheck = qrData.userId.id;
+    }
+
+    console.log("🔍 QR Verification Debug:");
+    console.log("- Booking ID:", qrData.bookingId);
+    console.log("- Ticket Reference:", qrData.ticketReference);
+    console.log("- Event ID (extracted):", eventIdToCheck);
+    console.log("- User ID (extracted):", userIdToCheck);
+    console.log("- Attendee Name:", qrData.attendeeName);
+    console.log("- Attendee Email:", qrData.attendeeEmail);
 
     // Find booking and populate necessary fields
     const booking = await Booking.findById(qrData.bookingId)
@@ -858,10 +890,30 @@ const verifyAndUseTicket = async (req, res) => {
       return sendError(res, 404, "Booking not found");
     }
 
+    console.log("📋 Booking Found:");
+    console.log("- Booking Event ID:", booking.event._id.toString());
+    console.log("- Booking User ID:", booking.user._id.toString());
+    console.log("- Event Organizer ID:", booking.event.organizer.toString());
+    console.log("- Current User ID:", req.user._id.toString());
+
+    // Verify that the QR code belongs to this booking's event and user
+    if (eventIdToCheck && booking.event._id.toString() !== eventIdToCheck) {
+      return sendError(res, 400, "QR code event does not match booking event");
+    }
+
+    if (userIdToCheck && booking.user._id.toString() !== userIdToCheck) {
+      return sendError(res, 400, "QR code user does not match booking user");
+    }
+
     // Check if user is organizer or admin
     const isOrganizer =
       booking.event.organizer.toString() === req.user._id.toString();
     const isAdmin = req.user.role === "admin";
+
+    console.log("🔐 Authorization Check:");
+    console.log("- Is Organizer:", isOrganizer);
+    console.log("- Is Admin:", isAdmin);
+    console.log("- User Role:", req.user.role);
 
     if (!isOrganizer && !isAdmin) {
       return sendError(
@@ -877,20 +929,30 @@ const verifyAndUseTicket = async (req, res) => {
     );
 
     if (ticketIndex === -1) {
+      console.log("❌ Ticket not found. Available tickets:");
+      booking.individualQRs.forEach((qr, index) => {
+        console.log(`  ${index}: ${qr.reference} - ${qr.attendee.name}`);
+      });
       return sendError(res, 400, "Invalid ticket reference");
     }
 
     const ticket = booking.individualQRs[ticketIndex];
 
-    // Verify QR data integrity
-    if (
-      qrData.attendeeName !== ticket.attendee.name ||
-      qrData.hash !== ticket.hash
-    ) {
+    console.log("🎫 Ticket Found:");
+    console.log("- Ticket Reference:", ticket.reference);
+    console.log("- Attendee Name (stored):", ticket.attendee.name);
+    console.log("- Attendee Name (QR):", qrData.attendeeName);
+    console.log("- Is Already Used:", ticket.isUsed);
+
+    // More flexible verification - check attendee name or email
+    const nameMatches = qrData.attendeeName === ticket.attendee.name;
+    const emailMatches = qrData.attendeeEmail === ticket.attendee.email;
+
+    if (!nameMatches && !emailMatches) {
       return sendError(
         res,
         400,
-        "QR code verification failed - Invalid ticket data"
+        "QR code verification failed - Attendee information does not match"
       );
     }
 
@@ -912,12 +974,12 @@ const verifyAndUseTicket = async (req, res) => {
     const now = new Date();
     const hoursUntilEvent = (eventDate - now) / (1000 * 60 * 60);
 
-    // Allow check-in up to 2 hours before event starts
-    if (hoursUntilEvent > 2) {
+    // Allow check-in up to 24 hours before event starts (more flexible)
+    if (hoursUntilEvent > 24) {
       return sendError(
         res,
         400,
-        `Event check-in opens 2 hours before start time. Event starts in ${Math.ceil(
+        `Event check-in opens 24 hours before start time. Event starts in ${Math.ceil(
           hoursUntilEvent
         )} hours.`
       );
