@@ -1,4 +1,5 @@
 const Event = require("../models/Event");
+const mongoose = require("mongoose");
 const UserManager = require("../utils/UserManager");
 const Booking = require("../models/Booking");
 const {
@@ -799,6 +800,7 @@ const getEventAttendees = async (req, res) => {
   try {
     const { id } = req.params;
     const { page, limit, skip } = getPagination(req);
+    const { status } = req.query; // Optional filter by status
 
     const event = await Event.findById(id);
     if (!event) {
@@ -817,27 +819,54 @@ const getEventAttendees = async (req, res) => {
       );
     }
 
-    const bookings = await Booking.find({
-      event: id,
-      status: "confirmed",
-    })
+    // Build query - fetch all bookings by default, or filter by status if provided
+    const query = { event: id };
+    if (status) {
+      query.status = status;
+    }
+
+    const bookings = await Booking.find(query)
       .populate("user", "firstName lastName email phone")
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit);
 
-    const total = await Booking.countDocuments({
-      event: id,
-      status: "confirmed",
+    const total = await Booking.countDocuments(query);
+
+    // Add summary statistics for different booking statuses
+    const statusCounts = await Booking.aggregate([
+      { $match: { event: new mongoose.Types.ObjectId(id) } },
+      { $group: { _id: "$status", count: { $sum: 1 } } },
+    ]);
+
+    const statusSummary = {
+      total: await Booking.countDocuments({ event: id }),
+      confirmed: 0,
+      pending: 0,
+      cancelled: 0,
+      refunded: 0,
+      used: 0,
+    };
+
+    statusCounts.forEach((item) => {
+      if (statusSummary.hasOwnProperty(item._id)) {
+        statusSummary[item._id] = item.count;
+      }
     });
 
-    sendSuccess(res, "Event attendees retrieved successfully", bookings, {
+    const message = status
+      ? `Event attendees with status '${status}' retrieved successfully`
+      : "Event attendees retrieved successfully";
+
+    sendSuccess(res, message, bookings, {
       pagination: {
         page,
         limit,
         total,
         pages: Math.ceil(total / limit),
       },
+      statusSummary,
+      appliedFilter: status || "all",
     });
   } catch (error) {
     console.error("Get event attendees error:", error);

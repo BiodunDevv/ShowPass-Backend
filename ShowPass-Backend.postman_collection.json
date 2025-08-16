@@ -2016,7 +2016,7 @@
           }
         },
         {
-          "name": "Get Event Attendees (Organizer)",
+          "name": "Get Event Attendees (Organizer) - All Statuses",
           "event": [
             {
               "listen": "test",
@@ -2026,12 +2026,26 @@
                   "    const response = pm.response.json();",
                   "    console.log('✅ Event attendees retrieved successfully');",
                   "    console.log('👥 Attendee Management Dashboard:');",
-                  "    console.log('- Total Confirmed Attendees:', response.data.length);",
+                  "    console.log('- Total Attendees (All Statuses):', response.data.length);",
                   "    console.log('- Page:', response.meta?.pagination?.page || 1);",
-                  "    console.log('- Total Attendees:', response.meta?.pagination?.total || 0);",
+                  "    console.log('- Total on Page:', response.meta?.pagination?.total || 0);",
+                  "    console.log('- Applied Filter:', response.meta?.appliedFilter || 'all');",
+                  "    ",
+                  "    // Display status summary if available",
+                  "    if (response.meta?.statusSummary) {",
+                  "        console.log('\\n📊 Status Summary (All Attendees):');",
+                  "        const summary = response.meta.statusSummary;",
+                  "        console.log('- Total Bookings:', summary.total);",
+                  "        console.log('- ✅ Confirmed:', summary.confirmed);",
+                  "        console.log('- ⏳ Pending:', summary.pending);",
+                  "        console.log('- ❌ Cancelled:', summary.cancelled);",
+                  "        console.log('- 💰 Refunded:', summary.refunded);",
+                  "        console.log('- 🎯 Used (Checked In):', summary.used);",
+                  "    }",
                   "    ",
                   "    let checkedIn = 0, pending = 0;",
                   "    let ticketTypeCounts = {};",
+                  "    let statusCounts = {};",
                   "    ",
                   "    response.data.forEach((booking, index) => {",
                   "        console.log(`\\n🎫 Attendee ${index + 1}:`);",
@@ -2040,7 +2054,8 @@
                   "        console.log('- Phone:', booking.user?.phone || 'Not provided');",
                   "        console.log('- Ticket Type:', booking.ticketType);",
                   "        console.log('- Quantity:', booking.quantity);",
-                  "        console.log('- Status:', booking.status);",
+                  "        console.log('- Status:', booking.status || 'confirmed');",
+                  "        console.log('- Payment Status:', booking.paymentStatus || 'paid');",
                   "        console.log('- Checked In:', !!booking.isCheckedIn);",
                   "        console.log('- Booking Date:', new Date(booking.createdAt).toLocaleDateString());",
                   "        ",
@@ -2052,12 +2067,23 @@
                   "            ticketTypeCounts[booking.ticketType] = 0;",
                   "        }",
                   "        ticketTypeCounts[booking.ticketType] += booking.quantity;",
+                  "        ",
+                  "        // Count statuses",
+                  "        const status = booking.status || 'confirmed';",
+                  "        statusCounts[status] = (statusCounts[status] || 0) + 1;",
                   "    });",
                   "    ",
                   "    console.log('\\n📊 Check-in Statistics:');",
                   "    console.log('- Checked In:', checkedIn);",
                   "    console.log('- Not Checked In:', pending);",
-                  "    console.log('- Check-in Rate:', Math.round((checkedIn / response.data.length) * 100) + '%');",
+                  "    if (response.data.length > 0) {",
+                  "        console.log('- Check-in Rate:', Math.round((checkedIn / response.data.length) * 100) + '%');",
+                  "    }",
+                  "    ",
+                  "    console.log('\\n📋 Status Distribution (Current Page):');",
+                  "    Object.entries(statusCounts).forEach(([status, count]) => {",
+                  "        console.log(`- ${status}: ${count} bookings`);",
+                  "    });",
                   "    ",
                   "    console.log('\\n🎟️ Ticket Type Distribution:');",
                   "    Object.entries(ticketTypeCounts).forEach(([type, count]) => {",
@@ -2090,14 +2116,23 @@
               "query": [
                 {
                   "key": "page",
-                  "value": "1"
+                  "value": "1",
+                  "description": "Page number for pagination"
                 },
                 {
                   "key": "limit",
-                  "value": "50"
+                  "value": "50",
+                  "description": "Number of attendees per page"
+                },
+                {
+                  "key": "status",
+                  "value": "",
+                  "description": "Optional: Filter by booking status (confirmed, pending, cancelled, refunded, used). Leave empty to show all statuses.",
+                  "disabled": true
                 }
               ]
-            }
+            },
+            "description": "Retrieve all event attendees regardless of booking status (confirmed, pending, cancelled, etc.). This endpoint provides comprehensive attendee management for event organizers.\n\n🔐 **Authentication Required**: Event organizer or admin only\n\n**Query Parameters:**\n- `page`: Pagination page number (default: 1)\n- `limit`: Results per page (default: 10, max: 100)\n- `status`: Optional filter by booking status\n  - `confirmed`: Only confirmed bookings\n  - `pending`: Only pending bookings\n  - `cancelled`: Only cancelled bookings\n  - `refunded`: Only refunded bookings\n  - `used`: Only checked-in attendees\n  - Leave empty to show all statuses\n\n**New Features:**\n- ✅ **All Status Support**: View attendees with any booking status\n- 📊 **Status Summary**: Complete breakdown of all booking statuses\n- 🔍 **Optional Filtering**: Filter by specific status when needed\n- 📈 **Enhanced Analytics**: Better insights into attendee management\n\n**Response Includes:**\n- Complete attendee list with user details\n- Booking information (status, payment status, check-in status)\n- Ticket details (type, quantity, individual QR codes)\n- Status summary with counts for all booking statuses\n- Pagination metadata\n- Applied filter information\n\n**Use Cases:**\n- **Event Management**: See all attendees regardless of payment/confirmation status\n- **Payment Tracking**: Monitor pending payments and confirmations\n- **Capacity Planning**: Track total registrations vs confirmed attendees\n- **Refund Management**: View cancelled and refunded bookings\n- **Check-in Management**: Identify used tickets and attendance rates\n\n**Expected Responses:**\n- 200: Attendees retrieved successfully with status summary\n- 403: Access denied (not event organizer or admin)\n- 404: Event not found"
           }
         },
         {
