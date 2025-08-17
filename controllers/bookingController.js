@@ -9,12 +9,11 @@ const {
   updateUserEventArrays,
 } = require("../utils/helpers");
 const {
-  generateTicketQR,
-  generateIndividualTicketQRs,
-} = require("../utils/qrGenerator");
+  generateVerificationCodes,
+  generateCodeHash,
+  verifyCodeHash,
+} = require("../utils/codeGenerator");
 const {
-  sendTicketConfirmation,
-  sendTicketConfirmationToAttendees,
   sendIndividualTicketsAndConfirmation,
   sendTicketUsageNotification,
 } = require("../utils/emailService");
@@ -63,7 +62,7 @@ const createBooking = async (req, res) => {
     const subtotal = ticketPrice * quantity;
     const fees = calculateFees(subtotal);
 
-    // Generate QR code immediately since payment is already processed
+    // Generate verification codes immediately since payment is already processed
     const bookingData = {
       user: req.user._id,
       event: eventId,
@@ -104,7 +103,7 @@ const createBooking = async (req, res) => {
       });
     }
 
-    // Create booking first (without QR codes)
+    // Create booking first (without verification codes)
     const booking = new Booking({
       ...bookingData,
       attendeeInfo: attendeeList,
@@ -116,20 +115,20 @@ const createBooking = async (req, res) => {
       { path: "event", select: "title startDate endDate venue organizer" },
     ]);
 
-    // Generate individual QR codes for each attendee
-    const individualQRs = await generateIndividualTicketQRs(
-      booking,
-      attendeeList
-    );
+    // Generate individual verification codes for each attendee
+    const verificationCodes = generateVerificationCodes(quantity);
+    const individualCodes = verificationCodes.map((code, index) => ({
+      code: code,
+      ticketNumber: index + 1,
+      attendee: attendeeList[index] || attendeeList[0],
+      hash: generateCodeHash(booking, code),
+      isUsed: false,
+    }));
 
-    // Save individual QR codes to the booking
-    booking.individualQRs = individualQRs;
-    booking.markModified("individualQRs"); // Ensure MongoDB knows the field changed
+    // Save individual verification codes to the booking
+    booking.verificationCodes = individualCodes;
+    booking.markModified("verificationCodes"); // Ensure MongoDB knows the field changed
     await booking.save();
-
-    console.log(
-      `✅ Saved ${individualQRs.length} individual QR codes to booking ${booking._id}`
-    );
 
     // Update user spending tracking
     try {
@@ -157,12 +156,8 @@ const createBooking = async (req, res) => {
         });
 
         await user.save();
-        console.log(
-          `💰 Updated user spending: ${user.email} - Total: ₦${user.totalSpent}`
-        );
       }
     } catch (spendingError) {
-      console.error("Failed to update user spending:", spendingError);
       // Don't fail the booking confirmation for spending tracking errors
     }
 
@@ -179,19 +174,40 @@ const createBooking = async (req, res) => {
       await event.save();
     }
 
-    // Send individual ticket emails
+    // Send individual ticket emails with verification codes
     try {
+      console.log("🔄 Attempting to send booking confirmation emails...");
+      console.log("📋 Email data check:", {
+        hasBookingUser: !!booking.user,
+        bookingUserEmail: booking.user?.email,
+        bookingUserName: booking.user?.firstName,
+        eventTitle: event?.title,
+        verificationCodesCount: individualCodes?.length,
+        reqUserEmail: req.user?.email,
+        reqUserName: req.user?.firstName,
+      });
+
+      // Use req.user since it has the complete user data
       await sendIndividualTicketsAndConfirmation(
-        booking.user,
+        req.user,
         booking,
         event,
-        individualQRs
+        individualCodes
       );
-      console.log(
-        `📧 Individual ticket confirmations sent for free event: ${event.title}`
-      );
+      console.log("✅ Booking confirmation emails sent successfully");
     } catch (emailError) {
-      console.error("Ticket email failed:", emailError);
+      // Email failure shouldn't fail the booking
+      console.error(
+        "❌ Failed to send booking confirmation emails:",
+        emailError
+      );
+      console.error("Email error details:", {
+        userEmail: req.user?.email,
+        eventTitle: event?.title,
+        verificationCodesCount: individualCodes?.length,
+        error: emailError.message,
+        stack: emailError.stack,
+      });
     }
 
     sendSuccess(
@@ -200,7 +216,6 @@ const createBooking = async (req, res) => {
       booking
     );
   } catch (error) {
-    console.error("Create booking error:", error);
     sendError(res, 500, "Failed to create booking", error.message);
   }
 };
@@ -229,18 +244,6 @@ const getUserBookings = async (req, res) => {
       .skip(skip)
       .limit(limit);
 
-    // Debug logging
-    console.log(
-      `📊 Retrieved ${bookings.length} bookings for user ${req.user._id}`
-    );
-    bookings.forEach((booking, index) => {
-      console.log(
-        `📋 Booking ${index + 1}: ID=${booking._id}, individualQRs count=${
-          booking.individualQRs?.length || 0
-        }`
-      );
-    });
-
     const total = await Booking.countDocuments(query);
 
     sendSuccess(res, "User bookings retrieved successfully", bookings, {
@@ -252,7 +255,6 @@ const getUserBookings = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error("Get user bookings error:", error);
     sendError(res, 500, "Failed to retrieve bookings", error.message);
   }
 };
@@ -273,23 +275,6 @@ const getBookingById = async (req, res) => {
       return sendError(res, 404, "Booking not found");
     }
 
-    console.log(
-      `📋 Retrieved booking ${id}: individualQRs count=${
-        booking.individualQRs?.length || 0
-      }`
-    );
-    if (booking.individualQRs && booking.individualQRs.length > 0) {
-      console.log(
-        `🎫 Individual QRs:`,
-        booking.individualQRs.map((qr) => ({
-          ticketNumber: qr.ticketNumber,
-          reference: qr.reference,
-          attendeeName: qr.attendee?.name,
-          hasQRImage: !!qr.qrCodeImage,
-        }))
-      );
-    }
-
     // Check if user owns the booking or is admin/organizer
     const isOwner = booking.user._id.toString() === req.user._id.toString();
     const isAdmin = req.user.role === "admin";
@@ -302,8 +287,101 @@ const getBookingById = async (req, res) => {
 
     sendSuccess(res, "Booking retrieved successfully", booking);
   } catch (error) {
-    console.error("Get booking error:", error);
     sendError(res, 500, "Failed to retrieve booking", error.message);
+  }
+};
+
+// Update booking
+const updateBooking = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const booking = await Booking.findById(id);
+
+    if (!booking) {
+      return sendError(res, 404, "Booking not found");
+    }
+
+    // Check if user owns the booking
+    if (booking.user.toString() !== req.user._id.toString()) {
+      return sendError(res, 403, "You can only update your own bookings");
+    }
+
+    if (booking.status !== "confirmed") {
+      return sendError(res, 400, "Only confirmed bookings can be updated");
+    }
+
+    // Only allow updating certain fields
+    const allowedUpdates = ["attendeeInfo"];
+    const updates = {};
+    allowedUpdates.forEach((field) => {
+      if (req.body[field] !== undefined) {
+        updates[field] = req.body[field];
+      }
+    });
+
+    Object.assign(booking, updates);
+    await booking.save();
+
+    sendSuccess(res, "Booking updated successfully", booking);
+  } catch (error) {
+    sendError(res, 500, "Failed to update booking", error.message);
+  }
+};
+
+// Delete booking (admin only)
+const deleteBooking = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    if (req.user.role !== "admin") {
+      return sendError(res, 403, "Only admins can delete bookings");
+    }
+
+    const booking = await Booking.findById(id);
+    if (!booking) {
+      return sendError(res, 404, "Booking not found");
+    }
+
+    await Booking.findByIdAndDelete(id);
+    sendSuccess(res, "Booking deleted successfully");
+  } catch (error) {
+    sendError(res, 500, "Failed to delete booking", error.message);
+  }
+};
+
+// Get all bookings (admin only)
+const getAllBookings = async (req, res) => {
+  try {
+    if (req.user.role !== "admin") {
+      return sendError(res, 403, "Only admins can view all bookings");
+    }
+
+    const { page, limit, skip } = getPagination(req);
+    const { status, event } = req.query;
+
+    let query = {};
+    if (status) query.status = status;
+    if (event) query.event = event;
+
+    const bookings = await Booking.find(query)
+      .populate("user", "firstName lastName email")
+      .populate("event", "title startDate venue organizer")
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit);
+
+    const total = await Booking.countDocuments(query);
+
+    sendSuccess(res, "All bookings retrieved successfully", bookings, {
+      pagination: {
+        page,
+        limit,
+        total,
+        pages: Math.ceil(total / limit),
+      },
+    });
+  } catch (error) {
+    sendError(res, 500, "Failed to retrieve bookings", error.message);
   }
 };
 
@@ -371,7 +449,6 @@ const cancelBooking = async (req, res) => {
       "Booking cancelled successfully. Refund will be processed within 3-5 business days."
     );
   } catch (error) {
-    console.error("Cancel booking error:", error);
     sendError(res, 500, "Failed to cancel booking", error.message);
   }
 };
@@ -424,220 +501,29 @@ const checkInBooking = async (req, res) => {
       checkInTime: booking.checkInTime,
     });
   } catch (error) {
-    console.error("Check-in booking error:", error);
     sendError(res, 500, "Failed to check-in booking", error.message);
   }
 };
 
-// Verify QR code for check-in (updated for individual tickets)
+// Legacy function - use verifyEventTicket instead
 const verifyQRCode = async (req, res) => {
-  try {
-    const { qrCode } = req.body;
-
-    if (!qrCode) {
-      return sendError(res, 400, "QR code is required");
-    }
-
-    let qrData;
-    try {
-      qrData = JSON.parse(qrCode);
-    } catch (error) {
-      return sendError(res, 400, "Invalid QR code format");
-    }
-
-    // Find booking by ID and populate necessary fields
-    const booking = await Booking.findById(qrData.bookingId)
-      .populate("user", "firstName lastName email")
-      .populate("event", "title organizer startDate venue");
-
-    if (!booking) {
-      return sendError(res, 404, "Booking not found");
-    }
-
-    // Check if user is organizer or admin
-    const isOrganizer =
-      booking.event.organizer.toString() === req.user._id.toString();
-    const isAdmin = req.user.role === "admin";
-
-    if (!isOrganizer && !isAdmin) {
-      return sendError(res, 403, "Access denied");
-    }
-
-    // Find the specific ticket in individual QRs
-    const ticketQR = booking.individualQRs.find(
-      (qr) => qr.reference === qrData.ticketReference
-    );
-
-    if (!ticketQR) {
-      return sendError(res, 400, "Invalid ticket reference");
-    }
-
-    // Verify QR data matches the specific ticket
-    if (
-      qrData.attendeeName !== ticketQR.attendee.name ||
-      qrData.hash !== ticketQR.hash
-    ) {
-      return sendError(res, 400, "QR code verification failed");
-    }
-
-    if (booking.status !== "confirmed") {
-      return sendError(res, 400, "Invalid booking status");
-    }
-
-    // Check if this specific ticket is already used
-    if (ticketQR.isUsed) {
-      return sendError(res, 400, "This ticket has already been used");
-    }
-
-    sendSuccess(res, "QR code verified successfully", {
-      valid: true,
-      ticket: {
-        ticketNumber: ticketQR.ticketNumber,
-        reference: ticketQR.reference,
-        attendeeName: ticketQR.attendee.name,
-        attendeeEmail: ticketQR.attendee.email,
-        ticketType: booking.ticketType,
-        isUsed: ticketQR.isUsed || false,
-      },
-      booking: {
-        _id: booking._id,
-        quantity: booking.quantity,
-        event: booking.event,
-        isCheckedIn: booking.isCheckedIn,
-        checkInTime: booking.checkInTime,
-      },
-    });
-  } catch (error) {
-    console.error("Verify QR code error:", error);
-    sendError(res, 500, "Failed to verify QR code", error.message);
-  }
+  console.warn(
+    "⚠️ verifyQRCode endpoint is deprecated. Use verifyEventTicket instead."
+  );
+  return sendError(
+    res,
+    410,
+    "This endpoint is deprecated. Please use /verify-event with verification codes instead."
+  );
 };
 
-// Check-in individual ticket (updated for individual QR codes)
+// Legacy function - use verifyEventTicket instead
 const checkInIndividualTicket = async (req, res) => {
-  try {
-    const { qrCode } = req.body;
-
-    if (!qrCode) {
-      return sendError(res, 400, "QR code is required");
-    }
-
-    let qrData;
-    try {
-      qrData = JSON.parse(qrCode);
-    } catch (error) {
-      return sendError(res, 400, "Invalid QR code format");
-    }
-
-    // Find booking and populate necessary fields
-    const booking = await Booking.findById(qrData.bookingId)
-      .populate("user", "firstName lastName email")
-      .populate("event", "title organizer startDate venue");
-
-    if (!booking) {
-      return sendError(res, 404, "Booking not found");
-    }
-
-    // Check if user is organizer or admin
-    const isOrganizer =
-      booking.event.organizer.toString() === req.user._id.toString();
-    const isAdmin = req.user.role === "admin";
-
-    if (!isOrganizer && !isAdmin) {
-      return sendError(
-        res,
-        403,
-        "Only event organizers and admins can check-in attendees"
-      );
-    }
-
-    // Find the specific ticket
-    const ticketIndex = booking.individualQRs.findIndex(
-      (qr) => qr.reference === qrData.ticketReference
-    );
-
-    if (ticketIndex === -1) {
-      return sendError(res, 400, "Invalid ticket reference");
-    }
-
-    const ticket = booking.individualQRs[ticketIndex];
-
-    // Verify QR data
-    if (
-      qrData.attendeeName !== ticket.attendee.name ||
-      qrData.hash !== ticket.hash
-    ) {
-      return sendError(res, 400, "QR code verification failed");
-    }
-
-    if (booking.status !== "confirmed") {
-      return sendError(res, 400, "Only confirmed bookings can be checked in");
-    }
-
-    if (ticket.isUsed) {
-      return sendError(res, 400, "This ticket has already been used");
-    }
-
-    // Mark the individual ticket as used
-    booking.individualQRs[ticketIndex].isUsed = true;
-    booking.individualQRs[ticketIndex].checkInTime = new Date();
-    booking.individualQRs[ticketIndex].checkedInBy = req.user._id;
-
-    // Check if all tickets in this booking are now used
-    const allTicketsUsed = booking.individualQRs.every((qr) => qr.isUsed);
-    if (allTicketsUsed) {
-      booking.isCheckedIn = true;
-      booking.checkInTime = new Date();
-      booking.checkedInBy = req.user._id;
-      booking.status = "used";
-    }
-
-    await booking.save();
-
-    // Send email notification to the user
-    try {
-      const checkedInBy = {
-        firstName: req.user.firstName,
-        lastName: req.user.lastName,
-      };
-
-      await sendTicketUsageNotification(
-        booking.user,
-        booking.individualQRs[ticketIndex],
-        booking,
-        booking.event,
-        checkedInBy
-      );
-
-      console.log(`📧 Ticket usage notification sent to ${booking.user.email}`);
-    } catch (emailError) {
-      console.error("Failed to send ticket usage notification:", emailError);
-      // Don't fail the check-in if email fails
-    }
-
-    sendSuccess(
-      res,
-      "Ticket checked in successfully! Email notification sent.",
-      {
-        ticket: {
-          ticketNumber: ticket.ticketNumber,
-          reference: ticket.reference,
-          attendeeName: ticket.attendee.name,
-          checkInTime: ticket.checkInTime,
-          isUsed: ticket.isUsed,
-        },
-        booking: {
-          _id: booking._id,
-          allTicketsUsed,
-          totalTickets: booking.individualQRs.length,
-          usedTickets: booking.individualQRs.filter((qr) => qr.isUsed).length,
-        },
-      }
-    );
-  } catch (error) {
-    console.error("Check-in individual ticket error:", error);
-    sendError(res, 500, "Failed to check-in ticket", error.message);
-  }
+  return sendError(
+    res,
+    410,
+    "This endpoint is deprecated. Please use /verify-event with verification codes instead."
+  );
 };
 
 // Register for free event
@@ -725,7 +611,7 @@ const registerForFreeEvent = async (req, res) => {
       });
     }
 
-    // Create booking for free event (without QR codes)
+    // Create booking for free event
     const booking = new Booking({
       user: req.user._id,
       event: eventId,
@@ -747,20 +633,20 @@ const registerForFreeEvent = async (req, res) => {
     // Populate booking for response
     await booking.populate("event", "title startDate venue");
 
-    // Generate individual QR codes for each attendee
-    const individualQRs = await generateIndividualTicketQRs(
-      booking,
-      attendeeList
-    );
+    // Generate individual verification codes for each attendee
+    const verificationCodes = generateVerificationCodes(quantity);
+    const individualCodes = verificationCodes.map((code, index) => ({
+      code: code,
+      ticketNumber: index + 1,
+      attendee: attendeeList[index] || attendeeList[0],
+      hash: generateCodeHash(booking, code),
+      isUsed: false,
+    }));
 
-    // Save individual QR codes to the booking
-    booking.individualQRs = individualQRs;
-    booking.markModified("individualQRs"); // Ensure MongoDB knows the field changed
+    // Save individual verification codes to the booking
+    booking.verificationCodes = individualCodes;
+    booking.markModified("verificationCodes"); // Ensure MongoDB knows the field changed
     await booking.save();
-
-    console.log(
-      `✅ Saved ${individualQRs.length} individual QR codes to free event booking ${booking._id}`
-    );
 
     // Update user's attending events array
     await updateUserEventArrays(req.user._id, eventId, "attending");
@@ -776,16 +662,10 @@ const registerForFreeEvent = async (req, res) => {
         req.user,
         booking,
         event,
-        individualQRs
-      );
-      console.log(
-        `📧 Free event registration confirmations sent for: ${event.title}`
+        individualCodes
       );
     } catch (emailError) {
-      console.log(
-        "⚠️ Failed to send registration confirmation emails:",
-        emailError.message
-      );
+      // Email failure shouldn't fail the booking
     }
 
     sendSuccess(
@@ -794,126 +674,44 @@ const registerForFreeEvent = async (req, res) => {
       booking
     );
   } catch (error) {
-    console.error("Register for free event error:", error);
     sendError(res, 500, "Failed to register for free event", error.message);
   }
 };
 
-// Debug endpoint to check individual QRs (temporary)
-const debugBookingQRs = async (req, res) => {
+// Verify event with 10-digit code and mark ticket as used
+const verifyEventTicket = async (req, res) => {
   try {
-    const { id } = req.params;
+    const { eventId, verificationCode } = req.body;
 
-    const booking = await Booking.findById(id);
-
-    if (!booking) {
-      return sendError(res, 404, "Booking not found");
+    if (!eventId || !verificationCode) {
+      return sendError(res, 400, "Event ID and verification code are required");
     }
 
-    console.log("🔍 Debug booking QRs:");
-    console.log("📋 Booking ID:", booking._id);
-    console.log("🎫 Individual QRs count:", booking.individualQRs?.length || 0);
-    console.log("📊 Full individualQRs data:", booking.individualQRs);
-
-    sendSuccess(res, "Debug info retrieved", {
-      bookingId: booking._id,
-      individualQRsCount: booking.individualQRs?.length || 0,
-      individualQRs: booking.individualQRs,
-      hasIndividualQRs: !!booking.individualQRs,
-      isArray: Array.isArray(booking.individualQRs),
-    });
-  } catch (error) {
-    console.error("Debug booking QRs error:", error);
-    sendError(res, 500, "Failed to debug booking QRs", error.message);
-  }
-};
-
-// Verify QR code and mark ticket as used (for camera scanning)
-const verifyAndUseTicket = async (req, res) => {
-  try {
-    const { qrCode } = req.body;
-
-    if (!qrCode) {
-      return sendError(res, 400, "QR code is required");
-    }
-
-    let qrData;
-    try {
-      qrData = JSON.parse(qrCode);
-    } catch (error) {
-      return sendError(res, 400, "Invalid QR code format");
-    }
-
-    // Validate QR code structure
-    if (!qrData.bookingId || !qrData.ticketReference) {
+    // Validate verification code format (10 digits)
+    if (!/^\d{10}$/.test(verificationCode)) {
       return sendError(
         res,
         400,
-        "Invalid QR code data - missing required fields"
+        "Invalid verification code format. Must be 10 digits."
       );
     }
 
-    // Extract event ID - handle both string and object formats
-    let eventIdToCheck;
-    if (typeof qrData.eventId === "string") {
-      eventIdToCheck = qrData.eventId;
-    } else if (qrData.eventId && qrData.eventId._id) {
-      eventIdToCheck = qrData.eventId._id;
-    } else if (qrData.eventId && qrData.eventId.id) {
-      eventIdToCheck = qrData.eventId.id;
-    }
-
-    // Extract user ID - handle both string and object formats
-    let userIdToCheck;
-    if (typeof qrData.userId === "string") {
-      userIdToCheck = qrData.userId;
-    } else if (qrData.userId && qrData.userId._id) {
-      userIdToCheck = qrData.userId._id;
-    } else if (qrData.userId && qrData.userId.id) {
-      userIdToCheck = qrData.userId.id;
-    }
-
-    console.log("🔍 QR Verification Debug:");
-    console.log("- Booking ID:", qrData.bookingId);
-    console.log("- Ticket Reference:", qrData.ticketReference);
-    console.log("- Event ID (extracted):", eventIdToCheck);
-    console.log("- User ID (extracted):", userIdToCheck);
-    console.log("- Attendee Name:", qrData.attendeeName);
-    console.log("- Attendee Email:", qrData.attendeeEmail);
-
-    // Find booking and populate necessary fields
-    const booking = await Booking.findById(qrData.bookingId)
-      .populate("user", "firstName lastName email")
+    // Find the booking with this verification code for this event
+    const booking = await Booking.findOne({
+      event: eventId,
+      "verificationCodes.code": verificationCode,
+    })
+      .populate("user", "firstName lastName email phone")
       .populate("event", "title organizer startDate endDate venue");
 
     if (!booking) {
-      return sendError(res, 404, "Booking not found");
-    }
-
-    console.log("📋 Booking Found:");
-    console.log("- Booking Event ID:", booking.event._id.toString());
-    console.log("- Booking User ID:", booking.user._id.toString());
-    console.log("- Event Organizer ID:", booking.event.organizer.toString());
-    console.log("- Current User ID:", req.user._id.toString());
-
-    // Verify that the QR code belongs to this booking's event and user
-    if (eventIdToCheck && booking.event._id.toString() !== eventIdToCheck) {
-      return sendError(res, 400, "QR code event does not match booking event");
-    }
-
-    if (userIdToCheck && booking.user._id.toString() !== userIdToCheck) {
-      return sendError(res, 400, "QR code user does not match booking user");
+      return sendError(res, 404, "Invalid verification code or event");
     }
 
     // Check if user is organizer or admin
     const isOrganizer =
       booking.event.organizer.toString() === req.user._id.toString();
     const isAdmin = req.user.role === "admin";
-
-    console.log("🔐 Authorization Check:");
-    console.log("- Is Organizer:", isOrganizer);
-    console.log("- Is Admin:", isAdmin);
-    console.log("- User Role:", req.user.role);
 
     if (!isOrganizer && !isAdmin) {
       return sendError(
@@ -923,58 +721,42 @@ const verifyAndUseTicket = async (req, res) => {
       );
     }
 
-    // Find the specific ticket
-    const ticketIndex = booking.individualQRs.findIndex(
-      (qr) => qr.reference === qrData.ticketReference
+    // Find the specific verification code
+    const codeIndex = booking.verificationCodes.findIndex(
+      (code) => code.code === verificationCode
     );
 
-    if (ticketIndex === -1) {
-      console.log("❌ Ticket not found. Available tickets:");
-      booking.individualQRs.forEach((qr, index) => {
-        console.log(`  ${index}: ${qr.reference} - ${qr.attendee.name}`);
-      });
-      return sendError(res, 400, "Invalid ticket reference");
+    if (codeIndex === -1) {
+      return sendError(res, 400, "Verification code not found");
     }
 
-    const ticket = booking.individualQRs[ticketIndex];
-
-    console.log("🎫 Ticket Found:");
-    console.log("- Ticket Reference:", ticket.reference);
-    console.log("- Attendee Name (stored):", ticket.attendee.name);
-    console.log("- Attendee Name (QR):", qrData.attendeeName);
-    console.log("- Is Already Used:", ticket.isUsed);
-
-    // More flexible verification - check attendee name or email
-    const nameMatches = qrData.attendeeName === ticket.attendee.name;
-    const emailMatches = qrData.attendeeEmail === ticket.attendee.email;
-
-    if (!nameMatches && !emailMatches) {
-      return sendError(
-        res,
-        400,
-        "QR code verification failed - Attendee information does not match"
-      );
-    }
+    const ticketCode = booking.verificationCodes[codeIndex];
 
     // Check booking status
     if (booking.status !== "confirmed") {
       return sendError(res, 400, "Only confirmed bookings can be verified");
     }
 
-    // Check if this specific ticket is already used
-    if (ticket.isUsed) {
-      return sendError(res, 400, "This ticket has already been used", {
-        usedAt: ticket.checkInTime,
-        usedBy: ticket.checkedInBy,
-      });
+    // Check if this specific ticket code is already used
+    if (ticketCode.isUsed) {
+      return sendError(
+        res,
+        400,
+        "This verification code has already been used",
+        {
+          usedAt: ticketCode.checkInTime,
+          usedBy: ticketCode.checkedInBy,
+          attendee: ticketCode.attendee.name,
+        }
+      );
     }
 
-    // Check if event has started (optional - you might want to allow early check-ins)
+    // Check if event has started (optional - allow early check-ins)
     const eventDate = new Date(booking.event.startDate);
     const now = new Date();
     const hoursUntilEvent = (eventDate - now) / (1000 * 60 * 60);
 
-    // Allow check-in up to 24 hours before event starts (more flexible)
+    // Allow check-in up to 24 hours before event starts
     if (hoursUntilEvent > 24) {
       return sendError(
         res,
@@ -985,73 +767,204 @@ const verifyAndUseTicket = async (req, res) => {
       );
     }
 
-    // Mark the individual ticket as used
-    booking.individualQRs[ticketIndex].isUsed = true;
-    booking.individualQRs[ticketIndex].checkInTime = new Date();
-    booking.individualQRs[ticketIndex].checkedInBy = req.user._id;
+    // Verify the code hash for security
+    const isValidHash = verifyCodeHash(
+      booking,
+      verificationCode,
+      ticketCode.hash
+    );
+    if (!isValidHash) {
+      return sendError(
+        res,
+        400,
+        "Invalid verification code - security check failed"
+      );
+    }
 
-    // Check if all tickets in this booking are now used
-    const allTicketsUsed = booking.individualQRs.every((qr) => qr.isUsed);
-    if (allTicketsUsed) {
+    // Mark the verification code as used
+    booking.verificationCodes[codeIndex].isUsed = true;
+    booking.verificationCodes[codeIndex].checkInTime = new Date();
+    booking.verificationCodes[codeIndex].checkedInBy = req.user._id;
+
+    // Check if all verification codes in this booking are now used
+    const allCodesUsed = booking.verificationCodes.every((code) => code.isUsed);
+    if (allCodesUsed) {
+      booking.status = "used";
       booking.isCheckedIn = true;
       booking.checkInTime = new Date();
       booking.checkedInBy = req.user._id;
-      booking.status = "used";
     }
 
+    // Save the booking
     await booking.save();
 
-    // Send email notification to the user
+    // Send email notification to the ticket holder
     try {
-      const checkedInBy = {
-        firstName: req.user.firstName,
-        lastName: req.user.lastName,
-      };
-
       await sendTicketUsageNotification(
         booking.user,
-        booking.individualQRs[ticketIndex],
-        booking,
         booking.event,
-        checkedInBy
+        ticketCode,
+        req.user
       );
-
-      console.log(`📧 Ticket usage notification sent to ${booking.user.email}`);
     } catch (emailError) {
-      console.error("Failed to send ticket usage notification:", emailError);
-      // Don't fail the check-in if email fails
+      // Don't fail the verification for email errors
     }
 
-    // Return success response
+    // Return success with full event and booking details
     sendSuccess(
       res,
-      "Ticket verified and checked in successfully! Email notification sent.",
+      "Verification code verified successfully! Attendee checked in.",
       {
-        ticket: {
-          ticketNumber: ticket.ticketNumber,
-          reference: ticket.reference,
-          attendeeName: ticket.attendee.name,
-          attendeeEmail: ticket.attendee.email,
-          checkInTime: ticket.checkInTime,
-          isUsed: ticket.isUsed,
-          ticketType: booking.ticketType,
-        },
         booking: {
-          _id: booking._id,
-          allTicketsUsed,
-          totalTickets: booking.individualQRs.length,
-          usedTickets: booking.individualQRs.filter((qr) => qr.isUsed).length,
+          id: booking._id,
+          paymentReference: booking.paymentReference,
+          status: booking.status,
+          totalAmount: booking.totalAmount,
+          finalAmount: booking.finalAmount,
+          ticketType: booking.ticketType,
+          quantity: booking.quantity,
+          checkInTime: ticketCode.checkInTime,
+          allCodesUsed: allCodesUsed,
         },
         event: {
+          id: booking.event._id,
           title: booking.event.title,
           startDate: booking.event.startDate,
+          endDate: booking.event.endDate,
           venue: booking.event.venue,
+        },
+        attendee: {
+          name: ticketCode.attendee.name,
+          email: ticketCode.attendee.email,
+          phone: ticketCode.attendee.phone,
+          ticketNumber: ticketCode.ticketNumber,
+        },
+        user: {
+          id: booking.user._id,
+          name: `${booking.user.firstName} ${booking.user.lastName}`,
+          email: booking.user.email,
+          phone: booking.user.phone,
+        },
+        verification: {
+          code: verificationCode,
+          usedAt: ticketCode.checkInTime,
+          verifiedBy: req.user._id,
         },
       }
     );
   } catch (error) {
-    console.error("Verify and use ticket error:", error);
-    sendError(res, 500, "Failed to verify ticket", error.message);
+    sendError(res, 500, "Failed to verify event ticket", error.message);
+  }
+};
+
+// Confirm booking payment and generate verification codes
+const confirmBookingPayment = async (req, res) => {
+  try {
+    const { bookingId, paymentReference, paystackReference } = req.body;
+
+    const booking = await Booking.findById(bookingId)
+      .populate("user", "firstName lastName email phone")
+      .populate("event", "title startDate endDate venue organizer");
+
+    if (!booking) {
+      return sendError(res, 404, "Booking not found");
+    }
+
+    if (booking.status === "confirmed") {
+      return sendError(res, 400, "Booking already confirmed");
+    }
+
+    // Update booking status and payment details
+    booking.status = "confirmed";
+    booking.paymentStatus = "paid";
+    booking.paymentReference = paymentReference;
+    booking.paystackReference = paystackReference;
+    booking.confirmedAt = new Date();
+
+    // Generate verification codes if not already generated
+    if (!booking.verificationCodes || booking.verificationCodes.length === 0) {
+      const verificationCodes = generateVerificationCodes(booking.quantity);
+      const individualCodes = verificationCodes.map((code, index) => ({
+        code: code,
+        ticketNumber: index + 1,
+        attendee: booking.attendeeInfo[index] || booking.attendeeInfo[0],
+        hash: generateCodeHash(booking, code),
+        isUsed: false,
+      }));
+
+      booking.verificationCodes = individualCodes;
+      booking.markModified("verificationCodes");
+    }
+
+    await booking.save();
+
+    // Update user's attending events array
+    await updateUserEventArrays(
+      booking.user._id,
+      booking.event._id,
+      "attending"
+    );
+
+    // Update event ticket sales
+    const event = await Event.findById(booking.event._id);
+    const ticketType = event.ticketTypes.find(
+      (tt) => tt.name === booking.ticketType
+    );
+    if (ticketType) {
+      ticketType.sold += booking.quantity;
+      event.currentAttendees += booking.quantity;
+      await event.save();
+    }
+
+    // Send email with verification codes
+    try {
+      console.log("🔄 Attempting to send payment confirmation emails...");
+      console.log("📋 Payment confirmation email data:", {
+        hasBookingUser: !!booking.user,
+        bookingUserEmail: booking.user?.email,
+        bookingUserName: booking.user?.firstName,
+        eventTitle: booking.event?.title,
+        verificationCodesCount: booking.verificationCodes?.length,
+        bookingId: booking._id,
+      });
+
+      await sendIndividualTicketsAndConfirmation(
+        booking.user,
+        booking,
+        booking.event,
+        booking.verificationCodes
+      );
+      console.log("✅ Payment confirmation emails sent successfully");
+    } catch (emailError) {
+      // Email failure shouldn't fail the confirmation
+      console.error(
+        "❌ Failed to send payment confirmation emails:",
+        emailError
+      );
+      console.error("Email error details:", {
+        userEmail: booking.user?.email,
+        eventTitle: booking.event?.title,
+        verificationCodesCount: booking.verificationCodes?.length,
+        error: emailError.message,
+        stack: emailError.stack,
+      });
+    }
+
+    if (res && res.json) {
+      sendSuccess(
+        res,
+        "Booking confirmed successfully! Check your email for tickets.",
+        booking
+      );
+    } else {
+      // Called from webhook - just log success
+      console.log(`✅ Booking ${bookingId} confirmed with verification codes`);
+    }
+  } catch (error) {
+    console.error("Confirm booking payment error:", error);
+    if (res && res.json) {
+      sendError(res, 500, "Failed to confirm booking", error.message);
+    }
   }
 };
 
@@ -1059,11 +972,14 @@ module.exports = {
   createBooking,
   getUserBookings,
   getBookingById,
+  updateBooking,
+  deleteBooking,
+  getAllBookings,
   cancelBooking,
   checkInBooking,
   verifyQRCode,
   checkInIndividualTicket,
   registerForFreeEvent,
-  debugBookingQRs,
-  verifyAndUseTicket,
+  verifyEventTicket,
+  confirmBookingPayment,
 };

@@ -391,7 +391,7 @@ router.get("/user/profile", requireAuth, hasRole("user"), async (req, res) => {
         amount: booking.totalAmount,
         bookingDate: booking.createdAt,
         isCheckedIn: booking.isCheckedIn || false,
-        qrCode: booking.qrCode,
+        verificationCodesCount: booking.verificationCodes?.length || 0,
       })),
 
       upcomingEvents: upcomingBookings.slice(0, 5).map((booking) => ({

@@ -1,5 +1,6 @@
 const fs = require("fs");
 const path = require("path");
+const Handlebars = require("handlebars");
 
 // Template loader utility
 const loadTemplate = (templateName) => {
@@ -17,19 +18,25 @@ const loadTemplate = (templateName) => {
   }
 };
 
-// Template compiler utility
+// Template compiler utility using Handlebars
 const compileTemplate = (template, data) => {
   if (!template) return "";
 
-  let compiledTemplate = template;
+  try {
+    // Compile the template with Handlebars
+    const compiledTemplate = Handlebars.compile(template);
+    return compiledTemplate(data);
+  } catch (error) {
+    console.error("Error compiling template:", error);
 
-  // Replace all placeholders with actual data
-  for (const [key, value] of Object.entries(data)) {
-    const placeholder = new RegExp(`{{${key}}}`, "g");
-    compiledTemplate = compiledTemplate.replace(placeholder, value || "");
+    // Fallback to basic string replacement for simple templates
+    let fallbackTemplate = template;
+    for (const [key, value] of Object.entries(data)) {
+      const placeholder = new RegExp(`{{${key}}}`, "g");
+      fallbackTemplate = fallbackTemplate.replace(placeholder, value || "");
+    }
+    return fallbackTemplate;
   }
-
-  return compiledTemplate;
 };
 
 module.exports = {

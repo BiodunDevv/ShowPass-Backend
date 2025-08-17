@@ -6,47 +6,89 @@
     <title>Event Created - ShowPass</title>
     <style>
       body {
-        font-family: Arial, sans-serif;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          "Helvetica Neue", Arial, sans-serif;
         line-height: 1.6;
         margin: 0;
-        padding: 0;
+        padding: 10px;
         background-color: #f4f4f4;
+        word-wrap: break-word;
+        overflow-wrap: break-word;
       }
       .container {
-        max-width: 100%;
+        max-width: 600px;
         margin: 0 auto;
         background-color: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
       }
       .header {
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         color: white;
-        padding: 20px;
+        padding: 30px 20px;
         text-align: center;
-        border-radius: 10px 10px 0 0;
       }
       .content {
-        padding: 10px;
+        padding: 30px 20px;
       }
       .event-details {
         background-color: #f8f9fa;
         padding: 20px;
         border-radius: 10px;
         margin: 20px 0;
+        border-left: 4px solid #667eea;
+      }
+      .event-details h4 {
+        margin-top: 0;
+        color: #667eea;
+      }
+      .detail-item {
+        margin: 10px 0;
+        padding: 5px 0;
+        word-wrap: break-word;
       }
       .status-badge {
         display: inline-block;
-        padding: 5px 15px;
+        padding: 8px 16px;
         background-color: #ffc107;
         color: #212529;
-        border-radius: 15px;
-        font-size: 12px;
+        border-radius: 20px;
+        font-size: 14px;
         text-transform: uppercase;
+        font-weight: 600;
+        margin: 10px 0;
       }
       .footer {
+        background-color: #f8f9fa;
         text-align: center;
         padding: 20px;
-        color: #666;
-        font-size: 12px;
+        color: #6c757d;
+        font-size: 14px;
+        border-top: 1px solid #e9ecef;
+      }
+      .footer a {
+        color: #667eea;
+        text-decoration: none;
+        word-wrap: break-word;
+      }
+      @media (max-width: 600px) {
+        body {
+          padding: 5px;
+        }
+        .container {
+          margin: 0;
+          border-radius: 0;
+        }
+        .header {
+          padding: 20px 15px;
+        }
+        .content {
+          padding: 20px 15px;
+        }
+        .footer {
+          padding: 15px;
+        }
       }
       .logo {
         font-size: 24px;
@@ -89,7 +131,7 @@
         </p>
       </div>
       <div class="footer">
-        <p>© 2024 ShowPass. All rights reserved.</p>
+        <p>© 2025 ShowPass. All rights reserved.</p>
         <p>Need help? Contact us at {{supportEmail}}</p>
       </div>
     </div>

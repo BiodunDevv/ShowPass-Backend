@@ -101,29 +101,29 @@ router.put(
   bookingController.checkInBooking
 );
 
-// @route   POST /api/booking/verify-qr
-// @desc    Verify QR code and mark ticket as used (for camera scanning)
+// @route   POST /api/booking/verify-event
+// @desc    Verify event with 10-digit code and mark ticket as used
 // @access  Private (Organizer/Admin)
 router.post(
-  "/verify-qr",
+  "/verify-event",
   [
     requireAuth,
     isOrganizer,
-    body("qrCode").notEmpty().withMessage("QR code is required"),
+    body("eventId").isMongoId().withMessage("Valid event ID is required"),
+    body("verificationCode")
+      .isLength({ min: 10, max: 10 })
+      .isNumeric()
+      .withMessage("Verification code must be a 10-digit number"),
   ],
-  bookingController.verifyAndUseTicket
+  bookingController.verifyEventTicket
 );
 
 // @route   POST /api/booking/checkin-ticket
-// @desc    Check-in individual ticket using QR code
+// @desc    Deprecated - use /verify-event with verification codes instead
 // @access  Private (Organizer/Admin)
 router.post(
   "/checkin-ticket",
-  [
-    requireAuth,
-    isOrganizer,
-    body("qrCode").notEmpty().withMessage("QR code is required"),
-  ],
+  [requireAuth],
   bookingController.checkInIndividualTicket
 );
 

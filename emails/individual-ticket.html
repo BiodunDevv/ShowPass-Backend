@@ -10,27 +10,32 @@
           "Helvetica Neue", Arial, sans-serif;
         line-height: 1.6;
         color: #333;
-        max-width: 600px;
+        max-width: 100%;
         margin: 0 auto;
-        padding: 20px;
+        padding: 10px;
         background-color: #f8f9fa;
+        word-wrap: break-word;
+        overflow-wrap: break-word;
       }
       .container {
         background-color: #ffffff;
         border-radius: 12px;
         box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         overflow: hidden;
+        max-width: 600px;
+        margin: 0 auto;
       }
       .header {
         background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
         color: white;
-        padding: 30px;
+        padding: 30px 20px;
         text-align: center;
       }
       .header h1 {
         margin: 0;
         font-size: 28px;
         font-weight: 700;
+        word-wrap: break-word;
       }
       .header .emoji {
         font-size: 48px;
@@ -47,12 +52,12 @@
         display: inline-block;
       }
       .content {
-        padding: 30px;
+        padding: 30px 20px;
       }
       .ticket-info {
         background: linear-gradient(135deg, #e8f5e8 0%, #d4edda 100%);
         border-radius: 12px;
-        padding: 25px;
+        padding: 25px 20px;
         margin: 20px 0;
         border: 2px solid #28a745;
         text-align: center;
@@ -62,34 +67,48 @@
         font-weight: 700;
         color: #28a745;
         margin-bottom: 10px;
+        word-wrap: break-word;
+        hyphens: auto;
       }
       .ticket-type {
         font-size: 18px;
         color: #495057;
         margin-bottom: 15px;
+        word-wrap: break-word;
       }
-      .qr-section {
+      .verification-section {
         background: #ffffff;
         border-radius: 12px;
-        padding: 30px;
+        padding: 30px 20px;
         text-align: center;
         margin: 25px 0;
         border: 3px dashed #28a745;
       }
-      .qr-code {
+      .verification-code {
         margin: 20px 0;
       }
-      .qr-code img {
-        max-width: 200px;
-        height: auto;
+      .verification-code .code {
+        font-size: 32px;
+        font-weight: bold;
+        color: #28a745;
+        letter-spacing: 4px;
+        margin: 10px 0;
+        padding: 15px;
+        background: #f8f9fa;
         border-radius: 8px;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        border: 2px solid #28a745;
+        font-family: "Courier New", monospace;
+        display: inline-block;
+        word-break: break-all;
+        max-width: 100%;
+        box-sizing: border-box;
       }
-      .qr-instructions {
+      .verification-instructions {
         color: #495057;
         font-size: 14px;
         margin-top: 15px;
         line-height: 1.5;
+        text-align: left;
       }
       .event-details {
         background: #f8f9fa;
@@ -104,6 +123,8 @@
         margin-bottom: 10px;
         padding: 8px 0;
         border-bottom: 1px solid #e9ecef;
+        align-items: flex-start;
+        gap: 15px;
       }
       .detail-row:last-child {
         border-bottom: none;
@@ -111,10 +132,16 @@
       .detail-label {
         font-weight: 600;
         color: #495057;
+        min-width: 100px;
+        flex-shrink: 0;
       }
       .detail-value {
         color: #212529;
         text-align: right;
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+        hyphens: auto;
+        flex: 1;
       }
       .important-notice {
         background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
@@ -147,6 +174,7 @@
       .footer a {
         color: #28a745;
         text-decoration: none;
+        word-wrap: break-word;
       }
       .ticket-reference {
         background: #e9ecef;
@@ -157,31 +185,54 @@
         margin: 10px 0;
         text-align: center;
         letter-spacing: 1px;
+        word-break: break-all;
       }
       @media (max-width: 600px) {
         body {
-          padding: 10px;
+          padding: 5px;
+        }
+        .container {
+          margin: 0;
+          border-radius: 0;
+        }
+        .header {
+          padding: 20px 15px;
         }
         .header h1 {
-          font-size: 24px;
+          font-size: 22px;
         }
         .content {
-          padding: 20px;
+          padding: 20px 15px;
         }
         .detail-row {
           flex-direction: column;
-          text-align: left;
+          gap: 5px;
         }
         .detail-value {
           text-align: left;
           margin-top: 5px;
           font-weight: 600;
         }
+        .detail-label {
+          min-width: auto;
+        }
         .attendee-name {
           font-size: 20px;
         }
-        .qr-code img {
-          max-width: 150px;
+        .verification-code .code {
+          font-size: 24px;
+          letter-spacing: 2px;
+          padding: 10px;
+          word-break: break-all;
+        }
+        .ticket-info {
+          padding: 20px 15px;
+        }
+        .verification-section {
+          padding: 20px 15px;
+        }
+        .footer {
+          padding: 15px;
         }
       }
     </style>
@@ -200,38 +251,101 @@
         <div class="ticket-info">
           <div class="attendee-name">{{attendeeName}}</div>
           <div class="ticket-type">{{ticketType}} Ticket</div>
-          <div class="ticket-reference">{{ticketReference}}</div>
         </div>
 
         <p>Hello {{firstName}},</p>
 
         <p>
           Here's your individual ticket for <strong>{{eventTitle}}</strong>.
-          Please save this email and present the QR code below for entry.
+          Please save this email and present the verification code below for
+          entry.
         </p>
 
-        <!-- QR Code Section -->
-        <div style="text-align: center; padding: 30px 20px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 15px; margin: 30px 0;">
-          <h2 style="color: white; margin-bottom: 20px; font-size: 24px;">🎫 Your Entry Ticket</h2>
-          <div style="background: white; display: inline-block; padding: 10px; border-radius: 15px; box-shadow: 0 8px 25px rgba(0,0,0,0.15);">
-            <img src="{{qrCodeImage}}" alt="QR Code" style="width: 200px; height: 200px; display: block; margin: 0 auto;" />
+        <!-- Verification Code Section -->
+        <div
+          style="
+            text-align: center;
+            padding: 30px 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 15px;
+            margin: 30px 0;
+          "
+        >
+          <h2 style="color: white; margin-bottom: 20px; font-size: 24px">
+            🎫 Your Entry Ticket
+          </h2>
+          <div
+            style="
+              background: white;
+              display: inline-block;
+              padding: 20px;
+              border-radius: 15px;
+              box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+            "
+          >
+            <div
+              style="
+                font-size: 36px;
+                font-weight: bold;
+                color: #28a745;
+                letter-spacing: 4px;
+                font-family: 'Courier New', monospace;
+              "
+            >
+              {{verificationCode}}
+            </div>
           </div>
-          <div style="color: white; margin-top: 20px;">
-            <p style="font-size: 16px; margin: 10px 0;"><strong>Ticket #{{ticketNumber}}</strong></p>
-            <p style="font-size: 14px; margin: 5px 0;">Reference: {{ticketReference}}</p>
-            <p style="font-size: 12px; margin: 5px 0; opacity: 0.9;">Show this QR code at the venue for entry</p>
+          <div style="color: white; margin-top: 20px">
+            <p style="font-size: 16px; margin: 10px 0">
+              <strong>Ticket #{{ticketNumber}}</strong>
+            </p>
+            <p style="font-size: 12px; margin: 5px 0; opacity: 0.9">
+              Present this verification code at the venue for entry
+            </p>
           </div>
         </div>
 
         <!-- Entry Instructions -->
-        <div style="background: #e8f5e8; border-left: 4px solid #28a745; padding: 20px; margin: 20px 0; border-radius: 8px;">
-          <h3 style="color: #155724; margin: 0 0 15px 0; font-size: 18px;">📱 Entry Instructions</h3>
-          <ul style="color: #155724; margin: 0; padding-left: 20px; line-height: 1.6;">
-            <li><strong>Present this QR code</strong> on your phone or print this email</li>
-            <li><strong>Arrive early:</strong> Come at least 15 minutes before the event starts</li>
-            <li><strong>Bring valid ID:</strong> You may need identification for verification</li>
-            <li><strong>Unique ticket:</strong> Each QR code is unique - sharing won't work</li>
-            <li><strong>Save offline:</strong> Screenshot or download for offline access</li>
+        <div
+          style="
+            background: #e8f5e8;
+            border-left: 4px solid #28a745;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+          "
+        >
+          <h3 style="color: #155724; margin: 0 0 15px 0; font-size: 18px">
+            📱 Entry Instructions
+          </h3>
+          <ul
+            style="
+              color: #155724;
+              margin: 0;
+              padding-left: 20px;
+              line-height: 1.6;
+            "
+          >
+            <li>
+              <strong>Present this verification code</strong> on your phone or
+              print this email
+            </li>
+            <li>
+              <strong>Arrive early:</strong> Come at least 15 minutes before the
+              event starts
+            </li>
+            <li>
+              <strong>Bring valid ID:</strong> You may need identification for
+              verification
+            </li>
+            <li>
+              <strong>Unique ticket:</strong> Each verification code is unique -
+              sharing won't work
+            </li>
+            <li>
+              <strong>Save offline:</strong> Screenshot or save this email for
+              offline access
+            </li>
           </ul>
         </div>
 
@@ -263,12 +377,18 @@
           <h3>⚠️ Important Instructions</h3>
           <ul>
             <li>
-              This QR code is unique to you and cannot be shared or duplicated
+              This verification code is unique to you and cannot be shared or
+              duplicated
             </li>
             <li>Arrive 15-30 minutes before the event start time</li>
-            <li>Have your QR code ready on your phone or printed copy</li>
+            <li>
+              Have your verification code ready on your phone or printed copy
+            </li>
             <li>Bring a valid ID that matches the name on this ticket</li>
-            <li>Screenshot this QR code in case of poor internet connection</li>
+            <li>
+              Screenshot this verification code in case of poor internet
+              connection
+            </li>
           </ul>
         </div>
 
@@ -287,7 +407,7 @@
           <a href="mailto:{{supportEmail}}">{{supportEmail}}</a>
         </p>
         <p style="margin-top: 10px; font-size: 12px">
-          Ticket Reference: {{ticketReference}} | Issued: {{issuedDate}}
+          Verification Code: {{verificationCode}} | Issued: {{issuedDate}}
         </p>
       </div>
     </div>

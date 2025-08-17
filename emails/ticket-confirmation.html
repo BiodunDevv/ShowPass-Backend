@@ -2,7 +2,12 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport        <div class="verification-code">
+          <h3>🎫 Your Event Verification Code</h3>
+          <p>Show this verification code at the event entrance:</p>
+          <div style="font-size: 24px; font-weight: bold; background: #f0f8ff; padding: 15px; border-radius: 8px; text-align: center; letter-spacing: 2px;">
+            {{verificationCode}}
+          </div>ent="width=device-width, initial-scale=1.0" />
     <title>Ticket Confirmation - ShowPass</title>
     <style>
       body {
@@ -33,7 +38,7 @@
         border-radius: 10px;
         margin: 20px 0;
       }
-      .qr-code {
+      .verification-code {
         text-align: center;
         margin: 20px 0;
       }
@@ -83,21 +88,18 @@
           <p><strong>Booking Reference:</strong> {{paymentReference}}</p>
         </div>
 
-        <div class="qr-code">
+        <div class="verification-code">
           <h4>📱 Your Digital Ticket</h4>
-          <p>Show this QR code at the event entrance:</p>
-          <img
-            src="{{qrCodeImage}}"
-            alt="Ticket QR Code"
-            style="max-width: 200px; height: auto"
-          />
+          <p>Show this verification code at the event entrance:</p>
+          <div style="font-size: 24px; font-weight: bold; background: #f0f8ff; padding: 15px; border-radius: 8px; text-align: center; letter-spacing: 2px;">
+            {{verificationCode}}
+          </div>
         </div>
 
         <div class="important">
           <h4>⚠️ Important Information</h4>
           <ul>
             <li>Please arrive at least 30 minutes before the event starts</li>
-            <li>Bring a valid ID for verification</li>
             <li>Screenshot or print this email for backup</li>
             <li>This ticket is non-transferable</li>
           </ul>
@@ -109,7 +111,7 @@
         </p>
       </div>
       <div class="footer">
-        <p>© 2024 ShowPass. All rights reserved.</p>
+        <p>© 2025 ShowPass. All rights reserved.</p>
         <p>Event support: {{supportEmail}}</p>
       </div>
     </div>

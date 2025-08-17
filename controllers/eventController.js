@@ -835,8 +835,8 @@ const getEventAttendees = async (req, res) => {
 
     // Add summary statistics for different booking statuses
     const statusCounts = await Booking.aggregate([
-      { $match: { event: new mongoose.Types.ObjectId(id) } },
-      { $group: { _id: "$status", count: { $sum: 1 } } },
+      { $match: { event: mongoose.Types.ObjectId(id) } },
+      { $group: { _id: "$status", count: { $sum: 1 } } }
     ]);
 
     const statusSummary = {
@@ -845,16 +845,16 @@ const getEventAttendees = async (req, res) => {
       pending: 0,
       cancelled: 0,
       refunded: 0,
-      used: 0,
+      used: 0
     };
 
-    statusCounts.forEach((item) => {
+    statusCounts.forEach(item => {
       if (statusSummary.hasOwnProperty(item._id)) {
         statusSummary[item._id] = item.count;
       }
     });
 
-    const message = status
+    const message = status 
       ? `Event attendees with status '${status}' retrieved successfully`
       : "Event attendees retrieved successfully";
 
@@ -866,7 +866,7 @@ const getEventAttendees = async (req, res) => {
         pages: Math.ceil(total / limit),
       },
       statusSummary,
-      appliedFilter: status || "all",
+      appliedFilter: status || "all"
     });
   } catch (error) {
     console.error("Get event attendees error:", error);

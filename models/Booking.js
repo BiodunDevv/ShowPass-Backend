@@ -52,18 +52,18 @@ const bookingSchema = new mongoose.Schema(
       unique: true,
     },
     frontendPaymentId: String, // Store frontend payment transaction ID
-    qrCode: String,
-    qrCodeImage: String,
-    individualQRs: [
+    verificationCodes: [
       {
+        code: {
+          type: String,
+          required: true,
+        },
         ticketNumber: Number,
-        reference: String,
         attendee: {
           name: String,
           email: String,
           phone: String,
         },
-        qrCodeImage: String,
         hash: String,
         isUsed: {
           type: Boolean,

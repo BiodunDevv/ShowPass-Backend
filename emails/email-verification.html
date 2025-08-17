@@ -6,7 +6,8 @@
     <title>Email Verification - ShowPass</title>
     <style>
       body {
-        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          Oxygen, Ubuntu, Cantarell, sans-serif;
         line-height: 1.6;
         margin: 0;
         padding: 0;
@@ -29,7 +30,7 @@
         position: relative;
       }
       .header::before {
-        content: '';
+        content: "";
         position: absolute;
         top: 0;
         left: 0;
@@ -78,7 +79,7 @@
         overflow: hidden;
       }
       .code-container::before {
-        content: '';
+        content: "";
         position: absolute;
         top: -50%;
         left: -50%;
@@ -94,8 +95,13 @@
         animation: shimmer 3s ease-in-out infinite;
       }
       @keyframes shimmer {
-        0%, 100% { transform: translateX(-100px) translateY(-100px); }
-        50% { transform: translateX(100px) translateY(100px); }
+        0%,
+        100% {
+          transform: translateX(-100px) translateY(-100px);
+        }
+        50% {
+          transform: translateX(100px) translateY(100px);
+        }
       }
       .code-label {
         font-size: 14px;
@@ -113,7 +119,7 @@
         color: #2d3748;
         letter-spacing: 8px;
         margin: 15px 0;
-        font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+        font-family: "Monaco", "Menlo", "Ubuntu Mono", monospace;
         position: relative;
         z-index: 1;
         text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
@@ -141,7 +147,7 @@
         align-items: center;
       }
       .instructions-title::before {
-        content: '💡';
+        content: "💡";
         margin-right: 8px;
       }
       .instructions-text {
@@ -184,7 +190,7 @@
         align-items: center;
       }
       .security-title::before {
-        content: '🔒';
+        content: "🔒";
         margin-right: 8px;
       }
       .security-text {
@@ -257,13 +263,14 @@
         <div class="logo">🎟️ ShowPass</div>
         <p class="header-subtitle">Your Premier Event Ticketing Platform</p>
       </div>
-      
+
       <div class="content">
         <h1 class="greeting">Hello {{firstName}}! 👋</h1>
-        
+
         <p class="main-text">
-          Welcome to ShowPass! We're excited to have you join our community of event enthusiasts. 
-          To complete your registration and start discovering amazing events, please verify your email address using the code below.
+          Welcome to ShowPass! We're excited to have you join our community of
+          event enthusiasts. To complete your registration and start discovering
+          amazing events, please verify your email address using the code below.
         </p>
 
         <div class="code-container">
@@ -275,9 +282,9 @@
         <div class="instructions">
           <div class="instructions-title">How to verify:</div>
           <p class="instructions-text">
-            1. Return to the ShowPass app or website<br>
-            2. Go to the email verification page<br>
-            3. Enter the 6-digit code above<br>
+            1. Return to the ShowPass app or website<br />
+            2. Go to the email verification page<br />
+            3. Enter the 6-digit code above<br />
             4. Click "Verify Email" to complete the process
           </p>
         </div>
@@ -290,36 +297,37 @@
         <div class="security-note">
           <div class="security-title">Security Notice</div>
           <p class="security-text">
-            This verification code is unique to your account. Never share it with anyone. 
-            If you didn't create a ShowPass account, please ignore this email and no action is required.
+            This verification code is unique to your account. Never share it
+            with anyone. If you didn't create a ShowPass account, please ignore
+            this email and no action is required.
           </p>
         </div>
 
-        <p class="main-text">
-          Once verified, you'll be able to:
-        </p>
-        <ul style="color: #4a5568; padding-left: 20px;">
+        <p class="main-text">Once verified, you'll be able to:</p>
+        <ul style="color: #4a5568; padding-left: 20px">
           <li>🎫 Browse and book tickets for exciting events</li>
           <li>❤️ Save your favorite events and organizers</li>
-          <li>📱 Receive digital tickets with QR codes</li>
+          <li>📱 Receive digital tickets with verification codes</li>
           <li>🔔 Get notified about new events in your area</li>
           <li>💰 Secure payment processing</li>
         </ul>
       </div>
-      
+
       <div class="footer">
         <div class="footer-logo">ShowPass</div>
         <p class="footer-text">© 2025 ShowPass. All rights reserved.</p>
-        <p class="footer-text">This is an automated email, please do not reply.</p>
-        
+        <p class="footer-text">
+          This is an automated email, please do not reply.
+        </p>
+
         <div class="social-links">
           <a href="#" class="social-link">📧</a>
           <a href="#" class="social-link">🐦</a>
           <a href="#" class="social-link">📘</a>
           <a href="#" class="social-link">📷</a>
         </div>
-        
-        <p class="footer-text" style="margin-top: 15px;">
+
+        <p class="footer-text" style="margin-top: 15px">
           Need help? Contact us at support@showpass.com
         </p>
       </div>

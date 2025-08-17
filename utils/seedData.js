@@ -521,7 +521,7 @@ const seedData = async () => {
         <ul>
           <li>Create shareable memes related to your event</li>
           <li>Develop simple mobile apps or web tools</li>
-          <li>Use QR codes for easy information sharing</li>
+          <li>Use verification codes for easy information sharing</li>
           <li>Create virtual event previews</li>
         </ul>
         
