@@ -856,6 +856,17 @@ const sendTicketUsageNotification = async (
   checkedInBy
 ) => {
   try {
+    console.log("🔍 Email Debug - checkedInBy data:", {
+      hasCheckedInBy: !!checkedInBy,
+      firstName: checkedInBy?.firstName,
+      lastName: checkedInBy?.lastName,
+      fullName:
+        `${checkedInBy?.firstName || ""} ${
+          checkedInBy?.lastName || ""
+        }`.trim() || "Event Staff",
+      keys: checkedInBy ? Object.keys(checkedInBy) : [],
+    });
+
     const templateData = {
       userName: user.firstName,
       attendeeName: ticketCode.attendee.name,
@@ -883,7 +894,9 @@ const sendTicketUsageNotification = async (
         }
       ),
       checkedInBy:
-        `${checkedInBy.firstName} ${checkedInBy.lastName}` || "Event Staff",
+        `${checkedInBy?.firstName || ""} ${
+          checkedInBy?.lastName || ""
+        }`.trim() || "Event Staff",
     };
 
     await sendEmail(

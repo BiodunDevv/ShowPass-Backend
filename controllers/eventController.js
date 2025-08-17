@@ -526,12 +526,26 @@ const updateEvent = async (req, res) => {
         const bookings = await Booking.find({
           event: event._id,
           status: "confirmed",
-        }).populate("user", "firstName lastName email");
+        });
 
         if (bookings.length > 0) {
-          // Use the change details message already generated
-          // Send notifications to all attendees
+          // Manually populate users using UserManager for multi-collection support
+          const UserManager = require("../utils/UserManager");
+          const populatedBookings = [];
+
           for (const booking of bookings) {
+            const userResult = await UserManager.findById(booking.user);
+            if (userResult && userResult.user) {
+              populatedBookings.push({
+                ...booking.toObject(),
+                user: userResult.user,
+              });
+            }
+          }
+
+          // Use the change details message already generated
+          // Send notifications to all attendees with populated user data
+          for (const booking of populatedBookings) {
             try {
               await sendEventUpdateNotification(
                 booking.user,
@@ -547,7 +561,7 @@ const updateEvent = async (req, res) => {
           }
 
           console.log(
-            `📧 Event update notifications sent to ${bookings.length} attendees`
+            `📧 Event update notifications sent to ${populatedBookings.length} attendees`
           );
         }
       } catch (notificationError) {
@@ -577,12 +591,26 @@ const updateEvent = async (req, res) => {
           const bookings = await Booking.find({
             event: event._id,
             status: "confirmed",
-          }).populate("user", "firstName lastName email");
+          });
 
           if (bookings.length > 0) {
-            // Use the change details message already generated for minor changes
-            // Send notifications to all attendees
+            // Manually populate users using UserManager for multi-collection support
+            const UserManager = require("../utils/UserManager");
+            const populatedBookings = [];
+
             for (const booking of bookings) {
+              const userResult = await UserManager.findById(booking.user);
+              if (userResult && userResult.user) {
+                populatedBookings.push({
+                  ...booking.toObject(),
+                  user: userResult.user,
+                });
+              }
+            }
+
+            // Use the change details message already generated for minor changes
+            // Send notifications to all attendees with populated user data
+            for (const booking of populatedBookings) {
               try {
                 await sendEventUpdateNotification(
                   booking.user,
@@ -598,7 +626,7 @@ const updateEvent = async (req, res) => {
             }
 
             console.log(
-              `📧 Minor event update notifications sent to ${bookings.length} attendees`
+              `📧 Minor event update notifications sent to ${populatedBookings.length} attendees`
             );
           }
         }
@@ -836,7 +864,7 @@ const getEventAttendees = async (req, res) => {
     // Add summary statistics for different booking statuses
     const statusCounts = await Booking.aggregate([
       { $match: { event: mongoose.Types.ObjectId(id) } },
-      { $group: { _id: "$status", count: { $sum: 1 } } }
+      { $group: { _id: "$status", count: { $sum: 1 } } },
     ]);
 
     const statusSummary = {
@@ -845,16 +873,16 @@ const getEventAttendees = async (req, res) => {
       pending: 0,
       cancelled: 0,
       refunded: 0,
-      used: 0
+      used: 0,
     };
 
-    statusCounts.forEach(item => {
+    statusCounts.forEach((item) => {
       if (statusSummary.hasOwnProperty(item._id)) {
         statusSummary[item._id] = item.count;
       }
     });
 
-    const message = status 
+    const message = status
       ? `Event attendees with status '${status}' retrieved successfully`
       : "Event attendees retrieved successfully";
 
@@ -866,7 +894,7 @@ const getEventAttendees = async (req, res) => {
         pages: Math.ceil(total / limit),
       },
       statusSummary,
-      appliedFilter: status || "all"
+      appliedFilter: status || "all",
     });
   } catch (error) {
     console.error("Get event attendees error:", error);

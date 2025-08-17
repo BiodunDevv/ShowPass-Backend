@@ -34,6 +34,24 @@ const createBooking = async (req, res) => {
       return sendError(res, 400, "Event is not yet approved for booking");
     }
 
+    // Check if user is trying to book their own event (organizers cannot book their own events)
+    if (event.organizer.toString() === req.user._id.toString()) {
+      return sendError(
+        res,
+        403,
+        "Event organizers cannot book tickets for their own events"
+      );
+    }
+
+    // Only regular users can book events (not organizers or admins)
+    if (req.user.role !== "user") {
+      return sendError(
+        res,
+        403,
+        "Only regular users can book event tickets. Organizers and admins cannot book tickets."
+      );
+    }
+
     // Check if event is in the future
     if (new Date(event.startDate) <= new Date()) {
       return sendError(res, 400, "Cannot book tickets for past events");
@@ -110,10 +128,34 @@ const createBooking = async (req, res) => {
     });
 
     await booking.save();
+
+    // Manual populate for flexible user types (RegularUser, Organizer, Admin)
+    const UserManager = require("../utils/UserManager");
+    const userResult = await UserManager.findById(booking.user);
+    let populatedUser = null;
+    if (userResult) {
+      populatedUser = userResult.user;
+    }
+
     await booking.populate([
-      { path: "user", select: "firstName lastName email phone" },
       { path: "event", select: "title startDate endDate venue organizer" },
     ]);
+
+    // Debug the populated user data
+    console.log("🔍 Booking Creation User Debug:", {
+      hasUserResult: !!userResult,
+      hasPopulatedUser: !!populatedUser,
+      userEmail: populatedUser?.email,
+      userFirstName: populatedUser?.firstName,
+      userLastName: populatedUser?.lastName,
+      userRole: userResult?.role,
+      userKeys: populatedUser
+        ? Object.keys(
+            populatedUser.toObject ? populatedUser.toObject() : populatedUser
+          )
+        : [],
+      bookingUserId: booking.user,
+    });
 
     // Generate individual verification codes for each attendee
     const verificationCodes = generateVerificationCodes(quantity);
@@ -178,18 +220,19 @@ const createBooking = async (req, res) => {
     try {
       console.log("🔄 Attempting to send booking confirmation emails...");
       console.log("📋 Email data check:", {
-        hasBookingUser: !!booking.user,
-        bookingUserEmail: booking.user?.email,
-        bookingUserName: booking.user?.firstName,
+        hasPopulatedUser: !!populatedUser,
+        populatedUserEmail: populatedUser?.email,
+        populatedUserName: populatedUser?.firstName,
         eventTitle: event?.title,
         verificationCodesCount: individualCodes?.length,
         reqUserEmail: req.user?.email,
         reqUserName: req.user?.firstName,
       });
 
-      // Use req.user since it has the complete user data
+      // Use populatedUser if available, otherwise fall back to req.user
+      const emailUser = populatedUser || req.user;
       await sendIndividualTicketsAndConfirmation(
-        req.user,
+        emailUser,
         booking,
         event,
         individualCodes
@@ -202,7 +245,8 @@ const createBooking = async (req, res) => {
         emailError
       );
       console.error("Email error details:", {
-        userEmail: req.user?.email,
+        populatedUserEmail: populatedUser?.email,
+        reqUserEmail: req.user?.email,
         eventTitle: event?.title,
         verificationCodesCount: individualCodes?.length,
         error: emailError.message,
@@ -466,16 +510,15 @@ const checkInBooking = async (req, res) => {
       return sendError(res, 404, "Booking not found");
     }
 
-    // Check if user is organizer or admin
-    const isOrganizer =
+    // Check if user is the specific organizer of this event (not just any organizer)
+    const isEventOrganizer =
       booking.event.organizer.toString() === req.user._id.toString();
-    const isAdmin = req.user.role === "admin";
 
-    if (!isOrganizer && !isAdmin) {
+    if (!isEventOrganizer) {
       return sendError(
         res,
         403,
-        "Only event organizers and admins can check-in attendees"
+        "Only the organizer of this specific event can check-in attendees"
       );
     }
 
@@ -543,6 +586,24 @@ const registerForFreeEvent = async (req, res) => {
 
     if (!event.isFreeEvent) {
       return sendError(res, 400, "This endpoint is only for free events");
+    }
+
+    // Check if user is trying to register for their own event (organizers cannot register for their own events)
+    if (event.organizer.toString() === req.user._id.toString()) {
+      return sendError(
+        res,
+        403,
+        "Event organizers cannot register for their own events"
+      );
+    }
+
+    // Only regular users can register for events (not organizers or admins)
+    if (req.user.role !== "user") {
+      return sendError(
+        res,
+        403,
+        "Only regular users can register for events. Organizers and admins cannot register."
+      );
     }
 
     // Check if event is in the future
@@ -700,24 +761,38 @@ const verifyEventTicket = async (req, res) => {
     const booking = await Booking.findOne({
       event: eventId,
       "verificationCodes.code": verificationCode,
-    })
-      .populate("user", "firstName lastName email phone")
-      .populate("event", "title organizer startDate endDate venue");
+    }).populate("event", "title organizer startDate endDate venue");
 
     if (!booking) {
       return sendError(res, 404, "Invalid verification code or event");
     }
 
-    // Check if user is organizer or admin
-    const isOrganizer =
-      booking.event.organizer.toString() === req.user._id.toString();
-    const isAdmin = req.user.role === "admin";
+    // Manual populate for flexible user types (RegularUser, Organizer, Admin)
+    const UserManager = require("../utils/UserManager");
+    const userResult = await UserManager.findById(booking.user);
+    let populatedUser = null;
+    if (userResult) {
+      populatedUser = userResult.user;
+    }
 
-    if (!isOrganizer && !isAdmin) {
+    // Validate that we have complete user data
+    if (!populatedUser || !booking.event) {
+      return sendError(
+        res,
+        500,
+        "Booking data is incomplete - missing user or event information"
+      );
+    }
+
+    // Check if user is the specific organizer of this event (not just any organizer)
+    const isEventOrganizer =
+      booking.event.organizer.toString() === req.user._id.toString();
+
+    if (!isEventOrganizer) {
       return sendError(
         res,
         403,
-        "Only event organizers and admins can verify tickets"
+        "Only the organizer of this specific event can verify tickets"
       );
     }
 
@@ -757,15 +832,15 @@ const verifyEventTicket = async (req, res) => {
     const hoursUntilEvent = (eventDate - now) / (1000 * 60 * 60);
 
     // Allow check-in up to 24 hours before event starts
-    if (hoursUntilEvent > 24) {
-      return sendError(
-        res,
-        400,
-        `Event check-in opens 24 hours before start time. Event starts in ${Math.ceil(
-          hoursUntilEvent
-        )} hours.`
-      );
-    }
+    // if (hoursUntilEvent > 24) {
+    //   return sendError(
+    //     res,
+    //     400,
+    //     `Event check-in opens 24 hours before start time. Event starts in ${Math.ceil(
+    //       hoursUntilEvent
+    //     )} hours.`
+    //   );
+    // }
 
     // Verify the code hash for security
     const isValidHash = verifyCodeHash(
@@ -798,16 +873,47 @@ const verifyEventTicket = async (req, res) => {
     // Save the booking
     await booking.save();
 
-    // Send email notification to the ticket holder
+    // Send email notification to the specific attendee whose ticket was used
     try {
-      await sendTicketUsageNotification(
-        booking.user,
-        booking.event,
-        ticketCode,
-        req.user
-      );
+      if (
+        ticketCode.attendee &&
+        ticketCode.attendee.email &&
+        ticketCode.attendee.name
+      ) {
+        // Create attendee user object for email service
+        const attendeeUser = {
+          email: ticketCode.attendee.email,
+          firstName: ticketCode.attendee.name.split(" ")[0], // Extract first name
+          lastName:
+            ticketCode.attendee.name.split(" ").slice(1).join(" ") || "", // Extract last name
+          phone: ticketCode.attendee.phone || "",
+        };
+
+        await sendTicketUsageNotification(
+          attendeeUser,
+          booking.event,
+          ticketCode,
+          req.user // Pass the full user object instead of just req.user._id
+        );
+        console.log(
+          "✅ Ticket usage notification sent successfully to attendee:",
+          ticketCode.attendee.email
+        );
+      } else {
+        console.log(
+          "⚠️ Skipping email notification - attendee data incomplete:",
+          {
+            hasAttendee: !!ticketCode.attendee,
+            hasEmail: !!ticketCode.attendee?.email,
+            hasName: !!ticketCode.attendee?.name,
+            attendeeEmail: ticketCode.attendee?.email,
+            attendeeName: ticketCode.attendee?.name,
+          }
+        );
+      }
     } catch (emailError) {
       // Don't fail the verification for email errors
+      console.error("❌ Email notification failed:", emailError.message);
     }
 
     // Return success with full event and booking details
@@ -840,10 +946,10 @@ const verifyEventTicket = async (req, res) => {
           ticketNumber: ticketCode.ticketNumber,
         },
         user: {
-          id: booking.user._id,
-          name: `${booking.user.firstName} ${booking.user.lastName}`,
-          email: booking.user.email,
-          phone: booking.user.phone,
+          id: populatedUser._id,
+          name: `${populatedUser.firstName} ${populatedUser.lastName}`,
+          email: populatedUser.email,
+          phone: populatedUser.phone,
         },
         verification: {
           code: verificationCode,
