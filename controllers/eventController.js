@@ -914,12 +914,61 @@ const getEventAttendees = async (req, res) => {
     // Flatten attendee data for easier frontend consumption
     const attendeeList = [];
     filteredBookings.forEach((booking) => {
-      // Add booking user as first attendee if not in attendee list
-      const userInAttendees = booking.attendeeInfo?.some(
-        (att) => att.email === booking.user.email
-      );
+      // Process each verification code to create individual attendee records
+      if (booking.verificationCodes && booking.verificationCodes.length > 0) {
+        booking.verificationCodes.forEach((codeData, index) => {
+          // Get attendee info from attendeeInfo array or use booking user as fallback
+          let attendeeInfo;
+          let attendeeType = "attendee";
 
-      if (!userInAttendees) {
+          if (booking.attendeeInfo && booking.attendeeInfo[index]) {
+            // Use attendee info from the array
+            attendeeInfo = booking.attendeeInfo[index];
+          } else {
+            // Fallback to booking user info (this is likely the booker's ticket)
+            attendeeInfo = {
+              name: `${booking.user.firstName} ${booking.user.lastName}`,
+              email: booking.user.email,
+              phone: booking.user.phone || "",
+            };
+            attendeeType = "booker";
+          }
+
+          // Check if this is actually the booker by comparing emails
+          const isBooker = attendeeInfo.email === booking.user.email;
+          if (isBooker) {
+            attendeeType = "booker";
+          }
+
+          attendeeList.push({
+            bookingId: booking._id,
+            attendeeType: attendeeType,
+            name: attendeeInfo.name,
+            email: attendeeInfo.email,
+            phone: attendeeInfo.phone || "",
+            bookingStatus: booking.status,
+            ticketType: booking.ticketType,
+            bookingDate: booking.createdAt,
+            totalAmount: booking.finalAmount / booking.quantity, // Per-attendee amount
+            paymentReference: booking.paymentReference,
+            isCheckedIn: codeData.isUsed || false,
+            checkInTime: codeData.checkInTime || null,
+            verificationCode: codeData.code,
+            ticketNumber: codeData.ticketNumber,
+            codeHash: codeData.hash, // Include hash for verification if needed
+            // Additional booking details for context
+            bookingUser: {
+              name: `${booking.user.firstName} ${booking.user.lastName}`,
+              email: booking.user.email,
+              phone: booking.user.phone || "",
+            },
+            totalBookingAmount: booking.finalAmount,
+            bookingQuantity: booking.quantity,
+          });
+        });
+      } else {
+        // Fallback for bookings without verification codes (shouldn't happen in normal flow)
+        console.warn(`Booking ${booking._id} has no verification codes`);
         attendeeList.push({
           bookingId: booking._id,
           attendeeType: "booker",
@@ -931,38 +980,18 @@ const getEventAttendees = async (req, res) => {
           bookingDate: booking.createdAt,
           totalAmount: booking.finalAmount,
           paymentReference: booking.paymentReference,
-          isCheckedIn: booking.isCheckedIn,
-          checkInTime: booking.checkInTime,
-          verificationCodes:
-            booking.verificationCodes?.map((code) => ({
-              code: code.code,
-              ticketNumber: code.ticketNumber,
-              isUsed: code.isUsed,
-              checkInTime: code.checkInTime,
-            })) || [],
-        });
-      }
-
-      // Add all attendees from attendeeInfo
-      if (booking.attendeeInfo && booking.attendeeInfo.length > 0) {
-        booking.attendeeInfo.forEach((attendee, index) => {
-          const correspondingCode = booking.verificationCodes?.[index];
-          attendeeList.push({
-            bookingId: booking._id,
-            attendeeType: "attendee",
-            name: attendee.name,
-            email: attendee.email,
-            phone: attendee.phone || "",
-            bookingStatus: booking.status,
-            ticketType: booking.ticketType,
-            bookingDate: booking.createdAt,
-            totalAmount: booking.finalAmount / booking.quantity, // Per-attendee amount
-            paymentReference: booking.paymentReference,
-            isCheckedIn: correspondingCode?.isUsed || false,
-            checkInTime: correspondingCode?.checkInTime,
-            verificationCode: correspondingCode?.code,
-            ticketNumber: correspondingCode?.ticketNumber,
-          });
+          isCheckedIn: booking.isCheckedIn || false,
+          checkInTime: booking.checkInTime || null,
+          verificationCode: null,
+          ticketNumber: null,
+          // Additional booking details
+          bookingUser: {
+            name: `${booking.user.firstName} ${booking.user.lastName}`,
+            email: booking.user.email,
+            phone: booking.user.phone || "",
+          },
+          totalBookingAmount: booking.finalAmount,
+          bookingQuantity: booking.quantity,
         });
       }
     });
