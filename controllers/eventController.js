@@ -854,16 +854,36 @@ const getEventAttendees = async (req, res) => {
     }
 
     const bookings = await Booking.find(query)
-      .populate("user", "firstName lastName email phone")
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit);
+
+    // Manually populate users using UserManager for multi-collection support
+    const UserManager = require("../utils/UserManager");
+    const populatedBookings = [];
+
+    for (const booking of bookings) {
+      const userResult = await UserManager.findById(booking.user);
+      if (userResult && userResult.user) {
+        populatedBookings.push({
+          ...booking.toObject(),
+          user: {
+            _id: userResult.user._id,
+            firstName: userResult.user.firstName,
+            lastName: userResult.user.lastName,
+            email: userResult.user.email,
+            phone: userResult.user.phone,
+            role: userResult.role,
+          },
+        });
+      }
+    }
 
     const total = await Booking.countDocuments(query);
 
     // Add summary statistics for different booking statuses
     const statusCounts = await Booking.aggregate([
-      { $match: { event: mongoose.Types.ObjectId(id) } },
+      { $match: { event: new mongoose.Types.ObjectId(id) } },
       { $group: { _id: "$status", count: { $sum: 1 } } },
     ]);
 
@@ -886,7 +906,7 @@ const getEventAttendees = async (req, res) => {
       ? `Event attendees with status '${status}' retrieved successfully`
       : "Event attendees retrieved successfully";
 
-    sendSuccess(res, message, bookings, {
+    sendSuccess(res, message, populatedBookings, {
       pagination: {
         page,
         limit,
