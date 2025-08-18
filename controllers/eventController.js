@@ -827,8 +827,7 @@ const getOrganizerEvents = async (req, res) => {
 const getEventAttendees = async (req, res) => {
   try {
     const { id } = req.params;
-    const { page, limit, skip } = getPagination(req);
-    const { status } = req.query; // Optional filter by status
+    const { status, search } = req.query; // Optional filters
 
     const event = await Event.findById(id);
     if (!event) {
@@ -853,10 +852,8 @@ const getEventAttendees = async (req, res) => {
       query.status = status;
     }
 
-    const bookings = await Booking.find(query)
-      .sort({ createdAt: -1 })
-      .skip(skip)
-      .limit(limit);
+    // Get all bookings without pagination
+    const bookings = await Booking.find(query).sort({ createdAt: -1 });
 
     // Manually populate users using UserManager for multi-collection support
     const UserManager = require("../utils/UserManager");
@@ -867,54 +864,124 @@ const getEventAttendees = async (req, res) => {
       if (userResult && userResult.user) {
         populatedBookings.push({
           ...booking.toObject(),
-          user: {
-            _id: userResult.user._id,
-            firstName: userResult.user.firstName,
-            lastName: userResult.user.lastName,
-            email: userResult.user.email,
-            phone: userResult.user.phone,
-            role: userResult.role,
-          },
+          user: userResult.user,
         });
       }
     }
 
-    const total = await Booking.countDocuments(query);
+    // Apply search filter if provided (search by attendee names or user name)
+    let filteredBookings = populatedBookings;
+    if (search && search.trim()) {
+      const searchTerm = search.trim().toLowerCase();
+      filteredBookings = populatedBookings.filter((booking) => {
+        // Search in user name
+        const userFullName = `${booking.user.firstName || ""} ${
+          booking.user.lastName || ""
+        }`.toLowerCase();
+        const userEmail = (booking.user.email || "").toLowerCase();
 
-    // Add summary statistics for different booking statuses
-    const statusCounts = await Booking.aggregate([
-      { $match: { event: new mongoose.Types.ObjectId(id) } },
-      { $group: { _id: "$status", count: { $sum: 1 } } },
-    ]);
+        // Search in attendee info
+        const attendeeMatches =
+          booking.attendeeInfo?.some((attendee) => {
+            const attendeeName = (attendee.name || "").toLowerCase();
+            const attendeeEmail = (attendee.email || "").toLowerCase();
+            return (
+              attendeeName.includes(searchTerm) ||
+              attendeeEmail.includes(searchTerm)
+            );
+          }) || false;
 
+        return (
+          userFullName.includes(searchTerm) ||
+          userEmail.includes(searchTerm) ||
+          attendeeMatches
+        );
+      });
+    }
+
+    // Calculate status summary using the filtered results
     const statusSummary = {
-      total: await Booking.countDocuments({ event: id }),
-      confirmed: 0,
-      pending: 0,
-      cancelled: 0,
-      refunded: 0,
-      used: 0,
+      total: populatedBookings.length,
+      confirmed: populatedBookings.filter((b) => b.status === "confirmed")
+        .length,
+      pending: populatedBookings.filter((b) => b.status === "pending").length,
+      cancelled: populatedBookings.filter((b) => b.status === "cancelled")
+        .length,
+      refunded: populatedBookings.filter((b) => b.status === "refunded").length,
+      used: populatedBookings.filter((b) => b.status === "used").length,
     };
 
-    statusCounts.forEach((item) => {
-      if (statusSummary.hasOwnProperty(item._id)) {
-        statusSummary[item._id] = item.count;
+    // Flatten attendee data for easier frontend consumption
+    const attendeeList = [];
+    filteredBookings.forEach((booking) => {
+      // Add booking user as first attendee if not in attendee list
+      const userInAttendees = booking.attendeeInfo?.some(
+        (att) => att.email === booking.user.email
+      );
+
+      if (!userInAttendees) {
+        attendeeList.push({
+          bookingId: booking._id,
+          attendeeType: "booker",
+          name: `${booking.user.firstName} ${booking.user.lastName}`,
+          email: booking.user.email,
+          phone: booking.user.phone || "",
+          bookingStatus: booking.status,
+          ticketType: booking.ticketType,
+          bookingDate: booking.createdAt,
+          totalAmount: booking.finalAmount,
+          paymentReference: booking.paymentReference,
+          isCheckedIn: booking.isCheckedIn,
+          checkInTime: booking.checkInTime,
+          verificationCodes:
+            booking.verificationCodes?.map((code) => ({
+              code: code.code,
+              ticketNumber: code.ticketNumber,
+              isUsed: code.isUsed,
+              checkInTime: code.checkInTime,
+            })) || [],
+        });
+      }
+
+      // Add all attendees from attendeeInfo
+      if (booking.attendeeInfo && booking.attendeeInfo.length > 0) {
+        booking.attendeeInfo.forEach((attendee, index) => {
+          const correspondingCode = booking.verificationCodes?.[index];
+          attendeeList.push({
+            bookingId: booking._id,
+            attendeeType: "attendee",
+            name: attendee.name,
+            email: attendee.email,
+            phone: attendee.phone || "",
+            bookingStatus: booking.status,
+            ticketType: booking.ticketType,
+            bookingDate: booking.createdAt,
+            totalAmount: booking.finalAmount / booking.quantity, // Per-attendee amount
+            paymentReference: booking.paymentReference,
+            isCheckedIn: correspondingCode?.isUsed || false,
+            checkInTime: correspondingCode?.checkInTime,
+            verificationCode: correspondingCode?.code,
+            ticketNumber: correspondingCode?.ticketNumber,
+          });
+        });
       }
     });
 
-    const message = status
+    const message = search
+      ? `Found ${attendeeList.length} attendees matching "${search}"`
+      : status
       ? `Event attendees with status '${status}' retrieved successfully`
-      : "Event attendees retrieved successfully";
+      : "All event attendees retrieved successfully";
 
-    sendSuccess(res, message, populatedBookings, {
-      pagination: {
-        page,
-        limit,
-        total,
-        pages: Math.ceil(total / limit),
-      },
+    sendSuccess(res, message, {
+      attendees: attendeeList,
+      totalAttendees: attendeeList.length,
+      totalBookings: filteredBookings.length,
       statusSummary,
-      appliedFilter: status || "all",
+      appliedFilters: {
+        status: status || null,
+        search: search || null,
+      },
     });
   } catch (error) {
     console.error("Get event attendees error:", error);
